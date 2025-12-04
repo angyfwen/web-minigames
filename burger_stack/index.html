@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacky's Burger Diner 🎓</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-tablecloth: #e63946; 
+            
+            --bun-color: #f4a261;
+            --bun-shadow: #e76f51;
+            --patty-color: #6f4e37;
+            --cheese-color: #ffd700;
+            --lettuce-color: #70e000;
+            --tomato-color: #d90429;
+            
+            --btn-push: #2a9d8f;
+            --btn-pop: #e63946;
+            --btn-serve: #ffca3a;
+            --btn-info: #4CC9F0;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            
+            /* Restaurant Checkered Tablecloth Pattern */
+            background-color: var(--bg-tablecloth);
+            background-image:
+                linear-gradient(45deg, #cc2936 25%, transparent 25%, transparent 75%, #cc2936 75%, #cc2936),
+                linear-gradient(45deg, #cc2936 25%, transparent 25%, transparent 75%, #cc2936 75%, #cc2936);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            
+            color: #333;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            width: 100%; height: 100%; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .screen.active { display: flex; animation: slideUp 0.5s; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- START SCREEN --- */
+        .menu-card {
+            background: #fff;
+            padding: 50px 70px;
+            border-radius: 15px;
+            text-align: center;
+            border: 10px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transform: rotate(-2deg);
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Fredoka One', cursive; font-size: 3.5rem; margin: 0;
+            color: #333; text-shadow: 4px 4px 0 #ddd;
+        }
+        
+        .subtitle { font-size: 1.2rem; color: #666; font-weight: 800; margin: 10px 0 20px 0; }
+
+        .btn-start {
+            background: #333; color: white; border: none;
+            padding: 15px 40px; font-size: 2rem; font-family: 'Fredoka One';
+            border-radius: 50px; cursor: pointer; transition: transform 0.1s;
+            box-shadow: 0 8px 0 #000; display: block; width: 100%;
+        }
+        .btn-start:active { transform: translateY(8px); box-shadow: none; }
+
+        .btn-info {
+            background: var(--btn-info); color: white; border: none;
+            padding: 10px 20px; font-size: 1rem; font-family: 'Fredoka One';
+            border-radius: 50px; cursor: pointer; margin-top: 15px;
+            box-shadow: 0 5px 0 #3a9bbd; display: inline-block;
+        }
+        .btn-info:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- GAME LAYOUT --- */
+        .game-wrapper {
+            width: 95%; max-width: 1100px; height: 90vh;
+            display: flex; gap: 40px;
+            align-items: center; justify-content: center;
+        }
+
+        /* FIXED HOME BUTTON */
+        .home-btn-fixed {
+            position: absolute; top: 20px; left: 20px;
+            background: white; border: 4px solid #333;
+            width: 60px; height: 60px; border-radius: 50%;
+            cursor: pointer; z-index: 200; font-size: 1.5rem;
+            color: #333; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .home-btn-fixed:active { transform: translateY(5px); box-shadow: none; }
+        .home-btn-fixed:hover { background: #f0f0f0; }
+
+        /* LEFT SIDE: Controls */
+        .controls-panel {
+            flex: 1;
+            display: flex; flex-direction: column; gap: 15px;
+            background: rgba(255,255,255,0.95);
+            padding: 20px; border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 4px solid #fff;
+        }
+
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .ing-btn {
+            border: none; padding: 12px; border-radius: 10px;
+            font-family: 'Fredoka One'; font-size: 1rem; color: white;
+            cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            text-transform: uppercase; transition: transform 0.1s;
+        }
+        .ing-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        .b-bun-bot { background: var(--bun-color); border-bottom: 5px solid var(--bun-shadow); }
+        .b-patty { background: var(--patty-color); }
+        .b-cheese { background: var(--cheese-color); color: #8B4513; }
+        .b-lettuce { background: var(--lettuce-color); color: #006400; }
+        .b-tomato { background: var(--tomato-color); }
+        .b-bun-top { background: var(--bun-color); border-top: 5px solid #ffcc80; }
+
+        .btn-pop {
+            background: var(--btn-pop); color: white; width: 100%;
+            padding: 12px; font-size: 1.1rem; font-family: 'Fredoka One';
+            border: none; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 5px 0 #a11d28; margin-top: 10px;
+        }
+        .btn-pop:active { transform: translateY(5px); box-shadow: none; }
+
+        .btn-serve {
+            background: var(--btn-serve); color: #333; width: 100%;
+            padding: 15px; font-size: 1.5rem; font-family: 'Fredoka One';
+            border: none; border-radius: 10px; cursor: pointer;
+            box-shadow: 0 6px 0 #c49a00; margin-top: 10px;
+            animation: pulse 2s infinite;
+        }
+        .btn-serve:active { transform: translateY(6px); box-shadow: none; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        /* CENTER: The Receipt */
+        .ticket-container {
+            width: 200px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+            animation: swing 2s ease-in-out infinite alternate;
+            transform-origin: top center;
+        }
+        @keyframes swing { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+
+        .ticket {
+            background: #fffdf5;
+            padding: 20px;
+            position: relative;
+            font-family: 'Courier Prime', monospace;
+            text-align: center;
+            background-image: linear-gradient(135deg, #fffdf5 50%, transparent 50%), linear-gradient(225deg, #fffdf5 50%, transparent 50%);
+            background-position: bottom left, bottom left;
+            background-size: 20px 20px;
+            background-repeat: repeat-x;
+            padding-bottom: 30px;
+            margin-bottom: -10px;
+        }
+        
+        .ticket-header { 
+            border-bottom: 2px dashed #ccc; padding-bottom: 10px; 
+            margin-bottom: 10px; font-weight: bold; font-size: 1.1rem; 
+        }
+
+        .target-view {
+            display: flex; flex-direction: column-reverse;
+            align-items: center; gap: 4px;
+            min-height: 100px; justify-content: flex-start;
+        }
+        
+        .mini-food { 
+            width: 80px; height: 15px; border-radius: 4px; 
+            border: 1px solid rgba(0,0,0,0.1); 
+        }
+
+        /* RIGHT SIDE: The Plate */
+        .plate-container {
+            flex: 2; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end;
+            padding-bottom: 50px;
+        }
+
+        .lifo-arrow {
+            color: white; font-weight: 900; font-size: 1.2rem;
+            text-shadow: 2px 2px 0 #000; margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #burger-stack {
+            width: 300px;
+            display: flex; flex-direction: column-reverse; 
+            align-items: center;
+            margin-bottom: -10px; z-index: 10;
+            min-height: 50px;
+        }
+
+        /* Food Assets */
+        .food {
+            width: 260px; height: 50px;
+            border: 4px solid #333;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: 900; font-size: 1.2rem; color: rgba(0,0,0,0.5);
+            margin-bottom: -12px; z-index: 1;
+            transition: transform 0.2s;
+        }
+        .food.new { animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        @keyframes dropIn { 
+            0% { transform: translateY(-200px) scale(0.5); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .f-bun-bot { background: var(--bun-color); border-radius: 15px 15px 30px 30px; height: 60px; z-index: 5; }
+        .f-patty { background: var(--patty-color); border-radius: 20px; width: 270px; z-index: 6; }
+        .f-cheese { background: var(--cheese-color); border-radius: 5px; height: 15px; width: 280px; border: none; box-shadow: 0 4px 0 rgba(0,0,0,0.2); z-index: 7; }
+        .f-lettuce { background: var(--lettuce-color); border-radius: 20px; border: 4px dashed #006400; width: 280px; height: 20px; z-index: 8; }
+        .f-tomato { background: var(--tomato-color); border-radius: 20px; width: 250px; z-index: 9; }
+        .f-bun-top { background: var(--bun-color); border-radius: 60px 60px 15px 15px; height: 90px; width: 270px; z-index: 20; }
+        .f-bun-top::after { content: ' . . '; color: white; position: absolute; top: 10px; font-size: 2rem;}
+
+        .plate {
+            width: 350px; height: 40px; background: white; border-radius: 50%;
+            border: 4px solid #ddd; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none;
+            justify-content: center; align-items: center; z-index: 500;
+            backdrop-filter: blur(5px);
+        }
+        .modal-card {
+            background: white; padding: 40px; border-radius: 20px; text-align: center;
+            border: 8px solid #333; width: 400px;
+            animation: bounceIn 0.4s;
+            position: relative;
+        }
+        @keyframes bounceIn { 0% { transform: scale(0.5); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* INFO MODAL STYLING */
+        .info-content { text-align: left; }
+        .info-title { font-family: 'Fredoka One'; color: var(--btn-info); font-size: 2rem; margin-bottom: 15px; }
+        .info-text { font-size: 1.1rem; line-height: 1.5; color: #555; }
+        .info-point { margin-bottom: 15px; display: flex; gap: 10px; align-items: flex-start; }
+        .info-icon { color: var(--btn-info); font-size: 1.2rem; margin-top: 2px; }
+        .close-btn {
+            position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #888;
+        }
+
+        /* Incorrect Shake */
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0% { transform: translateX(0); } 25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } 100% { transform: translateX(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="menu-card">
+            <h1>STACKY'S<br>DINER</h1>
+            <p class="subtitle">Order Up!</p>
+            
+            <button class="btn-start" onclick="startGame()">
+                OPEN KITCHEN <i class="fa-solid fa-fire-burner"></i>
+            </button>
+            
+            <button class="btn-info" onclick="showInfo()">
+                Why is this educational? <i class="fa-solid fa-circle-question"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <button class="home-btn-fixed" onclick="goHome()" title="Exit to Menu">
+            <i class="fa-solid fa-house"></i>
+        </button>
+
+        <div class="game-wrapper">
+            
+            <div class="controls-panel">
+                <div style="text-align:center; font-weight:bold; margin-bottom:10px;">ADD INGREDIENTS (PUSH)</div>
+                <div class="controls-grid">
+                    <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
+                    <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
+                    <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
+                    <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
+                    <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
+                    <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
+                </div>
+
+                <button class="btn-pop" onclick="popItem()">UNDO TOP (POP)</button>
+                <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
+            </div>
+
+            <div class="ticket-container">
+                <div class="ticket">
+                    <div class="ticket-header">
+                        <span id="level-display">ORDER #1</span>
+                    </div>
+                    <div class="target-view" id="target-view"></div>
+                </div>
+            </div>
+
+            <div class="plate-container">
+                <div class="lifo-arrow">
+                    <i class="fa-solid fa-arrow-down-long"></i><br>STACK
+                </div>
+                <div id="burger-stack"></div>
+                <div class="plate"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="win-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h1 id="modal-title" style="color: #4CAF50;">DELICIOUS!</h1>
+            <p id="modal-text" style="font-size: 1.2rem; margin: 20px 0;">Perfect Match!</p>
+            <button class="btn-start" id="next-btn" onclick="nextLevel()">NEXT ORDER</button>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="close-btn" onclick="hideInfo()"><i class="fa-solid fa-xmark"></i></div>
+            <div class="info-content">
+                <div class="info-title">Why is this educational?</div>
+                
+                <div class="info-point">
+                    <i class="fa-solid fa-layer-group info-icon"></i>
+                    <div class="info-text">
+                        <strong>The Stack Data Structure:</strong> Just like a burger, a "Stack" in coding follows the <strong>LIFO</strong> rule: Last-In, First-Out.
+                    </div>
+                </div>
+
+                <div class="info-point">
+                    <i class="fa-solid fa-hand-pointer info-icon"></i>
+                    <div class="info-text">
+                        <strong>Push & Pop:</strong> 
+                        Adding an item is called <strong>PUSH</strong>. 
+                        Removing the top item is called <strong>POP</strong>.
+                    </div>
+                </div>
+
+                <div class="info-point">
+                    <i class="fa-solid fa-laptop-code info-icon"></i>
+                    <div class="info-text">
+                        <strong>Real World:</strong> Your computer uses Stacks for things like the "Undo" button and browser history!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const levels = [
+            { id: 1, order: ['bun-bot', 'patty', 'bun-top'] },
+            { id: 2, order: ['bun-bot', 'patty', 'cheese', 'bun-top'] },
+            { id: 3, order: ['bun-bot', 'lettuce', 'patty', 'bun-top'] },
+            { id: 4, order: ['bun-bot', 'patty', 'cheese', 'tomato', 'bun-top'] },
+            { id: 5, order: ['bun-bot', 'patty', 'cheese', 'patty', 'cheese', 'bun-top'] }
+        ];
+
+        let currentLevelIdx = 0;
+        let userStack = [];
+        
+        // --- DOM ---
+        const stackEl = document.getElementById('burger-stack');
+        const targetView = document.getElementById('target-view');
+        const levelDisplay = document.getElementById('level-display');
+        const winModal = document.getElementById('win-modal');
+        const infoModal = document.getElementById('info-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- NAVIGATION ---
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').classList.add('active');
+            initLevel();
+        }
+
+        function goHome() {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').style.display = 'flex';
+            // Optional: reset level if desired, or keep progress
+        }
+
+        function showInfo() {
+            infoModal.style.display = 'flex';
+        }
+
+        function hideInfo() {
+            infoModal.style.display = 'none';
+        }
+
+        function initLevel() {
+            userStack = [];
+            stackEl.innerHTML = '';
+            winModal.style.display = 'none';
+            
+            const level = levels[currentLevelIdx];
+            levelDisplay.innerText = `ORDER #${level.id}`;
+            
+            targetView.innerHTML = '';
+            level.order.forEach(item => {
+                const mini = document.createElement('div');
+                mini.className = 'mini-food';
+                mini.style.background = getColor(item);
+                targetView.appendChild(mini);
+            });
+        }
+
+        // --- GAMEPLAY ---
+        function pushItem(type) {
+            userStack.push(type);
+            const el = document.createElement('div');
+            el.className = `food f-${type} new`;
+            stackEl.appendChild(el); 
+        }
+
+        function popItem() {
+            if (userStack.length === 0) return;
+            userStack.pop();
+            if (stackEl.lastChild) {
+                stackEl.removeChild(stackEl.lastChild);
+            }
+        }
+
+        function checkOrder() {
+            const target = levels[currentLevelIdx].order;
+            let correct = true;
+            if (userStack.length !== target.length) correct = false;
+            else {
+                for (let i = 0; i < target.length; i++) {
+                    if (userStack[i] !== target[i]) {
+                        correct = false;
+                        break;
+                    }
+                }
+            }
+
+            if (correct) {
+                modalTitle.innerText = "DELICIOUS!";
+                modalTitle.style.color = "#4CAF50";
+                modalText.innerText = "Order Complete!";
+                
+                if (currentLevelIdx < levels.length - 1) {
+                    nextBtn.innerText = "NEXT ORDER";
+                    nextBtn.onclick = nextLevel;
+                } else {
+                    nextBtn.innerText = "FINISH SHIFT";
+                    nextBtn.onclick = () => location.reload();
+                }
+                winModal.style.display = 'flex';
+            } else {
+                document.querySelector('.game-wrapper').classList.add('shake');
+                setTimeout(() => document.querySelector('.game-wrapper').classList.remove('shake'), 500);
+            }
+        }
+
+        function nextLevel() {
+            currentLevelIdx++;
+            initLevel();
+        }
+
+        function getColor(type) {
+            if(type.includes('bun')) return 'var(--bun-color)';
+            if(type === 'patty') return 'var(--patty-color)';
+            if(type === 'cheese') return 'var(--cheese-color)';
+            if(type === 'lettuce') return 'var(--lettuce-color)';
+            if(type === 'tomato') return 'var(--tomato-color)';
+            return '#333';
+        }
+
+    </script>
+</body>
+</html>
