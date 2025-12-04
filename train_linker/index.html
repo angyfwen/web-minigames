@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnetic Train - 5 Levels 🔊</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Titan+One&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-sky: #87CEEB;
+            --train-red: #ff595e;
+            --train-blue: #1982c4;
+            --train-green: #8ac926;
+            --train-yellow: #ffca3a;
+            --train-purple: #6a4c93;
+            --train-orange: #ff924c;
+            --train-indigo: #4B0082;
+            --train-violet: #EE82EE;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-sky);
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 50px 50px;
+            color: #333;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .screen.active { display: flex; animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- START SCREEN --- */
+        .title-card {
+            background: #fff;
+            padding: 50px;
+            border-radius: 40px;
+            text-align: center;
+            box-shadow: 0 20px 0 rgba(0,0,0,0.1);
+            border: 8px solid #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .title-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 20px;
+            background: repeating-linear-gradient(45deg, #ff595e, #ff595e 20px, #fff 20px, #fff 40px);
+        }
+
+        h1 {
+            font-family: 'Titan One', cursive;
+            font-size: 4rem;
+            margin: 20px 0 10px 0;
+            color: var(--train-blue);
+            text-shadow: 4px 4px 0 var(--train-yellow);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #666;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+
+        .btn-start {
+            background: var(--train-green);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 2rem;
+            font-family: 'Titan One', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #5f9609;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0 auto;
+        }
+        .btn-start:active { transform: translateY(10px); box-shadow: none; }
+        .btn-start:hover { filter: brightness(1.1); }
+
+        /* --- GAME UI --- */
+        .game-wrapper {
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* HUD */
+        .hud-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.9);
+            padding: 15px 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .level-badge {
+            background: var(--train-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-family: 'Titan One', cursive;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 0 #0d4a75;
+        }
+
+        .target-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hud-label { font-size: 0.8rem; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .target-seq { font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-red); }
+
+        .home-btn {
+            background: #f0f0f0; border: none; width: 50px; height: 50px; border-radius: 15px;
+            font-size: 1.2rem; cursor: pointer; color: #555; transition: background 0.2s;
+        }
+        .home-btn:hover { background: #e0e0e0; }
+
+        /* PLAY AREA */
+        .playground {
+            flex-grow: 1;
+            background-color: #8D6E63;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
+            border: 8px solid #5D4037;
+            background-image: 
+                linear-gradient(90deg, transparent 48%, #5a4b45 48%, #5a4b45 52%, transparent 52%),
+                linear-gradient(transparent 48%, #4e342e 48%, #4e342e 52%, transparent 52%);
+            background-size: 100px 100px; 
+        }
+
+        /* --- TRAIN CAR --- */
+        .train-car {
+            position: absolute;
+            width: 130px; 
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Titan One', cursive;
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+            cursor: grab;
+            z-index: 10;
+            transition: transform 0.1s;
+            background: linear-gradient(to bottom, var(--train-blue), #105a8b);
+            border-radius: 15px 15px 5px 5px;
+            border: 3px solid white;
+            box-shadow: 5px 10px 10px rgba(0,0,0,0.3);
+        }
+
+        .train-car::after {
+            content: ''; position: absolute; right: -15px; top: 50px; width: 25px; height: 12px;
+            background: #333; border-radius: 0 5px 5px 0; border: 2px solid #555; z-index: -1;
+        }
+        .train-car::before {
+            content: ''; position: absolute; left: -10px; top: 50px; width: 15px; height: 12px;
+            background: #222; border-radius: 5px 0 0 5px; z-index: -1;
+        }
+
+        /* Wheels */
+        .wheels {
+            position: absolute; bottom: -12px; width: 100%; display: flex; justify-content: space-around; pointer-events: none;
+        }
+        .wheel {
+            width: 30px; height: 30px; background: #333; border-radius: 50%; border: 3px solid #777;
+            box-shadow: 0 5px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+        }
+        .wheel-inner { width: 8px; height: 8px; background: #999; border-radius: 50%; }
+
+        /* Colors */
+        .t-red { background: linear-gradient(to bottom, var(--train-red), #c9182b); }
+        .t-blue { background: linear-gradient(to bottom, var(--train-blue), #105a8b); }
+        .t-green { background: linear-gradient(to bottom, var(--train-green), #5a8516); }
+        .t-yellow { background: linear-gradient(to bottom, var(--train-yellow), #e0a800); }
+        .t-purple { background: linear-gradient(to bottom, var(--train-purple), #4a3567); }
+        .t-orange { background: linear-gradient(to bottom, var(--train-orange), #b36635); }
+        .t-indigo { background: linear-gradient(to bottom, var(--train-indigo), #2a004b); }
+        .t-violet { background: linear-gradient(to bottom, var(--train-violet), #ad53ad); }
+
+        .train-car:active { cursor: grabbing; transform: scale(1.05); z-index: 100; }
+        .train-car.snapped { transition: top 0.2s, left 0.2s; } 
+
+        /* CONTROLS */
+        .controls { display: flex; justify-content: center; gap: 20px; height: 80px; }
+        .ctrl-btn {
+            border: none; padding: 0 30px; border-radius: 20px; font-family: 'Titan One', cursive;
+            font-size: 1.2rem; color: white; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px; transition: transform 0.1s;
+        }
+        .ctrl-btn:active { transform: translateY(6px); box-shadow: none; }
+        .btn-reset { background: var(--train-yellow); color: #5c4300; }
+        .btn-check { background: var(--train-green); }
+        .btn-break { background: var(--train-red); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.3s; }
+        
+        .modal-card {
+            background: white; padding: 40px; border-radius: 30px; text-align: center;
+            border: 8px solid var(--train-green);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            max-width: 400px;
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .modal-title { font-family: 'Titan One', cursive; font-size: 2.5rem; color: var(--train-green); margin: 0; }
+        .modal-text { font-size: 1.2rem; color: #555; margin: 20px 0; font-weight: bold; }
+        .modal-stars { font-size: 3rem; color: var(--train-yellow); margin-bottom: 20px; text-shadow: 0 3px 0 #d4a000; }
+        
+        @keyframes bounceIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* MUTE BUTTON */
+        .mute-btn {
+            position: absolute; top: 20px; right: 20px;
+            font-size: 1.5rem; cursor: pointer; color: white;
+            background: rgba(0,0,0,0.1); padding: 10px; border-radius: 50%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="mute-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></div>
+        <div class="title-card">
+            <h1>MAGNETIC<br>TRAINS</h1>
+            <div class="subtitle">5 Levels of Fun!</div>
+            <button class="btn-start" onclick="startGame()">
+                <i class="fa-solid fa-play"></i> START
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="game-wrapper">
+            
+            <div class="hud-bar">
+                <button class="home-btn" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
+                <div class="level-badge" id="level-display">Level 1</div>
+                <div class="target-box">
+                    <div class="hud-label">Required Order</div>
+                    <div class="target-seq" id="target-display">A ➜ B ➜ C</div>
+                </div>
+                <div style="width: 50px;"></div>
+            </div>
+
+            <div class="playground" id="playground"></div>
+
+            <div class="controls">
+                <button class="ctrl-btn btn-break" onclick="breakAll()">
+                    <i class="fa-solid fa-link-slash"></i> BREAK
+                </button>
+                <button class="ctrl-btn btn-reset" onclick="initLevel()">
+                    <i class="fa-solid fa-rotate-right"></i> RESET
+                </button>
+                <button class="ctrl-btn btn-check" onclick="checkWin()">
+                    <i class="fa-solid fa-check"></i> DEPART
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-title" id="modal-h">GREAT JOB!</div>
+            <div class="modal-stars" id="modal-icon">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <div class="modal-text" id="win-msg">Level Complete!</div>
+            <button class="btn-start" id="next-level-btn" onclick="nextLevel()">
+                NEXT <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- SOUND ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMuted = false;
+
+        function playSound(type) {
+            if (isMuted) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            }
+            else if (type === 'snap') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            }
+            else if (type === 'win') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((f, i) => {
+                    let o = audioCtx.createOscillator();
+                    let g = audioCtx.createGain();
+                    o.type = 'triangle'; o.frequency.value = f;
+                    o.connect(g); g.connect(audioCtx.destination);
+                    g.gain.setValueAtTime(0.1, now + i*0.1);
+                    g.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.3);
+                    o.start(now + i*0.1); o.stop(now + i*0.1 + 0.3);
+                });
+            }
+            else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('vol-icon').className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        }
+
+        // --- 5 LEVELS CONFIGURATION ---
+        const levels = [
+            { id: 1, data: ['A', 'B', 'C'], colors: ['t-red', 't-blue', 't-green'], type: 'ordered' },
+            { id: 2, data: ['A', 'B', 'C', 'D'], colors: ['t-blue', 't-green', 't-yellow', 't-red'], type: 'random' },
+            { id: 3, data: ['1', '2', '3', '4', '5'], colors: ['t-purple', 't-red', 't-blue', 't-green', 't-yellow'], type: 'ordered' },
+            { id: 4, data: ['X', 'Y', 'Z', '1', '2', '3'], colors: ['t-orange', 't-purple', 't-blue', 't-green', 't-yellow', 't-red'], type: 'random' },
+            { id: 5, data: ['R', 'O', 'Y', 'G', 'B', 'I', 'V'], colors: ['t-red', 't-orange', 't-yellow', 't-green', 't-blue', 't-indigo', 't-violet'], type: 'ordered' }
+        ];
+
+        // --- GAME STATE ---
+        let currentLevelIdx = 0;
+        let cars = [];
+        let targetSeq = [];
+        let draggedCar = null;
+        let offset = { x: 0, y: 0 };
+        const CAR_W = 130;
+        const SNAP_DIST = 60;
+
+        // --- DOM ---
+        const playground = document.getElementById('playground');
+        const targetDisplay = document.getElementById('target-display');
+        const levelDisplay = document.getElementById('level-display');
+        const winModal = document.getElementById('win-modal');
+        const winMsg = document.getElementById('win-msg');
+        const modalTitle = document.getElementById('modal-h');
+        const modalStars = document.getElementById('modal-icon');
+        const nextBtn = document.getElementById('next-level-btn');
+
+        // --- NAVIGATION ---
+        function startGame() {
+            playSound('click');
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            currentLevelIdx = 0;
+            initLevel();
+        }
+
+        function goHome() {
+            playSound('click');
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.add('active');
+            winModal.classList.remove('show');
+        }
+
+        // --- LOGIC ---
+        function initLevel() {
+            playground.innerHTML = '';
+            cars = [];
+            winModal.classList.remove('show');
+            
+            const level = levels[currentLevelIdx];
+            levelDisplay.innerText = "Level " + level.id;
+            
+            if (level.type === 'random') {
+                targetSeq = [...level.data].sort(() => Math.random() - 0.5);
+            } else {
+                targetSeq = [...level.data];
+            }
+            targetDisplay.innerText = targetSeq.join(' ➜ ');
+
+            level.data.forEach((val, i) => {
+                const c = createCar(val, i, level.colors[i % level.colors.length]);
+                cars.push(c);
+            });
+
+            scatterCars();
+        }
+
+        function createCar(val, id, colorClass) {
+            const el = document.createElement('div');
+            el.className = `train-car ${colorClass}`;
+            el.innerText = val;
+            el.dataset.id = id;
+            
+            const wheels = document.createElement('div');
+            wheels.className = 'wheels';
+            wheels.innerHTML = `<div class="wheel"><div class="wheel-inner"></div></div><div class="wheel"><div class="wheel-inner"></div></div>`;
+            el.appendChild(wheels);
+            
+            el.addEventListener('mousedown', onMouseDown);
+            playground.appendChild(el);
+            
+            return { id, val, el, x: 0, y: 0, next: null, prev: null };
+        }
+
+        function scatterCars() {
+            const rect = playground.getBoundingClientRect();
+            cars.forEach(c => {
+                c.next = null;
+                c.prev = null;
+                c.x = 50 + Math.random() * (rect.width - 250);
+                c.y = 50 + Math.random() * (rect.height - 250);
+                updatePos(c);
+            });
+        }
+
+        function updatePos(c) {
+            c.el.style.left = c.x + 'px';
+            c.el.style.top = c.y + 'px';
+            if (c.next) {
+                c.next.x = c.x + CAR_W + 5;
+                c.next.y = c.y;
+                updatePos(c.next);
+            }
+        }
+
+        // --- INTERACTION ---
+        function onMouseDown(e) {
+            const id = e.target.dataset.id;
+            draggedCar = cars.find(c => c.id == id);
+            
+            if (draggedCar.prev) {
+                draggedCar.prev.next = null;
+                draggedCar.prev = null;
+            }
+
+            const rect = draggedCar.el.getBoundingClientRect();
+            offset.x = e.clientX - rect.left;
+            offset.y = e.clientY - rect.top;
+            draggedCar.el.style.zIndex = 100;
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        function onMouseMove(e) {
+            if (!draggedCar) return;
+            const rect = playground.getBoundingClientRect();
+            let nx = e.clientX - rect.left - offset.x;
+            let ny = e.clientY - rect.top - offset.y;
+            draggedCar.x = nx; draggedCar.y = ny;
+            updatePos(draggedCar);
+        }
+
+        function onMouseUp() {
+            if (!draggedCar) return;
+            checkForSnap(draggedCar);
+            draggedCar.el.style.zIndex = 10;
+            draggedCar = null;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        function checkForSnap(current) {
+            for (let other of cars) {
+                if (other === current) continue;
+                if (other.next) continue; 
+                
+                const targetX = other.x + CAR_W + 5;
+                const targetY = other.y;
+                const dist = Math.hypot(current.x - targetX, current.y - targetY);
+                
+                if (dist < SNAP_DIST) {
+                    if (findHead(other) === current) return; 
+                    current.x = targetX;
+                    current.y = targetY;
+                    other.next = current;
+                    current.prev = other;
+                    updatePos(other);
+                    playSound('snap');
+                    break;
+                }
+            }
+        }
+
+        function findHead(c) {
+            let curr = c;
+            while (curr.prev) curr = curr.prev;
+            return curr;
+        }
+
+        function breakAll() {
+            playSound('click');
+            cars.forEach(c => { c.next = null; c.prev = null; });
+            scatterCars();
+        }
+
+        // --- FIXED WIN CONDITION ---
+        function checkWin() {
+            // 1. Must have exactly one head (start of chain)
+            let heads = cars.filter(c => c.prev === null);
+            
+            if (heads.length !== 1) {
+                showModal("Connect ALL cars!", false);
+                return;
+            }
+            
+            let head = heads[0];
+            let current = head;
+            let count = 0;
+            let match = true;
+            
+            // 2. Traverse and check order against target
+            while (current) {
+                if (count >= targetSeq.length || current.val !== targetSeq[count]) {
+                    match = false;
+                    break;
+                }
+                current = current.next;
+                count++;
+            }
+            
+            // 3. Must match length AND order
+            if (match && count === targetSeq.length && count === cars.length) {
+                showModal("Excellent Work!", true);
+            } else {
+                showModal("Wrong Order!", false);
+            }
+        }
+
+        function showModal(msg, success) {
+            winMsg.innerText = msg;
+            
+            if (success) {
+                playSound('win');
+                modalTitle.innerText = "GREAT JOB!";
+                modalTitle.style.color = "var(--train-green)";
+                modalStars.innerHTML = '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>';
+                winModal.classList.add('show');
+                
+                if (currentLevelIdx < levels.length - 1) {
+                    nextBtn.innerHTML = `NEXT LEVEL <i class="fa-solid fa-arrow-right"></i>`;
+                    nextBtn.onclick = nextLevel;
+                } else {
+                    nextBtn.innerHTML = `HOME <i class="fa-solid fa-house"></i>`;
+                    nextBtn.onclick = goHome;
+                    winMsg.innerText = "ALL LEVELS CLEARED!";
+                }
+                nextBtn.style.display = 'flex';
+            } else {
+                playSound('error');
+                modalTitle.innerText = "OOPS!";
+                modalTitle.style.color = "var(--train-red)";
+                modalStars.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                winModal.classList.add('show');
+                nextBtn.style.display = 'none';
+                setTimeout(() => winModal.classList.remove('show'), 1500);
+            }
+        }
+
+        function nextLevel() {
+            playSound('click');
+            currentLevelIdx++;
+            initLevel();
+        }
+
+    </script>
+</body>
+</html>
