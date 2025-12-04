@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Arcane Archives - Binary Search</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Fantasy Palette */
+            --bg-void: #0f0518;
+            --wood-dark: #2a1b0e;
+            --wood-light: #5c3a21;
+            --parchment: #f3e5ab;
+            --parchment-dark: #d4c59a;
+            
+            --magic-gold: #ffcc00;
+            --magic-blue: #00e5ff;
+            --magic-purple: #b300ff;
+            
+            --ink-color: #2b1d0e;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            user-select: none;
+            color: var(--parchment);
+
+            /* Magical Void Background */
+            background-color: var(--bg-void);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #1a0b2e 0%, var(--bg-void) 80%);
+        }
+
+        /* Floating Dust Particles */
+        .dust {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: rgba(255, 255, 200, 0.3);
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(255, 255, 200, 0.3);
+            animation: floatDust 10s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes floatDust {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            width: 100%; height: 100%; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            position: relative; z-index: 10;
+        }
+        .screen.active { display: flex; animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* START SCREEN (Grimoire Look) */
+        .grimoire-cover {
+            background: linear-gradient(135deg, #3e2723, #1a0b05);
+            padding: 60px 80px;
+            border-radius: 10px;
+            border: 4px solid var(--magic-gold);
+            text-align: center;
+            box-shadow: 
+                0 0 0 10px var(--wood-dark), 
+                0 0 50px rgba(0,0,0,0.8),
+                inset 0 0 100px rgba(0,0,0,0.9);
+            position: relative;
+            max-width: 600px;
+        }
+        
+        /* Book Corners */
+        .corner {
+            position: absolute; width: 40px; height: 40px;
+            border: 4px solid var(--magic-gold);
+            border-radius: 5px;
+        }
+        .tl { top: 10px; left: 10px; border-bottom: none; border-right: none; }
+        .tr { top: 10px; right: 10px; border-bottom: none; border-left: none; }
+        .bl { bottom: 10px; left: 10px; border-top: none; border-right: none; }
+        .br { bottom: 10px; right: 10px; border-top: none; border-left: none; }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            color: var(--magic-gold);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+            margin: 0 0 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.4rem; font-style: italic; color: #aaa; margin-bottom: 40px;
+        }
+
+        .btn-magic {
+            background: transparent;
+            color: var(--magic-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            padding: 15px 50px;
+            border: 2px solid var(--magic-gold);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+        
+        .btn-magic::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-magic:hover {
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .btn-magic:hover::before { left: 100%; }
+
+        .btn-scroll {
+            margin-top: 20px; font-size: 1rem; border-color: var(--parchment); color: var(--parchment);
+        }
+
+        /* --- GAME FRAME --- */
+        .game-frame {
+            width: 95%; max-width: 1200px; height: 90vh;
+            display: flex; flex-direction: column;
+            border: 15px solid var(--wood-dark);
+            border-image: linear-gradient(to bottom, #3e2723, #1a0b05) 1;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            background: rgba(10, 5, 15, 0.85);
+            position: relative;
+        }
+
+        /* HUD (Top Shelf) */
+        .shelf-hud {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 30px;
+            background: var(--wood-dark);
+            border-bottom: 4px solid #1a0b05;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        
+        .home-icon {
+            color: var(--parchment); font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+        }
+        .home-icon:hover { color: var(--magic-gold); text-shadow: 0 0 10px var(--magic-gold); }
+
+        .level-scroll {
+            font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.5rem; color: var(--parchment);
+            text-shadow: 0 2px 4px black;
+        }
+
+        /* CONTENT AREA */
+        .library-floor {
+            flex-grow: 1; display: flex; overflow: hidden;
+        }
+
+        /* LEFT SIDEBAR (The Lectern) */
+        .lectern {
+            width: 320px;
+            background: url('https://www.transparenttextures.com/patterns/aged-paper.png'), var(--wood-light);
+            border-right: 5px solid #1a0b05;
+            display: flex; flex-direction: column;
+            align-items: center; padding: 30px; gap: 30px;
+            box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+            position: relative; z-index: 5;
+        }
+
+        /* The Incoming Rune */
+        .rune-container { text-align: center; }
+        .rune-label {
+            font-family: 'Cinzel'; color: var(--parchment); margin-bottom: 15px; font-size: 1.1rem; letter-spacing: 1px;
+        }
+        
+        .active-rune {
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, #2a1b3d, #000);
+            border: 2px solid var(--magic-blue);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Cinzel'; font-size: 2.5rem; color: var(--magic-blue);
+            box-shadow: 0 0 20px var(--magic-blue), inset 0 0 20px var(--magic-blue);
+            margin: 0 auto;
+            animation: runePulse 2s infinite;
+        }
+        @keyframes runePulse { 0% { box-shadow: 0 0 15px var(--magic-blue); } 50% { box-shadow: 0 0 30px var(--magic-blue); } 100% { box-shadow: 0 0 15px var(--magic-blue); } }
+
+        /* Instructions Scroll */
+        .scroll-paper {
+            background: var(--parchment);
+            color: var(--ink-color);
+            padding: 20px;
+            border-radius: 2px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            position: relative;
+            transform: rotate(-1deg);
+        }
+        .scroll-paper::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 1px solid rgba(0,0,0,0.1); margin: 3px; }
+        
+        .highlight-num { font-weight: bold; color: #800000; font-size: 1.4rem; }
+
+        /* Spell Buttons */
+        .spell-controls { display: flex; gap: 20px; width: 100%; justify-content: center; }
+        
+        .spell-btn {
+            background: transparent; border: none; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            transition: transform 0.1s; opacity: 0.8;
+        }
+        .spell-btn:hover:not(:disabled) { opacity: 1; transform: scale(1.1); }
+        .spell-btn:active:not(:disabled) { transform: scale(0.95); }
+        .spell-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .spell-icon {
+            width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; color: white; border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .icon-left { background: radial-gradient(circle, #ff416c, #800000); }
+        .icon-right { background: radial-gradient(circle, #4286f4, #000080); }
+        
+        .spell-name { font-family: 'Cinzel'; font-size: 0.8rem; color: var(--parchment); letter-spacing: 1px; }
+
+        /* RIGHT AREA (The Void Tree) */
+        .archive-space { flex-grow: 1; position: relative; }
+
+        #magical-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+        }
+        .energy-beam {
+            stroke: var(--magic-gold); stroke-width: 2; fill: none;
+            stroke-dasharray: 1000; stroke-dashoffset: 1000;
+            animation: drawLine 1s forwards;
+            filter: drop-shadow(0 0 5px var(--magic-gold));
+        }
+        @keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+        /* NODES (Runestones) */
+        .rune-node {
+            position: absolute; width: 60px; height: 60px;
+            background: radial-gradient(circle at 30% 30%, #4a3b2a, #1a0b05);
+            border: 2px solid var(--magic-gold); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Cinzel'; font-size: 1.2rem; font-weight: bold; color: var(--magic-gold);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+        
+        .rune-node.root { border-color: white; color: white; box-shadow: 0 0 20px white; }
+        
+        .rune-node.target {
+            animation: targetPulse 1s infinite alternate;
+            z-index: 10; border-color: var(--magic-blue); color: var(--magic-blue);
+        }
+        @keyframes targetPulse { 
+            from { box-shadow: 0 0 10px var(--magic-blue); transform: scale(1); } 
+            to { box-shadow: 0 0 30px var(--magic-blue); transform: scale(1.15); } 
+        }
+
+        /* MODAL OVERLAY */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none;
+            justify-content: center; align-items: center; z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* GENERAL MODAL */
+        .scroll-modal {
+            background: #f3e5ab; /* Parchment */
+            width: 500px; padding: 40px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            position: relative; text-align: center; color: #2b1d0e;
+            border-top: 10px solid #c5b38a;
+            border-bottom: 10px solid #c5b38a;
+            border-radius: 5px;
+        }
+        
+        .modal-title { font-family: 'Cinzel'; font-size: 2rem; margin-bottom: 20px; border-bottom: 2px solid #8a6a4b; padding-bottom: 10px; }
+        
+        /* FINAL WIN MODAL SPECIFIC */
+        .win-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .win-icon { font-size: 4rem; color: var(--magic-gold); text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        
+        .modal-btn { 
+            background: #2b1d0e; color: #f3e5ab; border: none; padding: 10px 40px; 
+            font-family: 'Cinzel'; font-size: 1.2rem; cursor: pointer; margin-top: 10px;
+            border: 2px solid #8a6a4b;
+        }
+        .modal-btn:hover { background: #4a2e16; }
+
+    </style>
+</head>
+<body>
+
+    <div id="particles"></div>
+
+    <div id="start-screen" class="screen active">
+        <div class="grimoire-cover">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            
+            <h1>THE ARCANE<br>ARCHIVES</h1>
+            <div class="subtitle">"Order the chaos of the Runes..."</div>
+            
+            <button class="btn-magic" onclick="startGame()">
+                OPEN GRIMOIRE
+            </button>
+            <br>
+            <button class="btn-magic btn-scroll" onclick="showInfo()">
+                INSTRUCTIONS
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="game-frame">
+            
+            <div class="shelf-hud">
+                <i class="fa-solid fa-dungeon home-icon" onclick="goHome()" title="Exit Library"></i>
+                <div class="level-scroll" id="level-txt">CHAPTER I</div>
+                <div style="width: 20px"></div>
+            </div>
+
+            <div class="library-floor">
+                
+                <div class="lectern">
+                    <div class="rune-container">
+                        <div class="rune-label">INSCRIBE RUNE</div>
+                        <div class="active-rune" id="new-val">?</div>
+                    </div>
+
+                    <div class="scroll-paper">
+                        Is <span class="highlight-num" id="h-new">?</span> Smaller or Larger than <span class="highlight-num" id="h-target">?</span>?
+                    </div>
+
+                    <div class="spell-controls">
+                        <button class="spell-btn" id="btn-left" onclick="makeMove('left')">
+                            <div class="spell-icon icon-left"><i class="fa-solid fa-arrow-left"></i></div>
+                            <span class="spell-name">SMALLER</span>
+                        </button>
+                        
+                        <button class="spell-btn" id="btn-right" onclick="makeMove('right')">
+                            <div class="spell-icon icon-right"><i class="fa-solid fa-arrow-right"></i></div>
+                            <span class="spell-name">LARGER</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="archive-space" id="tree-area">
+                    <svg id="magical-lines"></svg>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-modal" class="modal-overlay">
+        <div class="scroll-modal" style="width: 300px;">
+            <h2 id="fb-title" class="modal-title">SPELL CAST!</h2>
+        </div>
+    </div>
+
+    <div id="win-modal" class="modal-overlay">
+        <div class="scroll-modal">
+            <div class="win-content">
+                <div class="win-icon"><i class="fa-solid fa-crown"></i></div>
+                <h2 class="modal-title">THE ARCHIVES RESTORED!</h2>
+                <p style="font-size: 1.2rem;">You have mastered the Binary Arts.</p>
+                <button class="modal-btn" onclick="goHome()">RETURN HOME</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="scroll-modal">
+            <div style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:1.5rem;" onclick="hideInfo()">✖</div>
+            <div class="modal-title">ARCHIVIST'S GUIDE</div>
+            <p style="font-size: 1.1rem; line-height: 1.6; text-align: left;">
+                The Library uses the <strong>Law of Binary</strong>.
+                <br><br>
+                Look at the Glowing Rune in the Archive.
+                <br>
+                <i class="fa-solid fa-bolt" style="color:#800000"></i> If your rune is <strong>SMALLER</strong>, cast it to the <strong>LEFT</strong>.
+                <br>
+                <i class="fa-solid fa-bolt" style="color:#000080"></i> If your rune is <strong>LARGER</strong>, cast it to the <strong>RIGHT</strong>.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- PARTICLES ---
+        const particleContainer = document.getElementById('particles');
+        for(let i=0; i<30; i++){
+            let p = document.createElement('div');
+            p.className = 'dust';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            p.style.animationDelay = (Math.random() * 5) + 's';
+            particleContainer.appendChild(p);
+        }
+
+        // --- SOUND ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMuted = false;
+
+        function playMagicSound(type) {
+            if (isMuted) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'start') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 1);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 1);
+                osc.start(now); osc.stop(now + 1);
+            } 
+            else if (type === 'good') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            }
+            else if (type === 'bad') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.3);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            }
+        }
+
+        // --- LEVELS ---
+        const levels = [
+            { id: 'I', root: 50, seq: [30, 70] },
+            { id: 'II', root: 50, seq: [25, 75, 10] },
+            { id: 'III', root: 50, seq: [60, 40, 55] },
+            { id: 'IV', root: 50, seq: [20, 80, 10, 90] }
+        ];
+
+        // --- LOGIC ---
+        class Rune {
+            constructor(val, x, y, level) {
+                this.value = val;
+                this.x = x; this.y = y; this.level = level;
+                this.left = null; this.right = null; this.el = null;
+            }
+        }
+
+        let treeRoot = null;
+        let currentLvl = 0;
+        let queue = [];
+        let currentRune = null;
+        let targetNode = null;
+
+        const treeArea = document.getElementById('tree-area');
+        const svgArea = document.getElementById('magical-lines');
+        const newValDisplay = document.getElementById('new-val');
+        const lvlDisplay = document.getElementById('level-txt');
+        const hNew = document.getElementById('h-new');
+        const hTarget = document.getElementById('h-target');
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const fbTitle = document.getElementById('fb-title');
+        const infoModal = document.getElementById('info-modal');
+        const winModal = document.getElementById('win-modal');
+
+        function startGame() {
+            playMagicSound('start');
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').classList.add('active');
+            currentLvl = 0;
+            initLevel();
+        }
+
+        function goHome() {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').style.display = 'flex';
+            winModal.style.display = 'none';
+        }
+
+        function showInfo() { infoModal.style.display = 'flex'; }
+        function hideInfo() { infoModal.style.display = 'none'; }
+
+        function initLevel() {
+            // Clean DOM
+            Array.from(treeArea.children).forEach(c => {
+                if(c.tagName !== 'svg') treeArea.removeChild(c);
+            });
+            svgArea.innerHTML = '';
+            
+            treeRoot = null;
+            const data = levels[currentLvl];
+            lvlDisplay.innerText = `CHAPTER ${data.id}`;
+            queue = [...data.seq];
+            
+            createRoot(data.root);
+            nextRune();
+        }
+
+        function createRoot(val) {
+            treeRoot = new Rune(val, 50, 10, 0); 
+            renderRune(treeRoot, true);
+        }
+
+        function renderRune(node, isRoot) {
+            const el = document.createElement('div');
+            el.className = isRoot ? 'rune-node root' : 'rune-node';
+            el.innerText = node.value;
+            el.style.left = `calc(${node.x}% - 30px)`;
+            el.style.top = `${node.y}%`;
+            treeArea.appendChild(el);
+            node.el = el;
+            
+            el.style.transform = 'scale(0)';
+            setTimeout(() => el.style.transform = 'scale(1)', 100);
+        }
+
+        function nextRune() {
+            if (queue.length === 0) {
+                showFeedback("CHAPTER COMPLETE!", true);
+                playMagicSound('start');
+                setTimeout(() => {
+                    currentLvl++;
+                    if(currentLvl >= levels.length) {
+                        showFinalWin();
+                    } else {
+                        initLevel();
+                    }
+                }, 2000);
+                return;
+            }
+            currentRune = queue.shift();
+            newValDisplay.innerText = currentRune;
+            targetNode = treeRoot;
+            updateUI();
+        }
+
+        function showFinalWin() {
+            winModal.style.display = 'flex';
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.rune-node').forEach(n => n.classList.remove('target'));
+            if(targetNode && targetNode.el) targetNode.el.classList.add('target');
+            
+            hNew.innerText = currentRune;
+            hTarget.innerText = targetNode.value;
+            
+            btnLeft.disabled = false;
+            btnRight.disabled = false;
+        }
+
+        function makeMove(dir) {
+            btnLeft.disabled = true;
+            btnRight.disabled = true;
+            
+            const correctDir = currentRune < targetNode.value ? 'left' : 'right';
+            
+            if (dir === correctDir) {
+                if (dir === 'left') {
+                    if (!targetNode.left) placeRune(targetNode, currentRune, 'left');
+                    else {
+                        drawBeam(targetNode, targetNode.left);
+                        targetNode = targetNode.left;
+                        setTimeout(updateUI, 500);
+                    }
+                } else {
+                    if (!targetNode.right) placeRune(targetNode, currentRune, 'right');
+                    else {
+                        drawBeam(targetNode, targetNode.right);
+                        targetNode = targetNode.right;
+                        setTimeout(updateUI, 500);
+                    }
+                }
+            } else {
+                showFeedback("THE MAGIC FIZZLES...", false);
+                playMagicSound('bad');
+                queue.unshift(currentRune);
+                setTimeout(() => {
+                    targetNode = treeRoot;
+                    updateUI();
+                }, 1500);
+            }
+        }
+
+        function placeRune(parent, val, dir) {
+            playMagicSound('good');
+            const spread = 20 / Math.pow(1.8, parent.level); 
+            const newX = dir === 'left' ? parent.x - spread : parent.x + spread;
+            const newY = parent.y + 18; 
+
+            const newNode = new Rune(val, newX, newY, parent.level + 1);
+            if (dir === 'left') parent.left = newNode;
+            else parent.right = newNode;
+
+            drawBeam(parent, newNode);
+            setTimeout(() => {
+                renderRune(newNode, false);
+                nextRune();
+            }, 500);
+        }
+
+        function drawBeam(n1, n2) {
+            const rect = treeArea.getBoundingClientRect();
+            const x1 = (n1.x / 100) * rect.width;
+            const y1 = (n1.y / 100) * rect.height + 30;
+            const x2 = (n2.x / 100) * rect.width;
+            const y2 = (n2.y / 100) * rect.height + 30;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+            line.setAttribute('class', 'energy-beam');
+            svgArea.appendChild(line);
+        }
+
+        function showFeedback(text, good) {
+            fbTitle.innerText = text;
+            fbTitle.style.color = good ? "#4CAF50" : "#8f2d2d";
+            feedbackModal.style.display = 'flex';
+            setTimeout(() => feedbackModal.style.display = 'none', 1200);
+        }
+
+    </script>
+</body>
+</html>
