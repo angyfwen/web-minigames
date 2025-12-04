@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Logic Ambulance ⚙️</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&family=Rye&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Steampunk Palette */
+            --bg-dark: #1a120b; 
+            --brass-light: #e6c288;
+            --brass-main: #c59d5f;
+            --brass-dark: #8c6a36;
+            --copper: #b87333;
+            --parchment: #fcf5e5;
+            --success-green: #4e8046;
+            --fail-red: #8f2d2d;
+        }
+
+        body {
+            font-family: 'Rye', serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-dark);
+            color: var(--brass-light);
+            overflow: hidden;
+            user-select: none;
+            
+            /* Gear Background Pattern */
+            background-image: 
+                radial-gradient(var(--brass-dark) 15%, transparent 16%),
+                radial-gradient(var(--brass-dark) 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .screen.active { display: flex; animation: steamRise 1s ease-out; }
+        
+        @keyframes steamRise {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- START SCREEN --- */
+        .title-plate {
+            background: linear-gradient(135deg, #422a18, #2b1d0e);
+            border: 8px solid var(--brass-main);
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 
+                0 0 0 4px #1a120b, 
+                0 0 0 8px var(--copper), 
+                0 20px 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        /* Screws in corners */
+        .screw {
+            position: absolute; width: 15px; height: 15px;
+            background: radial-gradient(circle, #ddd 20%, #999 100%);
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px #000;
+        }
+        .tl { top: 10px; left: 10px; }
+        .tr { top: 10px; right: 10px; }
+        .bl { bottom: 10px; left: 10px; }
+        .br { bottom: 10px; right: 10px; }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff5d6, #c59d5f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-family: 'Courier Prime', monospace;
+            color: var(--brass-light);
+            margin-top: 10px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .btn-steam {
+            margin-top: 40px;
+            background: radial-gradient(circle at 30% 30%, var(--copper), #5a3a29);
+            border: 4px solid var(--brass-main);
+            padding: 15px 40px;
+            font-family: 'Rye', serif;
+            font-size: 1.8rem;
+            color: #fff5d6;
+            cursor: pointer;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-shadow: 2px 2px 2px rgba(0,0,0,0.8);
+            border-radius: 10px;
+        }
+        .btn-steam:active { transform: translateY(4px); box-shadow: 0 4px 5px rgba(0,0,0,0.5); }
+        .btn-steam:hover { filter: brightness(1.2); }
+
+        /* --- GAME DASHBOARD --- */
+        .dashboard-frame {
+            width: 90%;
+            max-width: 900px;
+            background: #2e2014;
+            border: 10px ridge var(--brass-dark);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 20px;
+            position: relative;
+        }
+
+        /* HEADER */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--brass-main);
+            padding-bottom: 10px;
+        }
+        .level-tag {
+            font-family: 'Courier Prime', monospace;
+            background: #000;
+            color: var(--brass-light);
+            padding: 5px 15px;
+            border: 1px solid var(--brass-main);
+            font-weight: bold;
+        }
+
+        /* VIEWPORT (Windshield) */
+        .viewport-glass {
+            height: 200px;
+            background: linear-gradient(to bottom, #4a6d7c, #2f4f4f);
+            border: 4px solid #111;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+        
+        /* The Ambulance */
+        .ambulance {
+            position: absolute;
+            bottom: 20px;
+            left: -150px; 
+            width: 120px;
+            height: 70px;
+            background: #5d4037;
+            border-radius: 10px 30px 5px 5px;
+            border: 3px solid #1a120b;
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+            transition: left 2s ease-in-out;
+            z-index: 10;
+        }
+        .ambulance::before {
+            content: ''; position: absolute; top: 10px; right: 10px; width: 40px; height: 25px;
+            background: #87ceeb; border: 2px solid #333; border-radius: 5px; 
+        }
+        .ambulance::after {
+            content: ''; position: absolute; bottom: 5px; left: 5px; width: 110px; height: 5px;
+            background: var(--brass-main); 
+        }
+        .cross {
+            position: absolute; top: 20px; left: 20px; color: #8f2d2d; font-size: 30px;
+            background: #fcf5e5; border-radius: 50%; width: 35px; height: 35px;
+            display: flex; justify-content: center; align-items: center; border: 2px solid #8f2d2d;
+        }
+        
+        .wheels {
+            position: absolute; bottom: -10px; left: 10px; width: 100px;
+            display: flex; justify-content: space-between;
+        }
+        .wheel {
+            width: 30px; height: 30px; background: #222; border-radius: 50%;
+            border: 3px solid var(--brass-main);
+            animation: spin 0.5s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Obstacles / Fog */
+        .fog-layer {
+            position: absolute; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.2)" filter="blur(10px)"/></svg>');
+            animation: fogMove 20s linear infinite;
+            opacity: 0.6;
+        }
+        @keyframes fogMove { from { background-position: 0 0; } to { background-position: 100% 0; } }
+
+        /* Gate */
+        .gate {
+            position: absolute; right: 50px; bottom: 0; width: 20px; height: 120px;
+            background: repeating-linear-gradient(45deg, #333, #333 10px, #e6c288 10px, #e6c288 20px);
+            border: 2px solid #000;
+            transition: transform 0.5s;
+            transform-origin: bottom center;
+        }
+        .gate.open { transform: rotate(90deg); }
+
+        /* INSTRUCTIONS (Ticker Tape) */
+        .ticker-tape {
+            background: var(--parchment);
+            color: #333;
+            font-family: 'Courier Prime', monospace;
+            padding: 15px;
+            border: 1px solid #aaa;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            transform: rotate(-1deg);
+            margin: 10px 0;
+            position: relative;
+        }
+        .ticker-tape::before { /* Pin */
+            content: ''; position: absolute; top: -10px; left: 50%; width: 10px; height: 10px;
+            background: #b22222; border-radius: 50%; box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .code-snippet {
+            display: block; margin-top: 10px; font-weight: bold; font-size: 1.1rem;
+            color: #8f2d2d; border-top: 1px dashed #999; padding-top: 5px;
+        }
+
+        /* CONTROLS (Brass Switches) */
+        .control-board {
+            display: flex; justify-content: center; gap: 40px; padding: 10px;
+            background: #22150a; border-radius: 10px; border: 2px solid var(--brass-dark);
+        }
+
+        /* Custom Toggle Switch */
+        .toggle-wrapper {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .toggle-label { font-family: 'Courier Prime'; font-size: 0.9rem; color: var(--brass-light); }
+        
+        .switch {
+            position: relative; width: 60px; height: 100px;
+            background: #111; border: 3px solid var(--brass-main);
+            border-radius: 5px; cursor: pointer;
+        }
+        .handle {
+            position: absolute; bottom: 5px; left: 5px; width: 44px; height: 40px;
+            background: linear-gradient(to bottom, #d4af37, #8c6a36);
+            border-radius: 4px; transition: bottom 0.3s;
+            box-shadow: 0 4px 5px rgba(0,0,0,0.5);
+        }
+        /* Active State */
+        .switch.active .handle { bottom: 50px; background: linear-gradient(to bottom, #fff, #d4af37); }
+        
+        /* Indicators */
+        .led {
+            width: 10px; height: 10px; background: #300; border-radius: 50%;
+            margin-top: 5px; border: 1px solid #555;
+            box-shadow: 0 0 5px red; transition: all 0.3s;
+        }
+        .switch.active + .led { background: #0f0; box-shadow: 0 0 10px #0f0; }
+
+        /* EXECUTE BUTTON */
+        .lever-container { text-align: center; }
+        .lever-btn {
+            background: linear-gradient(to right, #8f2d2d, #5a1a1a);
+            border: 4px solid var(--brass-main); color: var(--parchment);
+            font-family: 'Rye'; font-size: 1.2rem; padding: 10px 30px;
+            cursor: pointer; box-shadow: 0 5px 0 #331111; border-radius: 5px;
+        }
+        .lever-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* STATUS POPUP */
+        #status-plate {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: #000; border: 4px solid var(--brass-light); color: var(--brass-light);
+            padding: 20px 40px; font-size: 2rem; z-index: 100;
+            transition: transform 0.3s; text-align: center;
+            box-shadow: 0 0 20px var(--brass-light);
+        }
+        #status-plate.show { transform: translate(-50%, -50%) scale(1); }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="title-plate">
+            <div class="screw tl"></div><div class="screw tr"></div>
+            <div class="screw bl"></div><div class="screw br"></div>
+            <h1>STEAM LOGIC<br>AMBULANCE</h1>
+            <div class="subtitle">ENGINEER: SET THE VALVES!</div>
+            <button class="btn-steam" onclick="goToGame()">
+                IGNITE ENGINE <i class="fa-solid fa-fire"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="dashboard-frame">
+            <div class="screw tl"></div><div class="screw tr"></div>
+            <div class="screw bl"></div><div class="screw br"></div>
+
+            <div class="dash-header">
+                <span><i class="fa-solid fa-gears"></i> LOGIC CONTROLLER</span>
+                <span class="level-tag" id="level-display">SECTOR 1</span>
+            </div>
+
+            <div class="viewport-glass">
+                <div class="fog-layer"></div>
+                <div class="gate" id="gate"></div>
+                <div class="ambulance" id="ambulance">
+                    <div class="cross"><i class="fa-solid fa-plus"></i></div>
+                    <div class="wheels">
+                        <div class="wheel"></div><div class="wheel"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticker-tape">
+                <div id="scenario-text">SCENARIO: Gate locked. Pressure is LOW.</div>
+                <span class="code-snippet" id="logic-code">IF (Pressure == HIGH) THEN OPEN_GATE()</span>
+            </div>
+
+            <div class="control-board" id="switch-container">
+                </div>
+
+            <div class="lever-container">
+                <button class="lever-btn" onclick="executeLogic()">ENGAGE <i class="fa-solid fa-check"></i></button>
+            </div>
+        </div>
+
+        <div id="status-plate">PATH CLEARED</div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const levels = [
+            {
+                id: 1,
+                text: "Obstacle Ahead! We need full steam pressure.",
+                code: "IF (Pressure == TRUE) THEN OPEN_GATE()",
+                switches: [{id: 's1', label: 'Pressure', req: true}]
+            },
+            {
+                id: 2,
+                text: "Crossing Junction. Signal and Brakes required.",
+                code: "IF (Signal == TRUE) AND (Brakes == TRUE) THEN OPEN_GATE()",
+                switches: [{id: 's1', label: 'Signal', req: true}, {id: 's2', label: 'Brakes', req: true}]
+            },
+            {
+                id: 3,
+                text: "Emergency Override. Open if Emergency OR Key is active.",
+                code: "IF (Emergency == TRUE) OR (MasterKey == TRUE) THEN OPEN_GATE()",
+                switches: [{id: 's1', label: 'Emergency', req: false}, {id: 's2', label: 'MasterKey', req: false}],
+                logic: 'OR'
+            },
+            {
+                id: 4,
+                text: "Safety Check. Open ONLY if Valve is NOT Leaking.",
+                code: "IF (NOT Leaking == TRUE) THEN OPEN_GATE()",
+                switches: [{id: 's1', label: 'Leaking', req: false}], // Must remain FALSE
+                logic: 'NOT'
+            }
+        ];
+
+        let currLvl = 0;
+        let switchesState = {};
+
+        // --- DOM ---
+        const ambulance = document.getElementById('ambulance');
+        const gate = document.getElementById('gate');
+        const switchContainer = document.getElementById('switch-container');
+        const statusPlate = document.getElementById('status-plate');
+
+        function goToGame() {
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            initLevel();
+        }
+
+        function initLevel() {
+            // Reset
+            ambulance.style.left = '-150px';
+            gate.classList.remove('open');
+            statusPlate.classList.remove('show');
+            switchesState = {};
+            
+            const lvl = levels[currLvl];
+            document.getElementById('level-display').innerText = "SECTOR " + lvl.id;
+            document.getElementById('scenario-text').innerText = "SCENARIO: " + lvl.text;
+            document.getElementById('logic-code').innerText = lvl.code;
+
+            // Render Switches
+            switchContainer.innerHTML = '';
+            lvl.switches.forEach(sw => {
+                switchesState[sw.id] = false; // Default false
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'toggle-wrapper';
+                
+                wrapper.innerHTML = `
+                    <div class="switch" id="sw-${sw.id}" onclick="toggleSwitch('${sw.id}')">
+                        <div class="handle"></div>
+                    </div>
+                    <div class="led"></div>
+                    <div class="toggle-label">${sw.label}</div>
+                `;
+                switchContainer.appendChild(wrapper);
+            });
+
+            // Intro Animation
+            setTimeout(() => {
+                ambulance.style.left = '50px'; // Move to waiting position
+            }, 500);
+        }
+
+        function toggleSwitch(id) {
+            switchesState[id] = !switchesState[id];
+            const el = document.getElementById(`sw-${id}`);
+            if (switchesState[id]) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        }
+
+        function executeLogic() {
+            const lvl = levels[currLvl];
+            let passed = false;
+
+            if (lvl.logic === 'OR') {
+                // OR Logic: At least one must be true
+                passed = lvl.switches.some(s => switchesState[s.id] === true);
+            } else if (lvl.logic === 'NOT') {
+                // NOT Logic: The switch must match the requirement (False)
+                // Requirement is 'false', so switch must be false.
+                passed = switchesState[lvl.switches[0].id] === false;
+            } else {
+                // AND Logic (Default): All must act match requirement (True)
+                passed = lvl.switches.every(s => switchesState[s.id] === s.req);
+            }
+
+            if (passed) {
+                gate.classList.add('open');
+                statusPlate.innerText = "PATH CLEARED";
+                statusPlate.style.color = "var(--success-green)";
+                statusPlate.style.borderColor = "var(--success-green)";
+                
+                setTimeout(() => {
+                    ambulance.style.left = '120%'; // Drive off screen
+                    statusPlate.classList.add('show');
+                    
+                    setTimeout(() => {
+                        currLvl++;
+                        // --- FINAL CHECK: IF GAME COMPLETE, GO TO START ---
+                        if (currLvl < levels.length) {
+                            initLevel();
+                        } else {
+                            // RESET TO TITLE SCREEN
+                            document.getElementById('game-screen').classList.remove('active');
+                            document.getElementById('start-screen').classList.add('active');
+                            currLvl = 0; // Reset progress
+                        }
+                    }, 2000);
+                }, 500);
+            } else {
+                statusPlate.innerText = "PRESSURE FAILURE";
+                statusPlate.style.color = "var(--fail-red)";
+                statusPlate.style.borderColor = "var(--fail-red)";
+                statusPlate.classList.add('show');
+                
+                // Shake effect
+                document.body.style.transform = "translateX(5px)";
+                setTimeout(() => document.body.style.transform = "translateX(-5px)", 50);
+                setTimeout(() => document.body.style.transform = "translateX(0)", 100);
+                
+                setTimeout(() => statusPlate.classList.remove('show'), 1500);
+            }
+        }
+
+    </script>
+</body>
+</html>
