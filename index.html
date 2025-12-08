@@ -535,8 +535,8 @@ const sfx = {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if(Ctx) this.ctx = new Ctx();
     
-    // Setup click sound from file - UPDATED PATH
-    this.clickAudio = new Audio('../audios/una.mp3');
+    // Setup click sound from file - FIXED PATH for GitHub
+    this.clickAudio = new Audio('audios/una.mp3');
     this.clickAudio.volume = 0.5;
     this.clickAudio.onerror = () => {
       console.warn("una.mp3 missing");
@@ -599,9 +599,9 @@ const sfx = {
   }
 };
 
-/* MUSIC ENGINE - UPDATED PATHS */
-const BG_MUSIC_URL = "../audios/ac_3pm.mp3";
-const JOJO_SFX_URL = "../audios/oraoraora.mp3";
+/* MUSIC ENGINE - FIXED PATHS for GitHub */
+const BG_MUSIC_URL = "audios/ac_3pm.mp3";
+const JOJO_SFX_URL = "audios/oraoraora.mp3";
 
 let bgAudio = new Audio(BG_MUSIC_URL);
 bgAudio.loop = true;
