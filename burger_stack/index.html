@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Burger Stack</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* THEME: Premium Red */
+            --bg-color: #A31621; 
+            --bg-pattern: #8D121B;
+
+            /* Ingredient Colors */
+            --bun-base: #FFB370;   
+            --patty-base: #795548;
+            --patty-shadow: #5D4037;
+            --cheese-base: #FFD54F;
+            --cheese-shadow: #FBC02D;
+            --lettuce-base: #9CCC65;
+            --lettuce-shadow: #7CB342;
+            --tomato-base: #EF5350;
+            --tomato-shadow: #D32F2F;
+            
+            /* UI Colors */
+            --text-main: #2D3436;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
+                repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
+            background-attachment: fixed;
+            color: var(--text-main);
+            user-select: none;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            width: 100%; 
+            min-height: 100%;
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding-bottom: 20px;
+        }
+        .screen.active { display: flex; animation: fadeScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes fadeScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- START SCREEN --- */
+        .menu-card {
+            background: #fff;
+            padding: 60px 80px;
+            border-radius: 30px;
+            text-align: center;
+            border-bottom: 12px solid rgba(0,0,0,0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            transform: rotate(-2deg);
+            margin: 20px;
+        }
+        
+        h1 {
+            font-family: 'Fredoka One', cursive; font-size: 4rem; margin: 0;
+            color: #2d3436; 
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0 #eee;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle { font-size: 1.4rem; color: #636e72; font-weight: 800; margin: 0 0 40px 0; text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-start {
+            background: #2d3436; color: white; border: none;
+            padding: 18px 50px; font-size: 2rem; font-family: 'Fredoka One';
+            border-radius: 20px; cursor: pointer; transition: all 0.1s;
+            box-shadow: 0 8px 0 #000; display: block; width: 100%; margin-bottom: 20px;
+        }
+        .btn-start:active { transform: translateY(8px); box-shadow: none; }
+
+        .btn-info-main {
+            background: #00cec9; color: white; border: none;
+            padding: 15px 40px; font-size: 1.2rem; font-family: 'Fredoka One';
+            border-radius: 50px; cursor: pointer; transition: all 0.1s;
+            box-shadow: 0 6px 0 #00b894;
+        }
+        .btn-info-main:active { transform: translateY(6px); box-shadow: none; }
+
+
+        /* --- GAME LAYOUT --- */
+        .game-wrapper {
+            width: 95%; max-width: 1400px; 
+            min-height: 90vh;
+            height: auto;
+            display: grid; 
+            grid-template-columns: 320px 1fr 380px;
+            gap: 30px;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- CONTROLS --- */
+        .controls-panel {
+            background: #fff;
+            padding: 25px; border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-bottom: 8px solid rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+        }
+
+        .header-code {
+            text-align: center; font-weight: bold; margin-bottom: 10px; 
+            font-family:'Fira Code'; color: #b2bec3; 
+            background: #2d3436; padding: 6px; border-radius: 8px; font-size: 0.9rem;
+        }
+
+        .controls-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+            margin-bottom: 15px; 
+        }
+        
+        .ing-btn {
+            border: none; padding: 15px 10px; border-radius: 12px;
+            font-family: 'Fredoka One'; font-size: 1rem; color: white;
+            cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+            text-transform: uppercase; transition: transform 0.1s;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+        .ing-btn:active { transform: translateY(6px); box-shadow: none; }
+        
+        .b-bun-top { background: linear-gradient(to bottom, #FFB370, #F57F17); }
+        .b-tomato { background: linear-gradient(to bottom, #EF5350, #C62828); }
+        .b-lettuce { background: linear-gradient(to bottom, #9CCC65, #558B2F); }
+        .b-cheese { background: linear-gradient(to bottom, #FFD54F, #F9A825); color: #7f5f00;}
+        .b-patty { background: linear-gradient(to bottom, #8D6E63, #4E342E); }
+        .b-bun-bot { background: linear-gradient(to bottom, #FFCC80, #EF6C00); }
+
+        .btn-pop {
+            background: #ff7675; color: white; width: 100%;
+            padding: 15px; font-size: 1.2rem; font-family: 'Fredoka One';
+            border: none; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 5px 0 #d63031; margin-top: 5px; margin-bottom: 10px;
+        }
+        .btn-pop:active { transform: translateY(5px); box-shadow: none; }
+
+        .btn-serve {
+            background: #fdcb6e; color: #2d3436; width: 100%;
+            padding: 18px; font-size: 1.6rem; font-family: 'Fredoka One';
+            border: none; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 8px 0 #e17055;
+        }
+        .btn-serve:active { transform: translateY(8px); box-shadow: none; }
+
+        /* --- STACK AREA --- */
+        .plate-area {
+            height: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end;
+            position: relative;
+            padding-bottom: 20px;
+            min-height: 400px;
+        }
+
+        #burger-stack {
+            width: 100%;
+            display: flex; flex-direction: column-reverse;
+            align-items: center;
+            margin-bottom: -45px; 
+            z-index: 10;
+            filter: none !important;
+        }
+
+        .food {
+            display: flex; justify-content: center; align-items: center;
+            font-weight: 900; font-size: 1rem; color: transparent;
+            position: relative; 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-bottom: -10px; 
+            transform-origin: center bottom;
+        }
+        .food.new { animation: dropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        @keyframes dropIn { 
+            0% { transform: translateY(-300px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Ingredients */
+        .f-bun-bot { width: 280px; height: 60px; background: var(--bun-base); border-radius: 15px 15px 40px 40px; margin-bottom: 0px; }
+        .f-patty { width: 290px; height: 60px; background: var(--patty-base); border-radius: 20px; background-image: repeating-linear-gradient(180deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 15px); margin-bottom: -12px; }
+        .f-cheese { width: 300px; height: 25px; background: var(--cheese-base); border-radius: 10px; z-index: 5; margin-bottom: -5px; }
+        .f-cheese::after { content: ''; position: absolute; width: 40px; height: 25px; background: var(--cheese-base); border-radius: 0 0 10px 10px; top: 15px; right: 50px; box-shadow: 60px 0 0 var(--cheese-base); }
+        .f-lettuce { width: 310px; height: 40px; background: var(--lettuce-base); border-radius: 20px; margin-bottom: -12px; background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.1) 50%); background-size: 20px 20px; }
+        .f-tomato { width: 270px; height: 45px; background: var(--tomato-base); border-radius: 25px; margin-bottom: -12px; }
+        
+        .f-bun-top { 
+            width: 310px; height: 90px; background-color: var(--bun-base);
+            border-radius: 155px 155px 20px 20px; margin-bottom: -20px; position: relative;
+        }
+        .f-bun-top::after { 
+            content: ' , . , ` , '; color: rgba(255, 224, 130, 0.8); 
+            position: absolute; top: 20px; left: 0; right: 0; text-align: center;
+            font-size: 2.2rem; letter-spacing: 15px; font-weight: bold;
+        }
+
+        .index-marker {
+            position: absolute; left: -80px; top: 50%; transform: translateY(-50%);
+            font-family: 'Fira Code', monospace; color: #fff; background: #2d3436;
+            padding: 4px 10px; border-radius: 8px; font-size: 0.9rem;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.2); display: flex; align-items: center;
+        }
+        .index-marker::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 2px; background: rgba(0,0,0,0.3); }
+
+        .plate {
+            width: 380px; height: 50px; background: #fff; border-radius: 50%;
+            border-bottom: 8px solid #ddd; box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 1;
+        }
+
+        /* --- RIGHT PANEL (TICKET & TERMINAL) --- */
+        .right-panel { display: flex; flex-direction: column; gap: 20px; height: 80vh; }
+        
+        .ticket {
+            background: #fffdf5; padding: 20px; font-family: 'Courier Prime', monospace; text-align: center;
+            background-image: linear-gradient(135deg, transparent 5px, #fffdf5 5px), linear-gradient(225deg, transparent 5px, #fffdf5 5px);
+            background-size: 20px 20px; background-repeat: repeat-x; background-position: bottom;
+            padding-bottom: 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: rotate(2deg);
+        }
+        .ticket-header { border-bottom: 2px dashed #b2bec3; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; color: #636e72; }
+        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; min-height: 100px; justify-content: center; }
+        .mini-food { width: 100px; height: 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+
+        /* --- SCROLLABLE TERMINAL --- */
+        .terminal {
+            background: #1e272e; border-radius: 15px; flex-grow: 1; box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            padding: 20px; font-family: 'Fira Code', monospace; font-size: 0.95rem; color: #d2dae2;
+            display: flex; flex-direction: column-reverse; border: 2px solid #485460;
+            overflow-y: auto; 
+            min-height: 0;
+        }
+        
+        .log-line { margin-bottom: 8px; border-bottom: 1px solid #485460; padding-bottom: 4px; }
+        .k-obj { color: #4bcffa; } .k-method { color: #badc58; } .k-str { color: #ffbe76; } .k-comment { color: #808e9b; font-style: italic; font-size: 0.85rem;} .k-return { color: #ef5777; } 
+
+        /* --- CUTE SCROLLBAR STYLES --- */
+        .terminal::-webkit-scrollbar {
+            width: 12px;
+        }
+        .terminal::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2); 
+            border-radius: 10px;
+            margin: 10px;
+        }
+        .terminal::-webkit-scrollbar-thumb {
+            background: #485460; 
+            border-radius: 10px;
+            border: 3px solid #1e272e;
+        }
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: #57606f;
+        }
+
+        /* --- MODALS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none;
+            justify-content: center; align-items: center; z-index: 500; backdrop-filter: blur(8px);
+        }
+        .modal-card {
+            background: white; padding: 50px; border-radius: 30px; text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5); width: 500px; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
+        }
+        @keyframes bounceIn { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+        .close-btn { position: absolute; top: 20px; right: 25px; font-size: 2rem; cursor: pointer; color: #b2bec3; transition: 0.2s; }
+        .close-btn:hover { color: #2d3436; transform: rotate(90deg); }
+
+        .info-block { text-align: left; margin-bottom: 25px; display: flex; gap: 20px; align-items: flex-start; }
+        .info-icon { font-size: 2.2rem; color: #00cec9; width: 50px; text-align: center; background: #e0fbfb; padding: 10px; border-radius: 50%; }
+        .info-text h3 { margin: 0 0 5px 0; font-family: 'Fredoka One'; color: #2d3436; font-size: 1.3rem; }
+        .info-text p { margin: 0; line-height: 1.5; color: #636e72; font-size: 1rem; }
+
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px) rotate(-5deg); } 75% { transform: translateX(15px) rotate(5deg); } }
+
+        .nav-btn {
+            position: absolute; top: 30px; background: white; border: none; width: 50px; height: 50px; border-radius: 15px;
+            cursor: pointer; z-index: 200; font-size: 1.2rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.1s;
+        }
+        .nav-btn:hover { transform: translateY(-3px); } .nav-btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-home { left: 30px; } 
+        .btn-mute { right: 30px; }
+        .btn-help { right: 90px; } 
+
+        /* =========================================
+           MOBILE OPTIMIZATIONS
+           ========================================= */
+        @media (max-width: 900px) {
+            .menu-card {
+                padding: 30px 20px; 
+                width: 85%; 
+                max-width: 350px;
+                margin-top: 50px;
+                margin-bottom: 50px;
+            }
+            h1 { font-size: 2.8rem; }
+            .subtitle { font-size: 1.1rem; margin-bottom: 25px; }
+            .btn-start { font-size: 1.5rem; padding: 15px; }
+            .btn-info-main { font-size: 1rem; padding: 12px; }
+
+            .modal-card {
+                width: 85%; 
+                max-width: 380px; 
+                padding: 25px;
+                max-height: 80vh; 
+                overflow-y: auto; 
+                margin: auto; 
+            }
+            .info-block {
+                flex-direction: row; 
+                gap: 12px;
+                margin-bottom: 15px;
+            }
+            .info-icon { font-size: 1.5rem; width: 40px; padding: 8px; }
+            .info-text h3 { font-size: 1.1rem; }
+            .info-text p { font-size: 0.9rem; }
+            .close-btn { top: 10px; right: 15px; font-size: 1.5rem; }
+
+            .game-wrapper {
+                display: flex;
+                flex-direction: column;
+                min-height: 100dvh;
+                height: auto;
+                padding: 10px;
+                padding-top: 80px; 
+                gap: 10px;
+                overflow-y: visible;
+            }
+
+            .right-panel {
+                order: 1;
+                flex-direction: row;
+                height: auto;
+                width: 100%;
+                gap: 10px;
+                margin-bottom: 0;
+            }
+            .ticket {
+                flex: 1;
+                padding: 10px;
+                padding-bottom: 20px;
+                transform: rotate(0deg); 
+            }
+            .ticket-header { margin-bottom: 5px; font-size: 0.8rem; }
+            .target-view { min-height: 60px; gap: 3px; }
+            .mini-food { width: 60px; height: 10px; border-radius: 4px; }
+            
+            .terminal {
+                flex: 1;
+                height: 150px; 
+                min-height: 150px;
+                padding: 10px;
+                font-size: 0.7rem;
+            }
+
+            .plate-area {
+                order: 2;
+                flex: 1;
+                width: 100%;
+                justify-content: flex-end;
+                transform: scale(0.65);
+                transform-origin: center bottom;
+                margin-bottom: 10px;
+                /* ADDED: Negative margin to pull the burger up and reduce space */
+                margin-top: -40px;
+            }
+
+            .controls-panel {
+                order: 3;
+                width: 100%;
+                height: auto;
+                padding: 15px;
+                border-radius: 20px 20px 0 0;
+            }
+
+            .controls-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                margin-bottom: 5px; 
+            }
+            .header-code {
+                padding: 5px;
+                margin-bottom: 5px;
+                font-size: 0.8rem;
+            }
+            
+            .ing-btn { padding: 15px 5px; font-size: 0.8rem; }
+            .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; }
+
+            .nav-btn { top: 15px; width: 40px; height: 40px; font-size: 1rem; }
+            .btn-home { left: 15px; }
+            .btn-mute { right: 15px; }
+            .btn-help { right: 65px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="menu-card">
+            <h1>STACKY'S<br>CODE DINER</h1>
+            <p class="subtitle">Delicious Data Structures</p>
+            <button class="btn-start" onclick="startGame()">START SHIFT <i class="fa-solid fa-play"></i></button>
+            <button class="btn-info-main" onclick="openEdu()"><i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE</i></button>
+        </div>
+    </div>
+
+    <div id="edu-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="close-btn" onclick="closeEdu()">&times;</div>
+            <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
+            </h2>
+            <div class="info-block">
+                <div class="info-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="info-text"><h3>LIFO Rule</h3><p><strong>Last-In, First-Out.</strong> Just like a burger, the last ingredient you put on is the first one you have to take off to fix a mistake.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="info-text"><h3>Push & Pop</h3><p>In coding, adding an item is called <strong>PUSH</strong>. Removing the top item is called <strong>POP</strong>.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon"><i class="fa-solid fa-terminal"></i></div>
+                <div class="info-text"><h3>Arrays</h3><p>Computers store lists in <strong>Arrays</strong>. They start counting at 0, not 1! Watch the terminal on the right as you play.</p></div>
+            </div>
+            <button class="btn-start" style="font-size: 1.2rem; padding: 12px; margin-bottom: 0;" onclick="closeEdu()">GOT IT!</button>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="close-btn" onclick="closeHelp()">&times;</div>
+            <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem;">HOW TO PLAY</h2>
+            <div class="info-block">
+                <div class="info-icon" style="background: #e0f0fb; color: #4488ff;"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div class="info-text"><h3>1. Check the Ticket</h3><p>Look at the order on the right. Build the burger from the <strong>bottom up</strong> to match.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon" style="background: #e0f0fb; color: #4488ff;"><i class="fa-solid fa-plus"></i></div>
+                <div class="info-text"><h3>2. Push Ingredients</h3><p>Click the ingredient buttons to <strong>stack.push()</strong> them onto the plate.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon" style="background: #ffe0e0; color: #ff4444;"><i class="fa-solid fa-rotate-left"></i></div>
+                <div class="info-text"><h3>3. Made a mistake?</h3><p>Click "UNDO" to <strong>stack.pop()</strong> (remove) the top item.</p></div>
+            </div>
+            <button class="btn-start" style="font-size: 1.2rem; padding: 12px; margin-bottom: 0;" onclick="closeHelp()">LET'S COOK!</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <button class="nav-btn btn-home" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+        <button class="nav-btn btn-help" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
+        <button class="nav-btn btn-mute" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
+
+        <div class="game-wrapper">
+            <div class="controls-panel">
+                <div class="header-code">stack.push( ... )</div>
+                <div class="controls-grid">
+                    <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
+                    <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
+                    <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
+                    <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
+                    <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
+                    <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
+                </div>
+                <div class="header-code" style="margin-top:10px;">stack.pop()</div>
+                <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
+                <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
+            </div>
+
+            <div class="plate-area">
+                <div id="burger-stack"></div>
+                <div class="plate"></div>
+            </div>
+
+            <div class="right-panel">
+                <div class="ticket">
+                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
+                    <div class="target-view" id="target-view"></div>
+                </div>
+                <div class="terminal" id="terminal-log">
+                    <div style="color: #636e72; margin-bottom: 10px; font-style: italic;">// System initialized...<br>// Waiting for chef input...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h1 id="modal-title" style="color: #00b894; font-family: 'Fredoka One'; font-size: 3rem; margin: 0;">TASTY!</h1>
+            <p id="modal-text" style="font-size: 1.3rem; margin: 20px 0; color: #636e72;">The code logic is delicious.</p>
+            <button class="btn-start" id="next-btn" onclick="nextLevel()">NEXT LEVEL</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME LOGIC ---
+        let currentLevelNum = 1;
+        const MAX_ORDERS = 5; // End shift after 5 orders
+        let currentTargetOrder = [];
+        let userStack = [];
+        const MAX_STACK_SIZE = 8;
+        let isMuted = false;
+        
+        function generateRandomOrder(level) {
+            let order = ['bun-bot'];
+            const ingredients = ['patty', 'cheese', 'lettuce', 'tomato'];
+            let minItems = Math.min(Math.floor(level / 2) + 1, 4);
+            let maxItems = Math.min(level + 2, 6); 
+            
+            let count = Math.floor(Math.random() * (maxItems - minItems + 1)) + minItems;
+            
+            for(let i=0; i<count; i++) {
+                const randomIng = ingredients[Math.floor(Math.random() * ingredients.length)];
+                order.push(randomIng);
+            }
+            order.push('bun-top');
+            return order;
+        }
+
+        // --- AUDIO SYSTEM ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playTone(type) {
+            if (isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'push') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+                gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'pop') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+                gainNode.gain.setValueAtTime(0.2, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gainNode.gain.setValueAtTime(0.4, now); gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'win') {
+                playNote(523.25, now); playNote(659.25, now + 0.1); playNote(783.99, now + 0.2); playNote(1046.50, now + 0.3, 0.4);
+            }
+        }
+
+        function playNote(freq, time, duration = 0.1) {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sine'; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.2, time); gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+            osc.start(time); osc.stop(time + duration);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('mute-icon');
+            if (isMuted) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark'); }
+            else { icon.classList.remove('fa-volume-xmark'); icon.classList.add('fa-volume-high'); initAudio(); playTone('pop'); }
+        }
+
+        // --- DOM & NAV ---
+        const stackEl = document.getElementById('burger-stack');
+        const targetView = document.getElementById('target-view');
+        const levelDisplay = document.getElementById('level-display');
+        const winModal = document.getElementById('win-modal');
+        const terminalLog = document.getElementById('terminal-log');
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        const nextBtn = document.getElementById('next-btn');
+
+        function startGame() {
+            initAudio(); 
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').classList.add('active');
+            currentLevelNum = 1;
+            initLevel();
+        }
+
+        function goHome() {
+            userStack = [];
+            currentLevelNum = 1; // Reset Level
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').style.display = 'flex';
+            document.getElementById('win-modal').style.display = 'none';
+            stackEl.innerHTML = '';
+        }
+
+        // Renamed functions for Educational Modal
+        function openEdu() { initAudio(); playTone('pop'); document.getElementById('edu-modal').style.display = 'flex'; }
+        function closeEdu() { initAudio(); playTone('push'); document.getElementById('edu-modal').style.display = 'none'; }
+        
+        // New functions for Help Modal
+        function openHelp() { initAudio(); playTone('pop'); document.getElementById('help-modal').style.display = 'flex'; }
+        function closeHelp() { initAudio(); playTone('push'); document.getElementById('help-modal').style.display = 'none'; }
+
+        // --- GAMEPLAY ---
+        function initLevel() {
+            userStack = [];
+            stackEl.innerHTML = '';
+            terminalLog.innerHTML = '<div style="color: #636e72; margin-bottom: 10px; font-style: italic;">// New Level Started<br>// Stack is empty</div>';
+            winModal.style.display = 'none';
+            
+            currentTargetOrder = generateRandomOrder(currentLevelNum);
+            levelDisplay.innerText = `ORDER #${currentLevelNum}`;
+            
+            targetView.innerHTML = '';
+            currentTargetOrder.forEach(item => {
+                const mini = document.createElement('div');
+                mini.className = 'mini-food';
+                mini.style.background = getColor(item);
+                targetView.appendChild(mini);
+            });
+        }
+
+        function pushItem(type) {
+            initAudio();
+            
+            if (userStack.length >= MAX_STACK_SIZE) {
+                logToTerminal('error', 'Stack Overflow Exception!');
+                playTone('error');
+                // Shake the Ticket to indicate error
+                document.querySelector('.ticket').classList.add('shake');
+                setTimeout(() => document.querySelector('.ticket').classList.remove('shake'), 400);
+                return;
+            }
+
+            userStack.push(type);
+            playTone('push');
+            
+            const el = document.createElement('div');
+            el.className = `food f-${type} new`;
+            el.style.zIndex = userStack.length;
+
+            const indexSpan = document.createElement('div');
+            indexSpan.className = 'index-marker';
+            indexSpan.innerText = `[${userStack.length - 1}]`;
+            el.appendChild(indexSpan);
+
+            stackEl.appendChild(el); 
+            logToTerminal('push', type, userStack.length - 1);
+        }
+
+        function popItem() {
+            initAudio();
+            if (userStack.length === 0) {
+                logToTerminal('error', 'Cannot pop() empty stack!');
+                playTone('error'); return;
+            }
+            const removedItem = userStack.pop();
+            playTone('pop');
+            if (stackEl.lastChild) stackEl.removeChild(stackEl.lastChild);
+            logToTerminal('pop', removedItem);
+        }
+
+        function checkOrder() {
+            initAudio();
+            let correct = true;
+            let i = 0;
+            // First check length
+            if (userStack.length !== currentTargetOrder.length) correct = false;
+            else {
+                for (i = 0; i < currentTargetOrder.length; i++) {
+                    if (userStack[i] !== currentTargetOrder[i]) { correct = false; break; }
+                }
+            }
+
+            if (correct) {
+                playTone('win');
+                
+                // CHECK FOR END OF SHIFT
+                if (currentLevelNum >= MAX_ORDERS) {
+                    modalTitle.innerText = "SHIFT COMPLETE!";
+                    modalText.innerText = "Great work! Time to clock out.";
+                    nextBtn.innerText = "CLOCK OUT 🕒";
+                    nextBtn.onclick = goHome;
+                } else {
+                    modalTitle.innerText = "TASTY!";
+                    modalText.innerText = "Order compiled successfully.";
+                    nextBtn.innerText = "NEXT ORDER";
+                    nextBtn.onclick = nextLevel;
+                }
+                
+                winModal.style.display = 'flex';
+                logToTerminal('success', 'Arrays Matched!');
+            } else {
+                playTone('error');
+                logToTerminal('error', 'MismatchException: Stack error.');
+                // FIX: Only shake the Ticket (order)
+                document.querySelector('.ticket').classList.add('shake');
+                setTimeout(() => document.querySelector('.ticket').classList.remove('shake'), 400);
+            }
+        }
+
+        function nextLevel() {
+            currentLevelNum++;
+            initLevel();
+        }
+
+        function logToTerminal(action, item, index = 0) {
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            if (action === 'push') {
+                const cleanName = formatName(item);
+                line.innerHTML = `<span class="k-obj">stack</span>.<span class="k-method">push</span>(<span class="k-str">"${cleanName}"</span>); <span class="k-comment">// Index ${index}</span>`;
+            } else if (action === 'pop') {
+                const cleanName = formatName(item);
+                line.innerHTML = `<span class="k-obj">stack</span>.<span class="k-method">pop</span>(); <span class="k-return">=> Returns "${cleanName}"</span>`;
+            } else if (action === 'error') {
+                line.innerHTML = `<span style="color:#ff7675; font-weight:bold;">⛔ ${item}</span>`;
+            } else if (action === 'success') {
+                line.innerHTML = `<span style="color:#badc58; font-weight:bold;">✔ ${item}</span>`;
+            }
+            terminalLog.appendChild(line);
+            terminalLog.scrollTop = terminalLog.scrollHeight;
+        }
+
+        function getColor(type) {
+            if(type.includes('bun')) return '#F57F17';
+            if(type === 'patty') return '#795548';
+            if(type === 'cheese') return '#FFD54F';
+            if(type === 'lettuce') return '#9CCC65';
+            if(type === 'tomato') return '#EF5350';
+            return '#333';
+        }
+
+        function formatName(str) {
+            return str.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Orbit Architect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --space-bg: #0b0b15;
+            --neon-sun: #fbbf24;
+            --neon-planet: #22d3ee;
+            --neon-zone: #34d399;
+            --neon-danger: #f43f5e;
+            --glass-panel: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(34, 211, 238, 0.3);
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Share Tech Mono', monospace;
+        }
+
+        /* MOBILE FIX: Stop highlighting on tap */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--space-bg);
+            color: #fff;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: none; 
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, #11111f 0%, #000000 100%);
+        }
+
+        #starfield, #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #starfield { z-index: 0; pointer-events: none; opacity: 0.9; }
+        #game-canvas { z-index: 1; cursor: crosshair; }
+
+        /* UI */
+        .ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none;
+            display: flex; flex-direction: column; justify-content: space-between; 
+            padding: 20px;
+        }
+
+        .hud-top { display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto; }
+
+        .panel {
+            background: rgba(10, 15, 30, 0.85); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px 20px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5); min-width: 200px;
+        }
+
+        .label { font-size: 0.7rem; color: #94a3b8; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px; padding-bottom: 2px; display: block; }
+        .value-display { font-size: 1.1rem; font-weight: 700; color: var(--neon-planet); font-family: var(--font-head); }
+        .data-row { font-size: 0.85rem; color: #cbd5e1; margin-top: 3px; display: flex; justify-content: space-between; }
+        .data-num { color: white; font-weight: bold; font-family: var(--font-body); }
+        .timer-val { font-family: var(--font-head); font-size: 1.8rem; color: white; line-height: 1; }
+        .timer-val.active { color: var(--neon-zone); text-shadow: 0 0 20px rgba(52, 211, 153, 0.6); }
+
+        .hud-bottom { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; padding-bottom: 10px; }
+        .btn-group { display: flex; gap: 10px; }
+
+        .btn {
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(10, 15, 30, 0.8);
+            padding: 10px; font-family: var(--font-head); font-size: 0.9rem;
+            cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s; color: white; border-radius: 8px; backdrop-filter: blur(4px); min-width: 45px;
+        }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 20px white; border-color: white; }
+        .btn:active { transform: scale(0.95); }
+        .btn-reset { border-color: var(--neon-danger); color: var(--neon-danger); padding: 10px 20px; }
+        .btn-reset:hover { background: var(--neon-danger); color: white; box-shadow: 0 0 20px var(--neon-danger); }
+        
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .holo-container {
+            background: rgba(8, 12, 25, 0.7); border: 1px solid var(--neon-planet);
+            box-shadow: 0 0 60px rgba(34, 211, 238, 0.15), inset 0 0 40px rgba(34, 211, 238, 0.05);
+            backdrop-filter: blur(12px); padding: 40px 50px; border-radius: 16px; text-align: center;
+            position: relative; animation: floatUI 6s ease-in-out infinite; max-width: 600px; width: 85%;
+        }
+        .corner { position: absolute; width: 15px; height: 15px; border: 2px solid white; }
+        .tl { top: -1px; left: -1px; border-right: none; border-bottom: none; border-color: var(--neon-planet); }
+        .tr { top: -1px; right: -1px; border-left: none; border-bottom: none; border-color: var(--neon-planet); }
+        .bl { bottom: -1px; left: -1px; border-right: none; border-top: none; border-color: var(--neon-planet); }
+        .br { bottom: -1px; right: -1px; border-left: none; border-top: none; border-color: var(--neon-planet); }
+        @keyframes floatUI { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
+
+        .title-main {
+            font-family: var(--font-head); font-size: 3.5rem; line-height: 1; margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(34, 211, 238, 0.4); letter-spacing: 2px;
+        }
+        .title-sub { font-size: 0.9rem; color: #94a3b8; margin-bottom: 30px; letter-spacing: 6px; text-transform: uppercase; font-weight: 700; }
+
+        .btn-start {
+            background: rgba(34, 211, 238, 0.1); color: var(--neon-planet); font-size: 1.2rem; padding: 14px 40px;
+            border: 1px solid var(--neon-planet); border-radius: 4px; transition: all 0.3s; font-family: var(--font-head);
+        }
+        .btn-start:hover { background: var(--neon-planet); color: #000; box-shadow: 0 0 40px rgba(34, 211, 238, 0.5); }
+        .btn-start-info { margin-top: 20px; color: #94a3b8; background: transparent; border: none; font-size: 0.9rem; cursor: pointer; letter-spacing: 2px; font-family: var(--font-head); }
+        .btn-start-info:hover { color: white; text-shadow: 0 0 10px white; }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-box {
+            background: #0b0b15; border: 1px solid var(--neon-zone); padding: 30px; width: 85%; max-width: 500px; text-align: center;
+            box-shadow: 0 0 80px rgba(52, 211, 153, 0.2); animation: zoomIn 0.3s ease-out; border-radius: 12px;
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes zoomIn { from{transform: scale(0.9); opacity:0;} to{transform: scale(1); opacity:1;} }
+        .modal-h { font-family: var(--font-head); font-size: 2rem; margin-bottom: 10px; color: white; display: flex; align-items: center; justify-content: center; gap: 15px;}
+        .modal-p { font-size: 1rem; color: #94a3b8; margin-bottom: 25px; }
+
+        .info-box { border-color: var(--neon-sun); box-shadow: 0 0 60px rgba(251, 191, 36, 0.15); text-align: left; }
+        .info-item { margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-start; }
+        .info-icon { font-size: 1.5rem; color: var(--neon-planet); min-width: 30px; margin-top: 2px; }
+        .info-title { color: var(--neon-sun); font-family: var(--font-head); font-weight: 700; font-size: 1.1rem; margin-bottom: 3px; }
+        .info-desc { color: #cbd5e1; font-size: 0.9rem; line-height: 1.4; }
+
+        /* --- MOBILE ROTATION MESSAGE --- */
+        #rotate-message {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0b0b15; z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; color: var(--neon-planet);
+            padding: 40px;
+        }
+        
+        @media only screen and (orientation: portrait) and (max-width: 900px) {
+            #rotate-message { display: flex; }
+            #game-ui, #start-screen, canvas { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="rotate-message">
+        <i class="fa-solid fa-mobile-screen-button fa-spin" style="font-size: 4rem; margin-bottom: 30px; --fa-animation-duration: 3s;"></i>
+        <h2 style="font-family: 'Orbitron'; font-size: 2rem; margin-bottom: 10px; color: var(--neon-danger);">SYSTEM LOCKDOWN</h2>
+        <p style="font-family: 'Share Tech Mono'; font-size: 1.2rem; color: #94a3b8;">
+            Orbital calculations require wide-field telemetry.<br><br>
+            <span style="color:white; border: 1px solid var(--neon-planet); padding: 5px 10px; border-radius: 4px;">PLEASE ROTATE DEVICE</span>
+        </p>
+    </div>
+
+    <canvas id="starfield"></canvas>
+    <canvas id="game-canvas"></canvas>
+
+    <div class="ui-layer" id="game-ui" style="display:none;">
+        <div class="hud-top">
+            <div class="panel">
+                <div class="label">TELEMETRY</div>
+                <div class="value-display" id="level-display">SECTOR 01</div>
+                <div class="data-row">
+                    <span>VELOCITY</span> <span><span class="data-num" id="val-speed">0000</span> km/s</span>
+                </div>
+                <div class="data-row">
+                    <span>DISTANCE</span> <span><span class="data-num" id="val-dist">0.00</span> AU</span>
+                </div>
+                <div style="font-size: 0.7rem; color: #64748b; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
+                    STATUS: <span id="sim-status" style="color:white;">READY</span>
+                </div>
+            </div>
+            
+            <div class="panel" style="text-align: right;">
+                <div class="label">STABILITY</div>
+                <div class="timer-val" id="orbit-timer">0.0s</div>
+                <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 15.0s</div>
+                <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 35s</div>
+            </div>
+        </div>
+
+        <div class="hud-bottom">
+            <div class="btn-group">
+                <button class="btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+                <button class="btn" onclick="toggleMute()" title="Mute/Unmute"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
+                <button class="btn" onclick="showHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
+            </div>
+
+            <button class="btn btn-reset" style="border-radius: 50px;" onclick="resetLevel()">
+                <i class="fa-solid fa-rotate-right mr-2"></i> RETRY
+            </button>
+
+            <div class="btn-group" style="visibility: hidden;">
+                <button class="btn">X</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="start-screen">
+        <div class="holo-container">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <div style="font-size: 3rem; color: var(--neon-sun); margin-bottom: 10px; filter: drop-shadow(0 0 30px var(--neon-sun));">
+                <i class="fa-solid fa-atom fa-spin" style="--fa-animation-duration: 20s;"></i>
+            </div>
+            <div class="title-main">ORBIT<br>ARCHITECT</div>
+            <div class="title-sub">DEEP GALAXY EDITION</div>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <button class="btn btn-start" onclick="startGame()">INITIALIZE</button>
+                <button class="btn-start-info" onclick="showEducationalInfo()">
+                    <i class="fa-solid fa-graduation-cap mr-2"></i> EDUCATIONAL VALUE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-box" style="border-color: var(--neon-zone);">
+            <div class="text-6xl text-emerald-400 mb-4"><i class="fa-regular fa-circle-check"></i></div>
+            <div class="modal-h">STABLE ORBIT</div>
+            <p class="modal-p">Trajectory confirmed for 15 seconds.</p>
+            <button class="btn" style="width: 100%; justify-content: center; background: rgba(74, 222, 128, 0.1); border-color: var(--neon-zone); color: var(--neon-zone);" onclick="nextLevel()">NEXT SECTOR</button>
+        </div>
+    </div>
+
+    <div id="finish-modal" class="modal">
+        <div class="modal-box" style="border-color: var(--neon-sun); box-shadow: 0 0 80px rgba(251, 191, 36, 0.3);">
+            <div class="text-6xl text-yellow-400 mb-4"><i class="fa-solid fa-trophy"></i></div>
+            <div class="modal-h" style="color: var(--neon-sun);">MISSION COMPLETE</div>
+            <p class="modal-p">All sectors mapped. Data uplink complete.</p>
+            <button class="btn" style="width: 100%; justify-content: center; border-color: white;" onclick="goHome()">RETURN TO MENU</button>
+        </div>
+    </div>
+
+    <div id="crash-modal" class="modal">
+        <div class="modal-box" style="border-color: var(--neon-danger); box-shadow: 0 0 60px rgba(244, 63, 94, 0.3);">
+            <div class="text-6xl text-red-500 mb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="modal-h" style="color: var(--neon-danger);">FAILURE</div>
+            <p class="modal-p" id="crash-msg">Object collision detected.</p>
+            <button class="btn btn-reset" style="width: 100%; justify-content: center; background: var(--neon-danger); color: black;" onclick="resetLevel()">RETRY LAUNCH</button>
+        </div>
+    </div>
+
+    <div id="edu-modal" class="modal">
+        <div class="modal-box info-box">
+            <h2 class="modal-h" style="text-align: left; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px;">
+                <i class="fa-solid fa-brain" style="color: var(--neon-planet);"></i> HOW IS THIS EDUCATIONAL?
+            </h2>
+            <div class="info-item">
+                <i class="fa-solid fa-atom info-icon"></i>
+                <div>
+                    <div class="info-title">Newtonian Physics</div>
+                    <div class="info-desc">Learn how Gravity (Mass) interacts with Velocity (Momentum) to create orbits.</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-globe info-icon"></i>
+                <div>
+                    <div class="info-title">Orbital Mechanics</div>
+                    <div class="info-desc">Experience Kepler's Laws intuitively. Planets move faster when closer to the star.</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-calculator info-icon"></i>
+                <div>
+                    <div class="info-title">Vector Math</div>
+                    <div class="info-desc">Aiming the launch visualizes vector magnitude and direction.</div>
+                </div>
+            </div>
+            <button class="btn" style="width: 100%; justify-content: center; border-color: white;" onclick="closeEduInfo()">ACKNOWLEDGE</button>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal">
+        <div class="modal-box info-box" style="border-color: var(--neon-planet);">
+            <h2 class="modal-h" style="text-align: left; font-size: 1.8rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; color: var(--neon-planet);">FLIGHT MANUAL</h2>
+            <div class="info-item">
+                <i class="fa-solid fa-hand-pointer info-icon"></i>
+                <div>
+                    <div class="info-title">Launch Controls</div>
+                    <div class="info-desc">Click & Drag on the planet. Pull back like a slingshot to aim and set power.</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-circle-notch info-icon"></i>
+                <div>
+                    <div class="info-title">Target Zone</div>
+                    <div class="info-desc">Keep the planet inside the <span style="color:var(--neon-zone)">Green Glowing Ring</span>.</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-stopwatch info-icon"></i>
+                <div>
+                    <div class="info-title">Victory Condition</div>
+                    <div class="info-desc">Maintain a stable orbit for 15.0 seconds. (You have 35s total before timeout).</div>
+                </div>
+            </div>
+            <button class="btn" style="width: 100%; justify-content: center; border-color: var(--neon-planet); color: var(--neon-planet);" onclick="closeHelp()">RETURN TO SIM</button>
+        </div>
+    </div>
+
+    <script>
+        const AudioSys = {
+            ctx: null, muted: false,
+            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            playTone(type, freq, dur, vol=0.1) {
+                if(this.muted || !this.ctx) return; const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+                o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol, this.ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+dur);
+                o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+dur);
+            },
+            launch() { this.init(); this.playTone('sawtooth', 150, 0.4, 0.05); },
+            win() { this.init(); this.playTone('sine', 440, 0.1, 0.1); setTimeout(()=>this.playTone('sine', 880, 0.3, 0.1), 100); },
+            crash() { this.init(); this.playTone('sawtooth', 80, 0.5, 0.1); }
+        };
+
+        function toggleMute() {
+            AudioSys.muted = !AudioSys.muted;
+            const icon = document.getElementById('snd-icon');
+            icon.className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        }
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const starCanvas = document.getElementById('starfield');
+        const starCtx = starCanvas.getContext('2d');
+        
+        let width, height;
+        let stars = [];
+
+        function resize() { 
+            width = canvas.width = starCanvas.width = window.innerWidth; 
+            height = canvas.height = starCanvas.height = window.innerHeight;
+            // CENTER FIX: Ensure Sun is always in the middle on resize
+            sun.x = width / 2;
+            sun.y = height / 2;
+            initStars();
+        }
+        window.addEventListener('resize', resize); 
+
+        function initStars() {
+            stars = [];
+            for(let i=0; i<200; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5,
+                    opacity: Math.random(),
+                    speed: Math.random() * 0.05 + 0.01
+                });
+            }
+        }
+
+        function drawStars() {
+            starCtx.clearRect(0, 0, width, height);
+            stars.forEach(star => {
+                star.y -= star.speed; 
+                if(star.y < 0) star.y = height; 
+                if(Math.random() > 0.995) star.opacity = Math.random();
+                starCtx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                starCtx.beginPath(); starCtx.arc(star.x, star.y, star.size, 0, Math.PI*2); starCtx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        /* PHYSICS CONFIG */
+        const G = 0.35; 
+        const LAUNCH_POWER = 0.15; 
+        
+        let currentLevel = 0;
+        let isDragging = false;
+        let dragStart = {x:0, y:0};
+        let dragCurrent = {x:0, y:0};
+        
+        let sun = { x: 0, y: 0, mass: 2000, radius: 35 };
+        let planet = { x: 0, y: 0, vx: 0, vy: 0, radius: 8, active: false, trail: [] };
+        let targetZone = { minR: 150, maxR: 350 };
+        
+        let stableTime = 0;
+        let totalFlightTime = 0;
+        let requiredTime = 15.0; 
+        let gameState = 'AIMING'; 
+
+        // UPDATED LEVELS
+        const LEVELS = [
+            { id: 1, sunMass: 1800, zone: [150, 350] }, 
+            { id: 2, sunMass: 2500, zone: [180, 320] }, 
+            { id: 3, sunMass: 3200, zone: [200, 300] }, 
+            { id: 4, sunMass: 3200, zone: [150, 250] }, 
+            { id: 5, sunMass: 3800, zone: [220, 320] } 
+        ];
+
+        function initLevel() {
+            const lvl = LEVELS[currentLevel];
+            sun.x = width / 2; sun.y = height / 2;
+            sun.mass = lvl.sunMass;
+            
+            planet.active = false;
+            const angle = Math.random() * Math.PI * 2;
+            const minSpawn = 200; 
+            const maxSpawn = 300; 
+            const dist = minSpawn + Math.random() * (maxSpawn - minSpawn);
+
+            planet.x = sun.x + Math.cos(angle) * dist;
+            planet.y = sun.y + Math.sin(angle) * dist;
+            
+            planet.x = Math.max(50, Math.min(width-50, planet.x));
+            planet.y = Math.max(50, Math.min(height-50, planet.y));
+
+            planet.vx = 0; planet.vy = 0;
+            planet.trail = [];
+
+            targetZone.minR = lvl.zone[0];
+            targetZone.maxR = lvl.zone[1];
+            
+            stableTime = 0;
+            totalFlightTime = 0;
+            gameState = 'AIMING';
+
+            document.getElementById('level-display').innerText = `SECTOR ${lvl.id}`;
+            document.getElementById('sim-status').innerText = "AWAITING VECTOR";
+            document.getElementById('sim-status').style.color = "#aaa";
+            document.getElementById('val-speed').innerText = "0000";
+            document.getElementById('val-dist').innerText = "0.00";
+            updateTimerDisplay();
+            
+            hideModals();
+        }
+
+        function hideModals() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('crash-modal').style.display = 'none';
+            document.getElementById('finish-modal').style.display = 'none';
+            document.getElementById('edu-modal').style.display = 'none';
+            document.getElementById('help-modal').style.display = 'none';
+        }
+
+        function update() {
+            if (gameState === 'FLYING') {
+                const dx = sun.x - planet.x;
+                const dy = sun.y - planet.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                const force = G * sun.mass / (dist*dist);
+                const ax = force * (dx / dist);
+                const ay = force * (dy / dist);
+
+                planet.vx += ax;
+                planet.vy += ay;
+                planet.x += planet.vx;
+                planet.y += planet.vy;
+
+                if (planet.trail.length > 150) planet.trail.shift();
+                planet.trail.push({x: planet.x, y: planet.y});
+
+                const speed = Math.sqrt(planet.vx*planet.vx + planet.vy*planet.vy) * 100;
+                document.getElementById('val-speed').innerText = Math.round(speed).toString().padStart(4, '0');
+                document.getElementById('val-dist').innerText = (dist/100).toFixed(2);
+
+                if (dist < sun.radius + planet.radius) failLevel("IMPACT WITH STAR");
+                if (dist > Math.max(width, height)) failLevel("SIGNAL LOST");
+
+                totalFlightTime += 1/60;
+
+                if (dist >= targetZone.minR && dist <= targetZone.maxR) {
+                    stableTime += 1/60;
+                    document.getElementById('sim-status').innerText = "TRAJECTORY STABLE";
+                    document.getElementById('sim-status').style.color = "#4ade80";
+                    
+                    if(stableTime >= requiredTime) {
+                        gameState = 'WIN'; AudioSys.win();
+                        if(currentLevel === LEVELS.length - 1) {
+                            document.getElementById('finish-modal').style.display = 'flex';
+                        } else {
+                            document.getElementById('modal').style.display = 'flex';
+                        }
+                    }
+                } else {
+                    document.getElementById('sim-status').innerText = "TRAJECTORY UNSTABLE";
+                    document.getElementById('sim-status').style.color = "#f43f5e";
+                }
+
+                if (totalFlightTime > 35.0 && stableTime < requiredTime) failLevel("TIMEOUT");
+
+                updateTimerDisplay(dist >= targetZone.minR && dist <= targetZone.maxR);
+            }
+        }
+
+        function failLevel(msg) {
+            gameState = 'CRASH'; AudioSys.crash();
+            document.getElementById('crash-msg').innerText = msg;
+            document.getElementById('crash-modal').style.display = 'flex';
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Zone
+            ctx.beginPath();
+            ctx.arc(sun.x, sun.y, targetZone.maxR, 0, Math.PI * 2);
+            ctx.arc(sun.x, sun.y, targetZone.minR, 0, Math.PI * 2, true);
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.15)'; 
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Sun
+            let sunGrad = ctx.createRadialGradient(sun.x, sun.y, 5, sun.x, sun.y, sun.radius);
+            sunGrad.addColorStop(0, '#fef3c7'); sunGrad.addColorStop(0.4, '#f59e0b'); sunGrad.addColorStop(1, '#b45309'); 
+            ctx.beginPath(); ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
+            ctx.fillStyle = sunGrad; ctx.shadowBlur = 60; ctx.shadowColor = '#fbbf24'; ctx.fill(); ctx.shadowBlur = 0;
+
+            // Planet
+            let pGrad = ctx.createRadialGradient(planet.x - 3, planet.y - 3, 2, planet.x, planet.y, planet.radius);
+            pGrad.addColorStop(0, '#bae6fd'); pGrad.addColorStop(1, '#0284c7'); 
+            ctx.beginPath(); ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+            ctx.fillStyle = pGrad; ctx.shadowBlur = 15; ctx.shadowColor = '#0ea5e9'; ctx.fill(); ctx.shadowBlur = 0;
+
+            // Trail
+            if (planet.trail.length > 1) {
+                ctx.beginPath(); ctx.moveTo(planet.trail[0].x, planet.trail[0].y);
+                for (let p of planet.trail) ctx.lineTo(p.x, p.y);
+                ctx.strokeStyle = 'rgba(14, 165, 233, 0.5)'; ctx.lineWidth = 2; ctx.stroke();
+            }
+
+            // Aiming
+            if (gameState === 'AIMING' && isDragging) {
+                ctx.beginPath(); ctx.moveTo(planet.x, planet.y); ctx.lineTo(dragCurrent.x, dragCurrent.y);
+                ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2; ctx.stroke();
+                drawPrediction();
+            }
+
+            requestAnimationFrame(() => { update(); draw(); });
+        }
+
+        function drawPrediction() {
+            let simX = planet.x; let simY = planet.y;
+            let simVx = (planet.x - dragCurrent.x) * LAUNCH_POWER;
+            let simVy = (planet.y - dragCurrent.y) * LAUNCH_POWER;
+            
+            ctx.beginPath(); ctx.moveTo(simX, simY);
+            for(let i=0; i<150; i++) {
+                const dx = sun.x - simX; const dy = sun.y - simY; const dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist < sun.radius) break; 
+                const force = G * sun.mass / (dist*dist);
+                const simAx = force * (dx / dist);
+                const simAy = force * (dy / dist);
+                simVx += simAx; simVy += simAy;
+                simX += simVx; simY += simVy;
+                ctx.lineTo(simX, simY);
+            }
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; ctx.setLineDash([5, 5]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+        }
+
+        function getPos(e) {
+            const r = canvas.getBoundingClientRect();
+            // Handle both touch and mouse events
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - r.left, y: clientY - r.top };
+        }
+
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('touchstart', startDrag, {passive: false});
+
+        function startDrag(e) {
+            if (gameState !== 'AIMING') return;
+            const pos = getPos(e);
+            if (Math.hypot(pos.x - planet.x, pos.y - planet.y) < 120) { 
+                isDragging = true; dragCurrent = pos;
+                if(e.type === 'touchstart') e.preventDefault();
+            }
+        }
+
+        window.addEventListener('mousemove', e => { if (isDragging) dragCurrent = getPos(e); });
+        window.addEventListener('touchmove', e => { if (isDragging) { e.preventDefault(); dragCurrent = getPos(e); } }, {passive: false});
+
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+
+        function endDrag() {
+            if (!isDragging) return;
+            isDragging = false;
+            const vx = (planet.x - dragCurrent.x) * LAUNCH_POWER;
+            const vy = (planet.y - dragCurrent.y) * LAUNCH_POWER;
+            if (Math.hypot(vx, vy) > 0.5) { planet.vx = vx; planet.vy = vy; gameState = 'FLYING'; AudioSys.launch(); }
+        }
+
+        function updateTimerDisplay(isActive) {
+            const el = document.getElementById('orbit-timer');
+            el.innerText = stableTime.toFixed(2) + 's';
+            if (isActive) el.classList.add('timer-active'); else el.classList.remove('timer-active');
+        }
+
+        function startGame() { AudioSys.init(); document.getElementById('start-screen').style.display = 'none'; document.getElementById('game-ui').style.display = 'flex'; currentLevel = 0; resize(); initLevel(); draw(); drawStars(); }
+        function goHome() { location.reload(); }
+        function resetLevel() { initLevel(); }
+        function nextLevel() { currentLevel++; if(currentLevel >= LEVELS.length) { document.getElementById('finish-modal').style.display = 'flex'; } else { initLevel(); } }
+        
+        function showEducationalInfo() { document.getElementById('edu-modal').style.display = 'flex'; }
+        function closeEduInfo() { document.getElementById('edu-modal').style.display = 'none'; }
+        
+        function showHelp() { document.getElementById('help-modal').style.display = 'flex'; }
+        function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
+
+        // Initial setup
+        resize();
+        initStars();
+        drawStars();
+
+    </script>
+</body>
+</html>

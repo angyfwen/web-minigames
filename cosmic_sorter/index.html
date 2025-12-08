@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cosmic Sorter</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-space: #140828;
+            --card-bg: #261642;
+            --accent-gold: #FFD700;
+            --btn-blue-top: #4FACFE;
+            --btn-blue-bot: #00F2FE;
+            --btn-pink-top: #FF6EC4;
+            --btn-pink-bot: #7873F5;
+            --btn-orange-top: #FF9966;
+            --btn-orange-bot: #FF5E62;
+            --btn-red-top: #ff4b1f;
+            --btn-red-bot: #ff9068;
+            --text-light: #A090C0;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; overflow: hidden; /* Lock scroll globally */
+            background-color: var(--bg-space);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(79, 172, 254, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 110, 196, 0.2) 0%, transparent 40%),
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 50px 50px, 100px 100px;
+            background-position: 0 0, 0 0, 0 0, 25px 25px;
+        }
+
+        /* --- SCREENS --- */
+        .screen { width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .screen.active { display: flex; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- MUTE BTN --- */
+        #mute-btn { position: fixed; top: 20px; right: 20px; z-index: 200; background: rgba(255,255,255,0.1); color: white; border: 2px solid rgba(255,255,255,0.2); width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; transition: all 0.2s; }
+        #mute-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+        #mute-btn.muted i::before { content: "\f6a9"; }
+
+        /* --- START SCREEN --- */
+        .title-box { text-align: center; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
+        
+        .title-rocket-img { 
+            width: 140px; height: auto; margin-bottom: 15px; 
+            animation: floatRocket 4s ease-in-out infinite; 
+            filter: drop-shadow(0 0 20px rgba(79, 172, 254, 0.6)); 
+        }
+        @keyframes floatRocket { 
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-15px); } 
+        }
+
+        h1 { font-family: 'Fredoka One', cursive; font-size: 5rem; margin: 0; background: linear-gradient(to bottom, #FFD700, #FFA500); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0px 5px 0px rgba(0,0,0,0.5)); letter-spacing: 2px; text-transform: uppercase; line-height: 1; z-index: 2; }
+        .subtitle { font-size: 1.5rem; color: var(--text-light); font-weight: 900; letter-spacing: 2px; margin-top: 15px; }
+        .btn-group { display: flex; gap: 20px; margin-top: 30px;}
+        .start-btn { background: linear-gradient(to bottom, var(--btn-blue-top) 0%, var(--btn-blue-bot) 100%); border: none; padding: 20px 60px; border-radius: 50px; font-family: 'Fredoka One', cursive; font-size: 2rem; color: white; cursor: pointer; box-shadow: 0px 8px 0px #00A8B5, 0px 20px 30px rgba(0,0,0,0.4); transition: transform 0.1s; text-transform: uppercase; }
+        .start-btn:active { transform: translateY(8px); box-shadow: 0px 0px 0px #00A8B5; }
+        .start-btn:hover { filter: brightness(1.1); }
+        .info-btn { background: linear-gradient(to bottom, var(--btn-pink-top) 0%, var(--btn-pink-bot) 100%); box-shadow: 0px 8px 0px #5954B8, 0px 20px 30px rgba(0,0,0,0.4); padding: 20px 40px; }
+        .info-btn:active { transform: translateY(8px); box-shadow: 0px 0px 0px #5954B8; }
+
+        /* --- INFO MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 10, 50, 0.6); z-index: 190; display: none; justify-content: center; align-items: center; backdrop-filter: blur(15px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+        .modal-box { background: var(--card-bg); padding: 40px; border-radius: 30px; width: 90%; max-width: 600px; border: 3px solid rgba(255,255,255,0.1); position: relative; text-align: left; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-light); font-size: 1.5rem; cursor: pointer; }
+        .modal-box h2 { font-family: 'Fredoka One'; color: var(--accent-gold); margin-top: 0; }
+        .modal-box p { line-height: 1.6; color: #ddd; }
+        .modal-box li { margin-bottom: 10px; }
+        .highlight { color: var(--btn-blue-top); font-weight: bold; }
+
+        /* --- GAME SCREEN --- */
+        .game-board { width: 90%; max-width: 1000px; background: rgba(38, 22, 66, 0.7); backdrop-filter: blur(10px); border-radius: 30px; border: 4px solid rgba(255,255,255,0.1); padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; margin-top: 40px; }
+
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.05); }
+        .card-title { font-family: 'Fredoka One'; font-size: 1.3rem; color: var(--btn-blue-top); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .level-display { font-size: 1.2rem; font-weight: 900; color: var(--accent-gold); }
+        .progress-container { background: #150a26; height: 20px; border-radius: 15px; border: 2px solid #3c2a5c; overflow: hidden; margin-top: 5px; }
+        .progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--btn-blue-top), var(--btn-blue-bot)); transition: width 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .progress-bar.danger { background: linear-gradient(90deg, #ff4b1f, #ff9068); }
+
+        .arena-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .arena { 
+            background: rgba(20, 10, 40, 0.6); border-radius: 25px; 
+            padding: 40px 20px; min-height: 160px; 
+            display: flex; justify-content: center; align-items: center; gap: 15px; 
+            border: 3px dashed rgba(255,255,255,0.1); flex-wrap: wrap; 
+            transition: opacity 0.3s;
+        }
+        .arena.faded { opacity: 0; }
+
+        /* NOTIFICATION: FIXED TOP CENTER */
+        .notification-popup { 
+            position: fixed; 
+            left: 50%; 
+            top: 25px; /* Lowered slightly */
+            transform: translateX(-50%); 
+            background: linear-gradient(90deg, #FFD700, #FFA500); 
+            color: #521536; padding: 15px 40px; border-radius: 999px; 
+            font-family: 'Fredoka One'; font-size: 1.5rem; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
+            z-index: 2000; 
+            transition: all 0.3s ease; 
+            display: flex; align-items: center; gap: 12px; white-space: nowrap; border: 4px solid #fff; 
+            opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-50px);
+        }
+        .notification-popup.active { 
+            opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+        }
+        .notification-popup.fail {
+            background: linear-gradient(90deg, #ff4b1f, #ff9068);
+            color: #fff;
+            box-shadow: 0 10px 40px rgba(255, 75, 31, 0.4);
+        }
+
+        .orb { width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--btn-blue-top) 20%, var(--btn-blue-bot) 100%); display: flex; justify-content: center; align-items: center; font-family: 'Fredoka One'; font-size: 2rem; color: #0d4663; text-shadow: 0px 1px 0px rgba(255,255,255,0.4); box-shadow: 0 10px 20px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.2s; position: relative; }
+        .orb::after { content: ''; position: absolute; top: 10px; left: 12px; width: 20px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.6); transform: rotate(-45deg); }
+        .orb:hover { transform: scale(1.1); }
+        .orb.selected { background: radial-gradient(circle at 30% 30%, #fff, var(--btn-pink-top) 20%, var(--btn-pink-bot) 100%); color: #521536; transform: scale(1.15) translateY(-10px); box-shadow: 0 0 25px var(--btn-pink-top); z-index: 10; }
+        .orb.sorted { background: radial-gradient(circle at 30% 30%, #fff, #42e695 20%, #3bb2b8 100%); color: #0f4d30; cursor: default; transform: none; }
+        
+        .controls { display: flex; justify-content: center; gap: 15px; }
+        .btn-game { border: none; padding: 12px 25px; border-radius: 50px; font-family: 'Fredoka One'; font-size: 1rem; text-transform: uppercase; color: white; cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; gap: 8px; }
+        .btn-blue { background: linear-gradient(to bottom, var(--btn-blue-top) 0%, var(--btn-blue-bot) 100%); box-shadow: 0px 5px 0px #00A8B5; }
+        .btn-pink { background: linear-gradient(to bottom, var(--btn-pink-top) 0%, var(--btn-pink-bot) 100%); box-shadow: 0px 5px 0px #5954B8; }
+        .btn-orange { background: linear-gradient(to bottom, var(--btn-orange-top) 0%, var(--btn-orange-bot) 100%); box-shadow: 0px 5px 0px #CC4548; }
+        .btn-red { background: linear-gradient(to bottom, var(--btn-red-top) 0%, var(--btn-red-bot) 100%); box-shadow: 0px 5px 0px #b31e00; }
+        
+        .btn-game:active { transform: translateY(5px); box-shadow: none; }
+        .btn-game:disabled { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        #status-bar { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; text-align: center; font-weight: 900; border: 2px solid rgba(255,255,255,0.1); }
+        
+        .home-btn { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.1); color: white; border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: background 0.2s; }
+        .home-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* Shake animation for game over */
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        /* --- MOBILE FIT-TO-SCREEN OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            /* Lock Viewport - No Scroll */
+            body { 
+                position: fixed; 
+                width: 100%; 
+                height: 100%; 
+                overflow: hidden;
+            }
+
+            /* --- Title Screen Adjustments --- */
+            h1 { font-size: 3.2rem; margin-top: 10px; }
+            .subtitle { font-size: 1.1rem; margin-top: 5px; }
+            .title-rocket-img { width: 90px; margin-bottom: 5px; }
+            
+            /* FIXED BUTTON GROUP: Vertical Stack with BIG GAP */
+            .btn-group { 
+                flex-direction: column; 
+                gap: 25px;  /* Huge gap requested */
+                margin-top: 30px; 
+                width: 100%; 
+                align-items: center; 
+            }
+            .start-btn { width: 70%; padding: 15px; font-size: 1.4rem; }
+
+            /* --- Game Screen Adjustments --- */
+            /* Flex layout to fill vertical space */
+            .game-board { 
+                width: 90%; 
+                height: 85vh; /* Occupy 85% of viewport height */
+                margin: 0 auto; 
+                padding: 15px; 
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between; /* Distribute items evenly */
+                margin-top: 50px; /* Space for top buttons */
+            }
+
+            /* Shrink Dashboard to minimal height */
+            .dashboard { 
+                flex: 0 0 auto; 
+                margin-bottom: 5px; 
+                gap: 8px; 
+                grid-template-columns: 1fr 1fr; /* Keep side by side for height savings */
+            }
+            .card { padding: 10px; }
+            .card-title { font-size: 0.9rem; margin-bottom: 5px; }
+            .level-display { font-size: 1rem; }
+            .progress-container { height: 12px; }
+
+            /* Arena takes remaining space */
+            .arena-wrapper {
+                flex: 1 1 auto; /* Grow to fill space */
+                display: flex;
+                align-items: center; /* Center orbs vertically */
+                justify-content: center;
+                margin-bottom: 10px;
+                overflow: hidden;
+            }
+            .arena { 
+                width: 100%; 
+                height: 100%; 
+                min-height: 0; /* Allow shrinking */
+                padding: 10px; 
+                box-sizing: border-box;
+                align-content: center;
+            }
+
+            /* Smaller Orbs */
+            .orb { width: 50px; height: 50px; font-size: 1.2rem; }
+            .orb::after { top: 6px; left: 8px; width: 14px; height: 6px; }
+
+            /* Compact Controls */
+            .controls { flex: 0 0 auto; gap: 8px; margin-bottom: 5px; }
+            .btn-game { padding: 10px; font-size: 0.8rem; border-radius: 10px; }
+            
+            /* Compact Status Bar */
+            #status-bar { flex: 0 0 auto; padding: 8px; font-size: 0.9rem; margin-top: 5px; }
+
+            /* Modal & Popups */
+            .modal-box { width: 85%; padding: 20px; max-height: 80vh; overflow-y: auto; }
+            .notification-popup { width: 90%; font-size: 1.1rem; padding: 10px; top: 10px; }
+
+            /* Fixed Buttons positions */
+            .home-btn { top: 10px; left: 10px; width: 35px; height: 35px; }
+            #mute-btn { top: 10px; right: 10px; width: 35px; height: 35px; }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="mute-btn" onclick="toggleMute()">
+        <i class="fa-solid fa-volume-high"></i>
+    </button>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeInfo()"><i class="fa-solid fa-xmark"></i></button>
+            
+
+[Image of sorting algorithms visualization]
+
+            <h2><i class="fa-solid fa-brain"></i> How is this educational?</h2>
+            <p>This game is a fun visualization of computer science <strong>Sorting Algorithms</strong>.</p>
+            <ul>
+                <li>The <strong><span class="highlight" style="color:var(--btn-blue-top)">SWAP</span></strong> action teaches the core concept of <strong>Bubble Sort</strong>, where adjacent items are compared and swapped if they are in the wrong order.</li>
+                <li>The <strong><span class="highlight" style="color:var(--btn-pink-top)">INSERT</span></strong> action mimics <strong>Insertion Sort</strong>, picking an item and placing it directly into its correct relative position among the sorted items.</li>
+            </ul>
+            <p><strong>Challenge Mode:</strong> You have limited fuel (moves). Think like a computer—optimize your steps!</p>
+        </div>
+    </div>
+
+    <div id="level-notification" class="notification-popup" aria-hidden="true">
+        <span id="notify-icon"><i class="fa-solid fa-trophy"></i></span> 
+        <span id="notify-text">Level Complete!</span>
+    </div>
+
+    <div id="start-screen" class="screen active">
+        <div class="title-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/1356/1356479.png" alt="Rocket" class="title-rocket-img">
+            <h1>Cosmic<br>Sorter</h1>
+            <div class="subtitle">Mission: Organize Data!</div>
+        </div>
+        <div class="btn-group">
+            <button class="start-btn" onclick="startGame()">
+                <i class="fa-solid fa-rocket"></i> Play
+            </button>
+            <button class="start-btn info-btn" onclick="openInfo()">
+                <i class="fa-solid fa-graduation-cap"></i> Educational Value
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <button class="home-btn" onclick="goToMenu()" title="Back to Menu"><i class="fa-solid fa-house"></i></button>
+        
+        <div class="game-board" id="game-board">
+            <div class="dashboard">
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-layer-group"></i> Level Progress</div>
+                    <div class="level-display" id="level-name">Level 1: Cadet</div>
+                    <div style="margin-top: 5px; font-size: 0.9rem; color: var(--text-light);">
+                        Sorting <span id="orb-count-disp">4</span> Data Orbs
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-gas-pump"></i> Fuel (Moves)</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="fuel-bar"></div>
+                    </div>
+                    <div style="margin-top: 10px; font-weight: bold; font-size: 0.9rem;">
+                        Remaining: <span id="moves-left-count" style="color:var(--accent-gold)">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arena-wrapper">
+                <div class="arena" id="orb-container"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-game btn-blue" id="btn-swap" disabled>
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i> Swap
+                </button>
+                <button class="btn-game btn-pink" id="btn-insert" disabled>
+                    <i class="fa-solid fa-file-import"></i> Insert
+                </button>
+                <button class="btn-game btn-orange" id="btn-reset" onclick="resetLevel()">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+
+            <div id="status-bar">Select 2 Orbs...</div>
+        </div>
+    </div>
+
+    <script>
+        // --- SOUND ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMuted = false;
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('mute-btn').classList.toggle('muted', isMuted);
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            switch(type) {
+                case 'select':
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
+                    gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                    break;
+                case 'action':
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                    break;
+                case 'fail':
+                    // Descending "game over" tone
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.5);
+                    osc.start(now); osc.stop(now + 0.5);
+                    break;
+                case 'winLevel':
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        let o = audioCtx.createOscillator(); let g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'sine'; o.frequency.value = freq;
+                        g.gain.setValueAtTime(0.1, now + i*0.1); g.gain.linearRampToValueAtTime(0, now + i*0.1 + 0.3);
+                        o.start(now + i*0.1); o.stop(now + i*0.1 + 0.3);
+                    });
+                    break;
+                case 'winGame':
+                    [440, 440, 440, 587.33, 523.25, 587.33].forEach((freq, i) => {
+                        let o = audioCtx.createOscillator(); let g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'triangle'; o.frequency.value = freq;
+                        let dur = (i === 3 || i === 5) ? 0.4 : 0.2;
+                        g.gain.setValueAtTime(0.2, now + i*0.3); g.gain.linearRampToValueAtTime(0, now + i*0.3 + dur);
+                        o.start(now + i*0.3); o.stop(now + i*0.3 + dur);
+                    });
+                    break;
+            }
+        }
+
+        // --- PAGE NAVIGATION ---
+        function openInfo() { document.getElementById('info-modal').classList.add('active'); playSound('select'); }
+        function closeInfo() { document.getElementById('info-modal').classList.remove('active'); playSound('select'); }
+        
+        function startGame() {
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            currentLevelIndex = 0; initLevel(); playSound('select');
+        }
+
+        function goToMenu() {
+            // Ensure notification is cleared when returning to menu
+            clearNotification();
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.add('active'); playSound('select');
+        }
+
+        // --- GAME DATA ---
+        const levels = [
+            { name: "Cadet", orbs: 4, maxMoves: 8 },
+            { name: "Pilot", orbs: 5, maxMoves: 10 },
+            { name: "Captain", orbs: 6, maxMoves: 15 },
+            { name: "Commander", orbs: 8, maxMoves: 20 },
+            { name: "Admiral", orbs: 10, maxMoves: 30 }
+        ];
+        let currentLevelIndex = 0;
+
+        // --- VARIABLES ---
+        const container = document.getElementById('orb-container');
+        const movesLeftDisp = document.getElementById('moves-left-count');
+        const statusDisplay = document.getElementById('status-bar');
+        const bar = document.getElementById('fuel-bar');
+        const btnSwap = document.getElementById('btn-swap');
+        const btnInsert = document.getElementById('btn-insert');
+        const btnReset = document.getElementById('btn-reset');
+        const levelNameDisp = document.getElementById('level-name');
+        const orbCountDisp = document.getElementById('orb-count-disp');
+        const notifyEl = document.getElementById('level-notification');
+        const notifyText = document.getElementById('notify-text');
+        const notifyIcon = document.getElementById('notify-icon');
+        const gameBoard = document.getElementById('game-board');
+
+        let orbs = [];
+        let selectedIndices = []; 
+        let movesUsed = 0;
+        let maxMoves = 0;
+        let isGameOver = false;
+        let notifyHideTimeout = null;
+
+        function initLevel() {
+            const levelData = levels[currentLevelIndex];
+            levelNameDisp.innerText = `Level ${currentLevelIndex + 1}: ${levelData.name}`;
+            orbCountDisp.innerText = levelData.orbs;
+            maxMoves = levelData.maxMoves;
+            
+            movesUsed = 0; selectedIndices = []; isGameOver = false;
+            updateFuelUI();
+
+            // Reset Button Appearance
+            btnReset.className = "btn-game btn-orange";
+            btnReset.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Reset';
+            
+            statusDisplay.innerText = "Mission: Sort Low to High!"; 
+            statusDisplay.style.color = "white";
+            btnSwap.disabled = true; 
+            btnInsert.disabled = true;
+            
+            clearNotification();
+            container.classList.remove('faded');
+            gameBoard.classList.remove('shake');
+
+            // Generate unsorted array
+            let numberArray = [];
+            let isSorted = true;
+            do {
+                let numbers = new Set();
+                while(numbers.size < levelData.orbs) {
+                    numbers.add(Math.floor(Math.random() * 99) + 1);
+                }
+                numberArray = Array.from(numbers);
+                
+                isSorted = true;
+                for(let i = 0; i < numberArray.length - 1; i++) {
+                    if(numberArray[i] > numberArray[i+1]) {
+                        isSorted = false; break;
+                    }
+                }
+            } while(isSorted);
+
+            renderOrbs(numberArray);
+        }
+
+        function resetLevel() { playSound('select'); initLevel(); }
+
+        function renderOrbs(numbers) {
+            container.innerHTML = "";
+            orbs = numbers.map((num, index) => {
+                let div = document.createElement('div');
+                div.className = 'orb'; 
+                div.innerText = num;
+                div.onclick = () => selectOrb(index);
+                container.appendChild(div);
+                return { val: num, el: div };
+            });
+            selectedIndices = [];
+            updateUI();
+        }
+
+        function selectOrb(index) {
+            if (isGameOver) return;
+            playSound('select');
+
+            if (selectedIndices.includes(index)) {
+                selectedIndices = selectedIndices.filter(i => i !== index);
+                orbs[index].el.classList.remove('selected');
+            } else {
+                if (selectedIndices.length < 2) {
+                    selectedIndices.push(index);
+                    orbs[index].el.classList.add('selected');
+                } else {
+                    const removed = selectedIndices.shift();
+                    orbs[removed].el.classList.remove('selected');
+                    selectedIndices.push(index);
+                    orbs[index].el.classList.add('selected');
+                }
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            const active = selectedIndices.length === 2;
+            btnSwap.disabled = !active; 
+            btnInsert.disabled = !active;
+            if (active) {
+                statusDisplay.innerText = "Tools Active! Choose SWAP or INSERT."; 
+                statusDisplay.style.color = "#FFD700";
+            } else {
+                statusDisplay.innerText = selectedIndices.length === 1 ? "Select 1 more Orb..." : "Select 2 Orbs...";
+                statusDisplay.style.color = "white";
+            }
+        }
+
+        function updateFuelUI() {
+            let left = maxMoves - movesUsed;
+            if(left < 0) left = 0;
+            movesLeftDisp.innerText = left;
+            
+            let pct = (left / maxMoves) * 100;
+            bar.style.width = pct + "%";
+            
+            // Color logic
+            if(pct <= 20) {
+                bar.className = "progress-bar danger";
+                movesLeftDisp.style.color = "var(--btn-red-top)";
+            } else {
+                bar.className = "progress-bar";
+                bar.style.background = "linear-gradient(90deg, var(--btn-blue-top), var(--btn-blue-bot))";
+                movesLeftDisp.style.color = "var(--accent-gold)";
+            }
+        }
+
+        // --- ACTIONS ---
+        btnSwap.onclick = () => {
+            if (selectedIndices.length !== 2) return;
+            const [i1, i2] = selectedIndices;
+            const temp = orbs[i1].val; orbs[i1].val = orbs[i2].val; orbs[i2].val = temp;
+            orbs[i1].el.innerText = orbs[i1].val;
+            orbs[i2].el.innerText = orbs[i2].val;
+            completeMove("Swapped Orbs!");
+        };
+
+        btnInsert.onclick = () => {
+            if (selectedIndices.length !== 2) return;
+            const fromIndex = selectedIndices[0];
+            const toIndex = selectedIndices[1];
+            let currentNums = orbs.map(o => o.val);
+            const valToMove = currentNums[fromIndex];
+            currentNums.splice(fromIndex, 1);
+            let finalDest = toIndex;
+            if (fromIndex < toIndex) finalDest = toIndex - 1; 
+            currentNums.splice(finalDest, 0, valToMove);
+            renderOrbs(currentNums);
+            completeMove("Inserted Orb!");
+        };
+
+        function completeMove(actionText) {
+            playSound('action'); 
+            movesUsed++; 
+            updateFuelUI();
+            
+            // clear selection UI
+            selectedIndices.forEach(i => { if (orbs[i] && orbs[i].el) orbs[i].el.classList.remove('selected'); });
+            selectedIndices = [];
+            updateUI();
+            statusDisplay.innerText = actionText; 
+
+            // Check Win first
+            const currentNums = orbs.map(o => o.val);
+            const sorted = [...currentNums].sort((a,b) => a-b);
+            const isWin = JSON.stringify(currentNums) === JSON.stringify(sorted);
+
+            if (isWin) {
+                handleWin();
+            } else {
+                // If not win, check if out of moves
+                if (movesUsed >= maxMoves) {
+                    handleLoss();
+                }
+            }
+        }
+
+        function clearNotification() {
+            notifyEl.classList.remove('active', 'fail');
+            notifyEl.setAttribute('aria-hidden', 'true');
+            if (notifyHideTimeout) { clearTimeout(notifyHideTimeout); notifyHideTimeout = null; }
+        }
+
+        function showNotification(text, type='win') {
+            notifyText.innerText = text;
+            notifyEl.setAttribute('aria-hidden', 'false');
+            
+            if(type === 'fail') {
+                notifyEl.classList.add('fail');
+                notifyIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else {
+                notifyEl.classList.remove('fail');
+                notifyIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+            }
+
+            notifyEl.classList.add('active');
+            
+            // Auto hide only if winning mid-game levels
+            if (type === 'win' && currentLevelIndex < levels.length - 1) {
+                if (notifyHideTimeout) clearTimeout(notifyHideTimeout);
+                notifyHideTimeout = setTimeout(() => {
+                    notifyEl.classList.remove('active');
+                }, 1800);
+            }
+        }
+
+        function handleLoss() {
+            isGameOver = true;
+            playSound('fail');
+            gameBoard.classList.add('shake');
+            statusDisplay.innerHTML = "OUT OF FUEL!";
+            statusDisplay.style.color = "#ff4b1f";
+            
+            btnSwap.disabled = true;
+            btnInsert.disabled = true;
+
+            // Highlight Reset button
+            btnReset.className = "btn-game btn-red";
+            btnReset.innerHTML = '<i class="fa-solid fa-repeat"></i> Retry Level';
+            
+            showNotification("Mission Failed: Out of Fuel!", 'fail');
+        }
+
+        function handleWin() {
+            isGameOver = true; // Stop inputs
+            statusDisplay.innerHTML = `<i class="fa-solid fa-star"></i> LEVEL SORTED! <i class="fa-solid fa-star"></i>`;
+            statusDisplay.style.color = "#42e695";
+            orbs.forEach(o => o.el.classList.add('sorted'));
+            btnSwap.disabled = true; 
+            btnInsert.disabled = true;
+
+            if (currentLevelIndex < levels.length - 1) {
+                playSound('winLevel');
+                showNotification(`${levels[currentLevelIndex].name} Complete!`);
+                
+                setTimeout(() => {
+                    container.classList.add('faded');
+                }, 1200);
+
+                setTimeout(() => { 
+                    currentLevelIndex++; 
+                    initLevel(); 
+                }, 2200);
+            } else {
+                playSound('winGame');
+                showNotification("All Systems Online! You Win!");
+                setTimeout(() => { goToMenu(); }, 4200);
+            }
+        }
+
+        // init
+        initLevel();
+        // Re-adjust if user resizes browser window for testing
+        window.addEventListener('resize', () => {
+            // Optional: force redraw logic if needed, but flexbox handles most
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Bio War</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-deep: #1a0505;
+            --card-bg: rgba(40, 10, 20, 0.8);
+            --accent-gold: #FFD700;
+            
+            --btn-start-top: #33cc33;
+            --btn-start-bot: #006600;
+            --btn-info-top: #FFD700;
+            --btn-info-bot: #B8860B;
+            --btn-red-top: #ff4444;
+            --btn-red-bot: #990000;
+            --btn-blue-top: #4488ff;
+            --btn-blue-bot: #004499;
+            --text-light: #ffcccc;
+        }
+
+        /* FIX 1: This stops the browser from highlighting things when you tap them */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            background-color: var(--bg-deep);
+            color: white;
+            user-select: none;
+            -webkit-user-select: none; /* Safari fix */
+            touch-action: none; 
+            -webkit-touch-callout: none;
+        }
+
+        /* --- LAYOUT CONTAINER --- */
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.15) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+        }
+
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; display: block; }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10; pointer-events: none;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+
+        .interactive { pointer-events: auto; }
+
+        /* --- SCREENS --- */
+        .screen {
+            position: absolute; width: 100%; height: 100%;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: rgba(20, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s;
+            z-index: 20;
+            perspective: 1000px;
+        }
+        .screen.active { display: flex; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- TYPOGRAPHY --- */
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 6rem; margin: 0;
+            background: linear-gradient(to bottom, #ff4444, #ff9999);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 10px 0px rgba(0,0,0,0.5));
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3.5rem; }
+            .subtitle { font-size: 1rem; }
+        }
+        
+        .subtitle { 
+            font-size: 1.5rem; color: var(--text-light); 
+            font-weight: 900; margin-top: 15px; 
+            text-transform: uppercase; letter-spacing: 3px; 
+            text-shadow: 0 2px 10px rgba(255, 0, 0, 0.5);
+            text-align: center; padding: 0 20px;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-group { display: flex; gap: 20px; margin-top: 50px; flex-wrap: wrap; justify-content: center;}
+        
+        .modern-btn {
+            border: none; padding: 18px 50px; border-radius: 50px;
+            font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: white;
+            cursor: pointer; transition: transform 0.1s, filter 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0px 8px 0px rgba(0,0,0,0.3), 0px 20px 30px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .modern-btn { padding: 15px 30px; font-size: 1.2rem; }
+        }
+
+        .modern-btn::after {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg) translate(-100%, -100%);
+            transition: transform 0.5s;
+        }
+        .modern-btn:hover::after { transform: rotate(45deg) translate(100%, 100%); }
+        .modern-btn:active { transform: translateY(6px); box-shadow: 0px 2px 0px rgba(0,0,0,0.3); }
+        .modern-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        .btn-start { background: linear-gradient(to bottom, var(--btn-start-top), var(--btn-start-bot)); box-shadow: 0px 8px 0px #004d00; }
+        .btn-info { background: linear-gradient(to bottom, var(--btn-info-top), var(--btn-info-bot)); box-shadow: 0px 8px 0px #8B6914; }
+        .btn-danger { background: linear-gradient(to bottom, var(--btn-red-top), var(--btn-red-bot)); box-shadow: 0px 8px 0px #550000; }
+        .btn-help { background: linear-gradient(to bottom, var(--btn-blue-top), var(--btn-blue-bot)); box-shadow: 0px 8px 0px #003366; }
+        
+        .btn-icon { padding: 15px; border-radius: 50%; width: 50px; height: 50px; justify-content: center; }
+
+        /* --- HUD --- */
+        #game-hud {
+            position: absolute; top: 0; left: 0; width: 100%;
+            display: none; justify-content: space-between; 
+            padding: 20px 40px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-left: max(40px, env(safe-area-inset-left));
+            padding-right: max(40px, env(safe-area-inset-right));
+            box-sizing: border-box; z-index: 15; pointer-events: none;
+        }
+        
+        .hud-card {
+            background: var(--card-bg);
+            border-radius: 20px; padding: 15px 25px;
+            border: 2px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; align-items: flex-start;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            min-width: 150px;
+        }
+
+        @media (max-width: 768px) {
+            .hud-card { padding: 10px 15px; min-width: 100px; }
+            .hud-label { font-size: 0.7rem; }
+            .hud-value { font-size: 1.2rem; }
+        }
+
+        .hud-label { font-family: 'Fredoka One'; color: var(--text-light); font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase; }
+        .hud-value { font-family: 'Fredoka One'; font-size: 1.8rem; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .progress-container { width: 100%; height: 12px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, #ff4444, #ff8800); transition: width 0.3s; }
+
+        /* Controls */
+        #controls-area {
+            position: absolute; bottom: 0; left: 0;
+            display: none; gap: 15px; z-index: 15;
+            padding-bottom: max(30px, env(safe-area-inset-bottom));
+            padding-left: max(30px, env(safe-area-inset-left));
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+            padding: 20px; box-sizing: border-box;
+        }
+        .modal-box {
+            background: #1a0000; 
+            border: 3px solid rgba(255,100,100,0.3);
+            padding: 40px; border-radius: 30px; max-width: 500px; width: 100%;
+            text-align: left; box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            color: #ddd; transform: scale(0.9); transition: transform 0.2s;
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box h2 { font-family: 'Fredoka One'; color: var(--accent-gold); margin-top: 0; }
+        .modal-box p { line-height: 1.6; font-size: 1.1rem; }
+
+        /* --- MOBILE ROTATE MESSAGE --- */
+        #rotate-message {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a0505; z-index: 999;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; color: white;
+        }
+        
+        @media only screen and (orientation: portrait) and (max-width: 768px) {
+            #rotate-message { display: flex; }
+            #game-wrapper { display: none; }
+        }
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+<div id="rotate-message">
+    <i class="fa-solid fa-rotate" style="font-size: 4rem; color: #FFD700; margin-bottom: 20px;"></i>
+    <h2 style="font-family: 'Fredoka One'; margin: 0;">Please Rotate Device</h2>
+    <p style="font-family: 'Nunito'; opacity: 0.7;">This mission requires landscape mode.</p>
+</div>
+
+<div id="game-wrapper">
+    
+    <div id="start-screen" class="screen active interactive">
+        <h1 id="main-title">Inner Space<br>Rapid Fire</h1>
+        <div class="subtitle">Collect 30 Pathogens in 30 Seconds!</div>
+        
+        <div class="btn-group">
+            <button class="modern-btn btn-start" onclick="GameApp.startGame()">
+                <i class="fa-solid fa-play"></i> Engage
+            </button>
+            <button class="modern-btn btn-info" onclick="GameApp.toggleInfo('edu')">
+                <i class="fa-solid fa-graduation-cap"></i> Educational Value
+            </button>
+        </div>
+    </div>
+
+    <div id="game-hud">
+        <div class="hud-card">
+            <div class="hud-label"><i class="fa-solid fa-virus"></i> Quota (300)</div>
+            <div class="hud-value" id="score-val">0 / 300</div>
+        </div>
+
+        <div class="hud-card" style="align-items: center;">
+            <div class="hud-label">Time Remaining</div>
+            <div class="hud-value" id="timer-val" style="color: var(--accent-gold)">30</div>
+        </div>
+
+        <div class="hud-card">
+            <div class="hud-label"><i class="fa-solid fa-heart-pulse"></i> Integrity</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="health-bar"></div>
+            </div>
+            <div style="font-size: 0.8rem; margin-top: 5px; color: #aaa;" id="health-text">100%</div>
+        </div>
+    </div>
+
+    <div id="controls-area" class="interactive">
+        <button class="modern-btn btn-red btn-icon" onclick="GameApp.goHome()" title="Abort Mission" style="background: linear-gradient(to bottom, #ff4444, #990000); box-shadow: 0px 8px 0px #550000;">
+            <i class="fa-solid fa-house"></i>
+        </button>
+        <button class="modern-btn btn-info btn-icon" onclick="GameApp.toggleMute()" id="mute-btn" title="Toggle Audio">
+            <i class="fa-solid fa-volume-high"></i>
+        </button>
+        
+        <button class="modern-btn btn-start btn-icon" onclick="GameApp.startGame()" title="Restart Mission">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+        
+        <button class="modern-btn btn-help btn-icon" onclick="GameApp.toggleInfo('help')" title="How to Play">
+            <i class="fa-solid fa-question"></i>
+        </button>
+    </div>
+
+    <div id="game-over-screen" class="screen interactive">
+        <div id="go-icon" style="font-size: 5rem; margin-bottom: 20px; text-shadow: 0 0 20px currentColor;"></div>
+        <h1 id="go-title" style="font-size: 4rem;">Title</h1>
+        <div id="go-reason" style="font-size: 1.2rem; margin-bottom: 10px; color: #ffaaaa; text-align: center; padding: 0 20px;"></div>
+        <div id="go-score" class="subtitle" style="color: white; margin-bottom: 30px;">Score: 0</div>
+        
+        <button class="modern-btn btn-danger" onclick="GameApp.goHome()">
+            <i class="fa-solid fa-house"></i> Return to Start
+        </button>
+    </div>
+
+    <div id="edu-modal" class="modal-overlay interactive">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-brain" style="color: #FFD700;"></i> How is this educational?
+                </h2>
+                <button onclick="GameApp.toggleInfo('edu')" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p><strong>SUBJECT: MACROPHAGE</strong></p>
+            <p>You are controlling a <em>Macrophage</em> (Greek for "Big Eater"). These are white blood cells that patrol your body.</p>
+            <p>When they find enemies (pathogens) or dead cells, they engulf and digest them in a process called <strong>Phagocytosis</strong>.</p>
+            <p style="color: #ffaaaa; font-size: 0.9em;"><em>Biology Note: In this simulation, you must quickly clear the infection before it overwhelms the system!</em></p>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal-overlay interactive">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Mission Brief</h2>
+                <button onclick="GameApp.toggleInfo('help')" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p><strong>CONTROLS:</strong></p>
+            <p><i class="fa-solid fa-hand-pointer"></i> <strong>DRAG</strong> the White Cell to move.</p>
+            <hr style="border: 0; border-top: 1px solid #444;">
+            <p><strong>OBJECTIVES:</strong></p>
+            <ul style="padding-left: 20px;">
+                <li>Absorb <strong style="color: #00ff00">Green Pathogens</strong> to score (+10).</li>
+                <li>Avoid <strong style="color: #ff4444">Red Blood Cells</strong> (-20 Health & -10 Score).</li>
+            </ul>
+            <p><strong>GOAL:</strong> Collect 300 Points in <strong style="color: #FFD700">30 Seconds</strong>.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- PARALLAX EFFECT ---
+    document.addEventListener('mousemove', (e) => {
+        const screen = document.getElementById('start-screen');
+        if(screen.classList.contains('active')) {
+            const title = document.getElementById('main-title');
+            const x = (window.innerWidth / 2 - e.pageX) / 30;
+            const y = (window.innerHeight / 2 - e.pageY) / 30;
+            title.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        }
+    });
+
+    // --- AUDIO ENGINE ---
+    const AudioEngine = {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        muted: false,
+        playTone(freq, type, duration, vol=0.1) {
+            if(this.muted || this.ctx.state === 'suspended') return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + duration);
+        },
+        playEat() { 
+            if(this.muted) return;
+            const osc = this.ctx.createOscillator(); 
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+        },
+        playHurt() { this.playTone(100, 'sawtooth', 0.4, 0.2); },
+        playWin() { 
+            if(this.muted) return;
+            [440, 554, 659, 880, 1100].forEach((f, i) => setTimeout(() => this.playTone(f, 'sine', 0.2, 0.1), i*100));
+        },
+        toggleMute() {
+            this.muted = !this.muted;
+            if(!this.muted && this.ctx.state === 'suspended') this.ctx.resume();
+            return this.muted;
+        }
+    };
+
+    // --- GAME APP CONTROLLER ---
+    const GameApp = {
+        gameInstance: null,
+        isPlaying: false,
+
+        startGame() {
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('game-over-screen').classList.remove('active');
+            document.getElementById('game-hud').style.display = 'flex';
+            document.getElementById('controls-area').style.display = 'flex';
+            
+            // Close any open modals
+            document.getElementById('edu-modal').style.display = 'none';
+            document.getElementById('help-modal').style.display = 'none';
+            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+
+            this.isPlaying = true;
+            
+            if(this.gameInstance) {
+                const scene = this.gameInstance.scene.getScene('GameScene');
+                if(scene) scene.scene.restart();
+            }
+            if(AudioEngine.ctx.state === 'suspended') AudioEngine.ctx.resume();
+        },
+
+        goHome() {
+            this.isPlaying = false;
+            document.getElementById('start-screen').classList.add('active');
+            document.getElementById('game-hud').style.display = 'none';
+            document.getElementById('controls-area').style.display = 'none';
+            document.getElementById('game-over-screen').classList.remove('active');
+            
+            if(this.gameInstance) {
+                const scene = this.gameInstance.scene.getScene('GameScene');
+                if(scene) scene.scene.pause();
+            }
+        },
+
+        toggleInfo(type) {
+            const modalId = type === 'edu' ? 'edu-modal' : 'help-modal';
+            const modal = document.getElementById(modalId);
+            
+            // Close the other modal if it's open
+            const otherId = type === 'edu' ? 'help-modal' : 'edu-modal';
+            document.getElementById(otherId).style.display = 'none';
+            document.getElementById(otherId).classList.remove('active');
+
+            if(modal.style.display === 'flex') {
+                modal.style.display = 'none';
+                modal.classList.remove('active');
+            } else {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+            }
+        },
+
+        toggleMute() {
+            const isMuted = AudioEngine.toggleMute();
+            const icon = document.querySelector('#mute-btn i');
+            icon.className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        },
+
+        updateHUD(score, target, health, time) {
+            document.getElementById('score-val').innerText = score + " / " + target;
+            document.getElementById('timer-val').innerText = time;
+            document.getElementById('health-bar').style.width = health + '%';
+            document.getElementById('health-text').innerText = Math.floor(health) + '%';
+            
+            if(score >= target) document.getElementById('score-val').style.color = '#00ff00';
+            else document.getElementById('score-val').style.color = 'white';
+
+            if(health < 30) document.getElementById('health-bar').style.background = '#ff0000';
+            else document.getElementById('health-bar').style.background = 'linear-gradient(90deg, #ff4444, #ff8800)';
+        },
+
+        triggerGameOver(victory, score, reason) {
+            this.isPlaying = false;
+            const screen = document.getElementById('game-over-screen');
+            const title = document.getElementById('go-title');
+            const icon = document.getElementById('go-icon');
+            const reasonTxt = document.getElementById('go-reason');
+            
+            document.getElementById('game-hud').style.display = 'none';
+            document.getElementById('controls-area').style.display = 'none';
+            
+            screen.classList.add('active');
+            document.getElementById('go-score').innerText = 'Final Score: ' + score;
+            reasonTxt.innerText = reason || "";
+
+            if(victory) {
+                title.innerText = "QUOTA MET";
+                title.style.background = "linear-gradient(to bottom, #00ff00, #88ff88)";
+                title.style.webkitBackgroundClip = "text";
+                title.style.webkitTextFillColor = "transparent";
+                icon.innerHTML = '<i class="fa-solid fa-shield-virus" style="color: #00ff00"></i>';
+                AudioEngine.playWin();
+            } else {
+                title.innerText = "FAILURE";
+                title.style.background = "linear-gradient(to bottom, #ff0000, #ff4444)";
+                title.style.webkitBackgroundClip = "text";
+                title.style.webkitTextFillColor = "transparent";
+                icon.innerHTML = '<i class="fa-solid fa-biohazard" style="color: #ff0000"></i>';
+                AudioEngine.playHurt();
+            }
+        }
+    };
+
+    // --- PHASER SCENE ---
+    class GameScene extends Phaser.Scene {
+        constructor() { super({ key: 'GameScene' }); }
+
+        preload() {
+            let g = this.make.graphics({x:0, y:0, add:false});
+            
+            // Macrophage (Player)
+            g.fillStyle(0xffffff, 1); g.fillCircle(32,32,18);
+            g.fillStyle(0xffffff, 0.3); g.fillCircle(32,32,28);
+            g.generateTexture('macrophage', 64, 64);
+
+            // Pathogen
+            g.clear(); g.fillStyle(0x00ff00, 1); g.fillCircle(20,20,12);
+            g.lineStyle(3, 0x00ff00);
+            for(let i=0; i<8; i++) {
+                let a = Phaser.Math.DegToRad(i*45);
+                g.lineBetween(20,20, 20+Math.cos(a)*20, 20+Math.sin(a)*20);
+            }
+            g.generateTexture('enemy', 40, 40);
+
+            // RBC
+            g.clear(); g.fillStyle(0xd63031, 1); g.fillCircle(25,25,25);
+            g.fillStyle(0xb71c1c, 1); g.fillCircle(25,25,12); 
+            g.generateTexture('rbc', 50, 50);
+
+            // Spark
+            g.clear(); g.fillStyle(0xffffff, 1); g.fillCircle(4,4,4);
+            g.generateTexture('spark', 8, 8);
+
+            // Plasma
+            g.clear(); g.fillStyle(0xff4444, 0.6); g.fillCircle(4,4,4);
+            g.generateTexture('plasma', 8, 8);
+        }
+
+        create() {
+            // --- GAME SETTINGS ---
+            this.targetScore = 300; 
+            this.timeLeft = 30;
+            this.score = 0;
+            this.health = 100;
+            this.isGameOver = false;
+
+            this.bgEmitter = this.add.particles(0, 0, 'plasma', {
+                x: window.innerWidth + 50,
+                y: { min: 0, max: window.innerHeight },
+                lifespan: 3000,
+                speedX: { min: -300, max: -600 },
+                scale: { start: 1, end: 0.5 },
+                quantity: 1, 
+                blendMode: 'ADD',
+                frequency: 200 
+            });
+
+            // Player
+            this.player = this.physics.add.sprite(200, 300, 'macrophage');
+            this.player.setCollideWorldBounds(true);
+            
+            // INTERACTIVE & DRAG SETUP
+            this.player.setInteractive({ cursor: 'pointer' });
+            
+            this.input.addPointer(1);
+            this.input.setDraggable(this.player);
+            
+            // Variables for manual rotation
+            this.player.lastX = this.player.x;
+            this.player.lastY = this.player.y;
+
+            // FIX 2: REMOVE BLOOM TO PREVENT WHITE SQUARE ARTIFACTS ON MOBILE
+            // if(this.cameras.main.postFX) this.player.postFX.addBloom(0xffffff, 1, 1, 2, 1.2);
+
+            this.tweens.add({ targets:this.player, scaleX:1.1, scaleY:0.95, yoyo:true, repeat:-1, duration:500 });
+
+            // DRAG EVENTS
+            this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+                if(this.isGameOver || !GameApp.isPlaying) return;
+                // Move Game Object directly (1:1 Drag Control)
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+            });
+
+            // Groups
+            this.enemies = this.physics.add.group();
+            this.friendlies = this.physics.add.group();
+
+            // Burst Emitter
+            this.emitter = this.add.particles(0, 0, 'spark', {
+                speed: {min:100, max:300}, scale: {start:1, end:0},
+                lifespan: 400, blendMode: 'ADD', emitting: false
+            });
+
+            // Timers
+            this.time.addEvent({ delay: 400, callback: this.spawnEnemy, callbackScope: this, loop: true });
+            this.time.addEvent({ delay: 1000, callback: this.spawnFriendly, callbackScope: this, loop: true });
+            this.time.addEvent({ delay: 1000, callback: this.tick, callbackScope: this, loop: true });
+
+            // Collisions
+            this.physics.add.overlap(this.player, this.enemies, this.eatEnemy, null, this);
+            this.physics.add.overlap(this.player, this.friendlies, this.hitFriendly, null, this);
+
+            GameApp.updateHUD(0, this.targetScore, 100, 30);
+
+            if(!GameApp.isPlaying) {
+                this.scene.pause();
+            }
+        }
+
+        update() {
+            if(this.isGameOver || !GameApp.isPlaying) return;
+
+            // --- MANUAL ROTATION BASED ON DRAG MOVEMENT ---
+            let dx = this.player.x - this.player.lastX;
+            let dy = this.player.y - this.player.lastY;
+
+            if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+                let angle = Math.atan2(dy, dx);
+                this.player.rotation = Phaser.Math.Angle.RotateTo(this.player.rotation, angle, 0.2);
+            }
+
+            // Store current pos for next frame calculation
+            this.player.lastX = this.player.x;
+            this.player.lastY = this.player.y;
+
+            // Cleanup off-screen entities
+            this.enemies.children.iterate(c => { if(c && c.x < -50) c.destroy(); });
+            this.friendlies.children.iterate(c => { if(c && c.x < -50) c.destroy(); });
+        }
+
+        spawnEnemy() {
+            if(this.isGameOver || !GameApp.isPlaying) return;
+            let y = Phaser.Math.Between(50, window.innerHeight-50);
+            let e = this.enemies.create(window.innerWidth + 50, y, 'enemy');
+            
+            e.setVelocityX(Phaser.Math.Between(-400, -700)); 
+            e.setAngularVelocity(150);
+        }
+
+        spawnFriendly() {
+            if(this.isGameOver || !GameApp.isPlaying) return;
+            let y = Phaser.Math.Between(50, window.innerHeight-50);
+            let f = this.friendlies.create(window.innerWidth + 50, y, 'rbc');
+            f.setVelocityX(Phaser.Math.Between(-300, -500)); 
+        }
+
+        tick() {
+            if(this.isGameOver || !GameApp.isPlaying) return;
+            this.timeLeft--;
+            GameApp.updateHUD(this.score, this.targetScore, this.health, this.timeLeft);
+            
+            if(this.timeLeft <= 5) AudioEngine.playTone(800, 'square', 0.1);
+            
+            if(this.timeLeft <= 0) {
+                if(this.score >= this.targetScore) {
+                    this.endGame(true, "Quota Met!");
+                } else {
+                    this.endGame(false, "Time Out! Not enough pathogens collected.");
+                }
+            }
+        }
+
+        eatEnemy(player, enemy) {
+            enemy.destroy();
+            AudioEngine.playEat();
+            
+            this.emitter.emitParticleAt(enemy.x, enemy.y, 10);
+            
+            this.score += 10;
+            this.health = Math.min(100, this.health + 5);
+            GameApp.updateHUD(this.score, this.targetScore, this.health, this.timeLeft);
+        }
+
+        hitFriendly(player, friendly) {
+            friendly.destroy();
+            AudioEngine.playHurt();
+            this.cameras.main.shake(200, 0.01);
+            
+            this.health -= 20;
+            this.score = Math.max(0, this.score - 10);
+            
+            GameApp.updateHUD(this.score, this.targetScore, this.health, this.timeLeft);
+            
+            if(this.health <= 0) this.endGame(false, "Cell Integrity Critical.");
+        }
+
+        endGame(victory, reason) {
+            this.isGameOver = true;
+            this.physics.pause();
+            GameApp.triggerGameOver(victory, this.score, reason);
+        }
+    }
+
+    // --- PHASER CONFIG ---
+    const config = {
+        type: Phaser.AUTO,
+        scale: {
+            mode: Phaser.Scale.RESIZE,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+            width: window.innerWidth,
+            height: window.innerHeight,
+        },
+        parent: 'game-wrapper',
+        transparent: true,
+        physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
+        scene: [GameScene]
+    };
+
+    window.onload = () => {
+        GameApp.gameInstance = new Phaser.Game(config);
+    };
+
+</script>
+</body>
+</html>

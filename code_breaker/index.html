@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Code Breaker</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-body: #0d0d0d;
+            --case-color: #1a1a1a;
+            --plate-color: #2b2b2b;
+            --accent-gold: #c5a059;
+            --lamp-off: #111;
+            --lamp-on: #ffd700;
+            --text-color: #e0e0e0;
+            --wire-color: var(--accent-gold);
+            --socket-selected-shadow: 0 0 14px rgba(197,160,89,0.95);
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-color);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+        }
+
+        /* --- PORTRAIT WARNING OVERLAY --- */
+        #portrait-warning {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: none; /* Hidden by default, shown via Media Query */
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; color: var(--accent-gold);
+            padding: 20px; box-sizing: border-box;
+        }
+        
+        #portrait-warning i { font-size: 3rem; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
+        #portrait-warning p { font-family: 'Special Elite'; font-size: 1.2rem; }
+
+        @keyframes rotatePhone {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* Show warning only on Portrait screens */
+        @media (orientation: portrait) {
+            #portrait-warning { display: flex; }
+            #machine-case { display: none !important; } /* Hide game to save resources */
+            .controls { display: none; }
+        }
+
+        /* --- THE MACHINE --- */
+        #machine-case {
+            width: 900px;
+            height: 720px;
+            background: var(--case-color);
+            border-radius: 15px;
+            border: 4px solid #333;
+            box-shadow: 0 0 0 10px #0d0d0d, 0 20px 50px rgba(0,0,0,0.8), inset 0 0 80px rgba(0,0,0,0.8);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            box-sizing: border-box;
+            /* Scaling Logic applied via JS for Landscape Mobile */
+            transform-origin: center center; 
+        }
+
+        /* Top Section: Rotors & Paper */
+        .top-deck {
+            flex: 0 0 200px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--plate-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .printer-box {
+            width: 55%;
+            background: #f0f0e0;
+            color: #222;
+            font-family: 'Special Elite', cursive;
+            padding: 15px;
+            border: 1px solid #999;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
+        #decrypted-output {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #000;
+            background: rgba(0,0,0,0.05);
+            padding: 0 5px;
+            min-height: 1.5rem;
+            display: inline-block;
+            min-width: 50px;
+        }
+        #story-text {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #333;
+            background: rgba(255,255,255,0.85);
+            padding: 8px;
+            border-radius: 6px;
+            min-height: 48px;
+            line-height: 1.2;
+            box-shadow: inset 0 1px 0 rgba(0,0,0,0.04);
+        }
+
+        .rotors-container {
+            width: 40%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background: #111;
+            border-radius: 5px;
+            border: 2px solid #555;
+            padding: 10px;
+        }
+        .rotor { display: flex; flex-direction: column; align-items: center; }
+        .rotor-window {
+            width: 45px; height: 50px;
+            background: #e0e0e0; color: #000;
+            font-size: 1.8rem; font-family: 'Special Elite'; font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 3px;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+            margin: 5px 0;
+        }
+        .rotor-btn {
+            background: #333; color: #fff; border: 1px solid #555;
+            cursor: pointer; width: 100%; height: 20px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 0.7rem;
+        }
+        .rotor-btn:hover { background: var(--accent-gold); color: #000; }
+
+        /* Middle Section: Lamps */
+        .lampboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid #333;
+            box-shadow: inset 0 0 20px #111;
+        }
+
+        .row { display: flex; justify-content: center; gap: 12px; margin-bottom: 8px; }
+
+        .lamp {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--lamp-off);
+            border: 2px solid #333;
+            color: #444;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; font-family: sans-serif;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.05s;
+        }
+        .lamp.active {
+            background: var(--lamp-on);
+            color: #000;
+            box-shadow: 0 0 15px var(--lamp-on), inset 0 0 10px #fff;
+            border-color: #fff;
+        }
+
+        /* Bottom Section: Plugboard & Keys */
+        .bottom-deck { flex: 1; display: flex; gap: 20px; }
+
+        /* Plugboard (Left) */
+        .plugboard {
+            flex: 1;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 5px;
+            position: relative;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .socket-container { display: flex; flex-direction: column; align-items: center; position: relative; }
+        .socket {
+            width: 10px; height: 10px;
+            background: #000;
+            border: 2px solid #666;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: box-shadow 0.12s, border-color 0.12s, background 0.12s;
+        }
+        /* Increase touch target for mobile sockets */
+        .socket::after {
+            content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
+        }
+
+        .socket:hover { border-color: #fff; }
+        /* connected: keep black fill, gold border and glow */
+        .socket.connected { background: #000; border-color: var(--accent-gold); box-shadow: var(--socket-selected-shadow); }
+        .socket-label { font-size: 0.6rem; color: #888; margin-bottom: 2px; }
+
+        /* Wires SVG Layer */
+        #wire-svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+        }
+        /* wires use gold */
+        line { stroke: var(--wire-color); stroke-width: 3; stroke-linecap: round; opacity: 0.95; filter: drop-shadow(0 3px 2px rgba(0,0,0,0.6)); }
+
+        /* Keyboard (Right) */
+        .keyboard {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 10px;
+        }
+        .key-btn {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #444, #111);
+            color: #fff;
+            border: 3px solid #666;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            font-family: 'Special Elite'; font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.05s;
+        }
+        .key-btn:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            border-color: #333;
+        }
+
+        /* --- OVERLAYS --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .overlay.visible { opacity: 1; pointer-events: auto; }
+
+        .modal {
+            background: #f4f4f4; color: #111;
+            width: 500px; padding: 40px;
+            font-family: 'Special Elite', cursive;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            transform: rotate(-1deg);
+            position: relative;
+            text-align: left;
+            max-width: 90vw; /* Mobile safety */
+        }
+        .modal::before {
+            content: "CONFIDENTIAL";
+            position: absolute; top: 20px; right: 20px;
+            color: rgba(255, 0, 0, 0.2);
+            font-size: 3rem; font-weight: bold;
+            transform: rotate(15deg);
+            pointer-events: none;
+        }
+        .modal h2 { margin-top: 0; border-bottom: 2px solid #333; padding-bottom: 10px; }
+
+        .action-btn {
+            background: #333; color: white; border: none;
+            padding: 10px 20px; font-family: 'Share Tech Mono';
+            cursor: pointer; font-size: 1.1rem; margin-top: 20px;
+            display: block; width: 100%;
+        }
+        .action-btn:hover { background: var(--accent-gold); color: #000; }
+
+        /* Hint & Reveal Buttons */
+        .tools-row { display: flex; gap: 10px; margin-top: 10px; }
+
+        .hint-btn, .reveal-btn, .reset-btn {
+            color: white; border: none; padding: 5px 10px;
+            font-size: 0.8rem; cursor: pointer; border-radius: 3px;
+            font-family: 'Share Tech Mono';
+        }
+        .hint-btn { background: #333; }
+        .hint-btn:hover { background: #555; }
+
+        .reveal-btn { background: var(--wire-color); }
+        .reveal-btn:hover { background: #b38f45; }
+
+        .reset-btn { background: #e67e22; }
+        .reset-btn:hover { background: #d35400; }
+
+        .hint-display {
+            background: #fff; border: 1px dashed #333; padding: 5px;
+            font-size: 0.9rem; margin-top: 5px; display: none; color: #d32f2f;
+        }
+
+        /* Top Controls */
+        .controls {
+            position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 50;
+        }
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #333; color: #fff; border: 1px solid #555;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+        }
+        .icon-btn:hover { background: var(--accent-gold); color: #000; }
+
+        /* guide highlight - kept for compatibility with original guide code */
+        .key-btn.guide-highlight {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px var(--accent-gold), inset 0 0 10px var(--accent-gold);
+            color: var(--accent-gold);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px var(--accent-gold); }
+            50% { box-shadow: 0 0 20px var(--accent-gold); }
+            100% { box-shadow: 0 0 10px var(--accent-gold); }
+        }
+
+        /* decrypted-output error class */
+        #decrypted-output.error { background-color: rgba(255,0,0,0.25); color: #000; padding: 3px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div id="portrait-warning">
+    <i class="fa-solid fa-mobile-screen-button"></i>
+    <p>CLASSIFIED DEVICE DETECTED</p>
+    <p style="color: #888; font-size: 0.9rem; margin-top: 10px;">Enigma protocols require landscape orientation.</p>
+    <p style="color: #fff; font-size: 1rem; margin-top: 20px;">PLEASE ROTATE DEVICE</p>
+</div>
+
+<div class="controls">
+    <button class="icon-btn" onclick="toggleMute()" title="Toggle Sound">
+        <i id="mute-icon" class="fa-solid fa-volume-high"></i>
+    </button>
+    <button class="icon-btn" onclick="showStartScreen()" title="Home">
+        <i class="fa-solid fa-house"></i>
+    </button>
+</div>
+
+<div id="start-screen" class="overlay visible">
+    <div class="modal">
+        <h2>PROJECT ENIGMA</h2>
+        <p><strong>MISSION:</strong> Break the enemy cipher.</p>
+        <p>This simulator has <strong>5 Levels</strong> of increasing difficulty.</p>
+        <ul>
+            <li><strong>ROTORS:</strong> Shift letters (A -> B).</li>
+            <li><strong>PLUGS:</strong> Swap letters (A &lt;-&gt; Z).</li>
+        </ul>
+        <button class="action-btn" onclick="startGame()">START MISSION</button>
+        <button class="action-btn" style="margin-top:10px; background:#555;" onclick="toggleInfo()"><i class="fa-solid fa-graduation-cap"></i> educational vallue</button>
+    </div>
+</div>
+
+<div id="info-screen" class="overlay">
+    <div class="modal" style="transform: rotate(1deg);">
+        <h2><i class="fa-solid fa-brain" style="margin-right:8px; color:#c5a059;"></i>how is this educational?</h2>
+        <p><strong>Historical Context:</strong><br>
+        The Enigma Machine was used by Nazi Germany to encrypt communications. Mathematician <strong>Alan Turing</strong> and his team at Bletchley Park cracked it, shortening the war by years.</p>
+        <p><strong>The Math:</strong><br>
+        It uses <i>Polyalphabetic Substitution</i>. Pressing 'A' never gives 'A'. Rotors spin after every keypress, changing the cipher constantly.</p>
+        <button class="action-btn" onclick="toggleInfo()">CLOSE</button>
+    </div>
+</div>
+
+<div id="win-screen" class="overlay">
+    <div class="modal">
+        <h2 id="win-title" style="color: green;">DECODED!</h2>
+        <p>excellent work.</p>
+        <p id="win-story" style="font-weight:bold; font-size:1.05rem;"></p>
+        <button id="win-btn" class="action-btn" onclick="nextLevel()">NEXT LEVEL</button>
+    </div>
+</div>
+
+<div id="machine-case">
+    <div class="top-deck">
+        <div class="printer-box">
+            <div style="font-weight:bold; border-bottom:1px solid #999; margin-bottom:5px;">INTERCEPT LOG</div>
+            <div id="target-text" style="color: #d32f2f;">TARGET: ????</div>
+            <div id="decrypted-output"></div>
+
+            <div id="story-text">mission briefing: set your rotors and plugs, then press keys to decode.</div>
+
+            <div class="tools-row">
+                <button class="hint-btn" onclick="showHint()">SHOW HINT</button>
+                <button class="reset-btn" onclick="resetLevel()">RESET</button>
+                <button class="reveal-btn" onclick="revealAnswer()">AUTO-SOLVE</button>
+            </div>
+            <div id="hint-display" class="hint-display"></div>
+        </div>
+
+        <div class="rotors-container">
+            <div class="rotor">
+                <div style="color:#aaa; font-size:0.7rem;">I</div>
+                <button class="rotor-btn" onclick="changeRotor(0, 1)">▲</button>
+                <div class="rotor-window" id="rotor-0">A</div>
+                <button class="rotor-btn" onclick="changeRotor(0, -1)">▼</button>
+            </div>
+            <div class="rotor">
+                <div style="color:#aaa; font-size:0.7rem;">II</div>
+                <button class="rotor-btn" onclick="changeRotor(1, 1)">▲</button>
+                <div class="rotor-window" id="rotor-1">A</div>
+                <button class="rotor-btn" onclick="changeRotor(1, -1)">▼</button>
+            </div>
+            <div class="rotor">
+                <div style="color:#aaa; font-size:0.7rem;">III</div>
+                <button class="rotor-btn" onclick="changeRotor(2, 1)">▲</button>
+                <div class="rotor-window" id="rotor-2">A</div>
+                <button class="rotor-btn" onclick="changeRotor(2, -1)">▼</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="lampboard" id="lamp-area"></div>
+
+    <div class="bottom-deck">
+        <div class="plugboard" id="plug-area">
+            <div style="color:#888; font-size:0.7rem; text-align:center; margin-bottom:5px;">PLUGBOARD</div>
+            <svg id="wire-svg"></svg>
+        </div>
+
+        <div class="keyboard" id="key-area"></div>
+    </div>
+</div>
+
+<script>
+    // === original game logic preserved ===
+    // --- CONFIGURATION ---
+    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+    const ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+
+    // levels now include 'story' and optional 'endStory' for final text
+    const LEVELS = [
+        {
+            name: "Level 1: Basic Shift",
+            target: "HELLO",
+            hint: "Set Rotor III to 'Z'. Follow the green lights.",
+            solutionRotors: [0, 0, 25], // Z
+            solutionPlugs: {},
+            story: "briefing: a single courier's signal keeps getting garbled. decrypt 'HELLO' to restore the contact.",
+            endStory: "the courier's message is restored — the lone contact is back on the grid."
+        },
+        {
+            name: "Level 2: The Plug",
+            target: "BOMB",
+            hint: "Set Rotor III to 'B'. Plug B-Z.",
+            solutionRotors: [0, 0, 1], // B
+            solutionPlugs: {'B':'Z'},
+            story: "briefing: intercepted chatter hints at a planted device. decode 'BOMB' to confirm threat level.",
+            endStory: "threat verified and defused — the local sweep team moves in."
+        },
+        {
+            name: "Level 3: U-Boat",
+            target: "FIRE",
+            hint: "Rotor III to 'Z'. Plug F-X.",
+            solutionRotors: [0, 0, 25], // Z
+            solutionPlugs: {'F':'X'},
+            story: "briefing: a coastal unit reports engine failure. decrypt 'FIRE' to relay emergency coordinates.",
+            endStory: "coordinates delivered — rescue tugs are dispatched before sunset."
+        },
+        {
+            name: "Level 4: Operation Overlord",
+            target: "DAWN",
+            hint: "Rotor III to 'B'. Plug D-W.",
+            solutionRotors: [0, 0, 1], // B
+            solutionPlugs: {'D':'W'},
+            story: "briefing: the dawn window is critical for a rendezvous. decode 'DAWN' to align phase windows.",
+            endStory: "phase windows synchronized — the rendezvous goes ahead as planned."
+        },
+        {
+            name: "Level 5: The Turing Test",
+            target: "PEACE",
+            hint: "Rotor II to 'B', Rotor III to 'B'. Plug P-L, E-M.",
+            solutionRotors: [0, 1, 1], // A B B
+            solutionPlugs: {'P':'L', 'E':'M'},
+            story: "briefing: insurgent broadcasts threaten escalation. decrypt 'PEACE' to unlock a hostage safe-route plan.",
+            endStory: "shift ended — the sector is secure and the safe-route was successfully executed. operations report: area is stable."
+        }
+    ];
+
+    // --- GAME STATE ---
+    let rotors = [0, 0, 0];
+    let plugs = {};
+    let currentLevel = 0;
+    let userInput = "";
+    let isMuted = false;
+    let selectedSocket = null;
+    let hasWon = false;
+    let isAutoSolving = false;
+
+    // This is the static sequence of keys needed to solve the level IF settings are correct.
+    let solutionKeySequence = "";
+
+    // --- AUDIO SYSTEM ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if(isMuted) return;
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if(type === 'click') {
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        } else if(type === 'rotor') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, now);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.08);
+        } else if(type === 'plug') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.1);
+        }
+        osc.start(now); osc.stop(now + 0.1);
+    }
+
+    // --- UTILS: normalize/symmetric plug map & lookup ---
+    function normalizePlugs(map) {
+        // returns a symmetric copy of map: for each a->b add b->a
+        let res = {};
+        for (let k in map) {
+            let v = map[k];
+            if (!v || k === v) continue;
+            res[k] = v;
+            res[v] = k;
+        }
+        return res;
+    }
+
+    function plugLookupBothWays(map, key) {
+        // return partner of key if exists, or undefined
+        if (!map) return undefined;
+        if (map[key]) return map[key];
+        for (let a in map) {
+            if (map[a] === key) return a;
+        }
+        return undefined;
+    }
+
+    // --- ENIGMA LOGIC (Simplified for Game) ---
+    function getEnigmaChar(char, currentRotors, currentPlugs) {
+        let idx = ALPHABET.indexOf(char);
+
+        // 1. Plug In
+        let plugIn = plugLookupBothWays(currentPlugs, char);
+        if (plugIn) idx = ALPHABET.indexOf(plugIn);
+
+        // 2. Rotor Shift (Simplified sum shift)
+        let shift = currentRotors[0] + currentRotors[1] + currentRotors[2];
+
+        // Decrypt Logic: idx - shift
+        idx = (idx - shift) % 26;
+        if (idx < 0) idx += 26;
+
+        // 3. Plug Out
+        let outChar = ALPHABET[idx];
+        let plugOut = plugLookupBothWays(currentPlugs, outChar);
+        if (plugOut) outChar = plugOut;
+
+        return outChar;
+    }
+
+    // --- SOLUTION CALCULATION ---
+    function getRequiredKeyForTarget(targetChar, simRotors, simPlugsRaw) {
+        let simPlugs = normalizePlugs(simPlugsRaw || {});
+        let idx = ALPHABET.indexOf(targetChar);
+
+        // Reverse Plug Out
+        let partner = plugLookupBothWays(simPlugs, targetChar);
+        if (partner) idx = ALPHABET.indexOf(partner);
+
+        // Reverse Shift (Encrypt Logic: idx + shift)
+        let shift = simRotors[0] + simRotors[1] + simRotors[2];
+        idx = (idx + shift) % 26;
+
+        let outChar = ALPHABET[idx];
+
+        // Reverse Plug In
+        let reversePartner = plugLookupBothWays(simPlugs, outChar);
+        if (reversePartner) outChar = reversePartner;
+
+        return outChar;
+    }
+
+    // --- INITIALIZATION ---
+    function init() {
+        const lampArea = document.getElementById('lamp-area');
+        const keyArea = document.getElementById('key-area');
+        const plugArea = document.getElementById('plug-area');
+        lampArea.innerHTML = ''; keyArea.innerHTML = ''; plugArea.innerHTML = '';
+
+        ROWS.forEach(rowStr => {
+            let lRow = document.createElement('div'); lRow.className = 'row';
+            let kRow = document.createElement('div'); kRow.className = 'row';
+            let pRow = document.createElement('div'); pRow.className = 'row';
+
+            rowStr.split('').forEach(char => {
+                // Lamp
+                let l = document.createElement('div');
+                l.className = 'lamp'; l.id = 'lamp-'+char; l.innerText = char;
+                lRow.appendChild(l);
+
+                // Key
+                let k = document.createElement('button');
+                k.className = 'key-btn'; k.id = 'key-'+char; k.innerText = char;
+                k.onclick = function() { if(!isAutoSolving) handleInput(char); };
+                kRow.appendChild(k);
+
+                // Socket
+                let sCont = document.createElement('div'); sCont.className = 'socket-container';
+                let sl = document.createElement('div'); sl.className = 'socket-label'; sl.innerText = char;
+                let s = document.createElement('div'); s.className = 'socket'; s.id = 'socket-'+char;
+                s.onclick = () => { if(!isAutoSolving) handleSocket(char); };
+                sCont.appendChild(sl); sCont.appendChild(s);
+                pRow.appendChild(sCont);
+            });
+            lampArea.appendChild(lRow); keyArea.appendChild(kRow); plugArea.appendChild(pRow);
+        });
+
+        loadLevel(0);
+        // MOBILE SCALE ADJUSTER
+        adjustLayoutForMobile();
+    }
+
+    // --- NEW: MOBILE SCALING LOGIC ---
+    function adjustLayoutForMobile() {
+        const machine = document.getElementById('machine-case');
+        const margin = 20; 
+        
+        // Original size of the machine div
+        const baseWidth = 900;
+        const baseHeight = 720;
+        
+        // Current viewport size
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Calculate scale ratio to fit screen
+        const scaleX = (vw - margin) / baseWidth;
+        const scaleY = (vh - margin) / baseHeight;
+        let scale = Math.min(scaleX, scaleY);
+        
+        // Cap scale at 1 (don't zoom in on huge screens)
+        if(scale > 1) scale = 1;
+
+        // Apply scale
+        if(scale < 1) {
+            machine.style.transform = `scale(${scale})`;
+            // Re-center logic because transform scale happens from center
+            // but layout flow can get weird. We are using flex center on body so this works well.
+        } else {
+             machine.style.transform = `scale(1)`;
+        }
+    }
+
+    // --- PRE-CALCULATE CORRECT SEQUENCE ---
+    function computeLevelSolution(level) {
+        let tempRotors = [...level.solutionRotors];
+        let tempPlugs = normalizePlugs(level.solutionPlugs || {});
+        let target = level.target;
+        solutionKeySequence = "";
+
+        for(let i=0; i<target.length; i++) {
+            // simulate spin before decrypt
+            tempRotors[2]++;
+            if(tempRotors[2] > 25) tempRotors[2] = 0;
+            if(tempRotors[2] === 0) {
+                tempRotors[1]++;
+                if(tempRotors[1] > 25) tempRotors[1] = 0;
+                if(tempRotors[1] === 0) {
+                     tempRotors[0]++;
+                     if(tempRotors[0] > 25) tempRotors[0] = 0;
+                }
+            }
+
+            let neededKey = getRequiredKeyForTarget(target[i], tempRotors, tempPlugs);
+            solutionKeySequence += neededKey;
+        }
+        console.log("level solution key sequence:", solutionKeySequence);
+    }
+
+    // --- CORE GAME LOOP ---
+    function handleInput(char) {
+        if (hasWon) return;
+
+        // 1. Spin Rotors
+        spinRotor(2, 1);
+
+        // 2. Decrypt using USER'S CURRENT SETTINGS
+        playSound('click');
+        let decryptedChar = getEnigmaChar(char, rotors, plugs);
+
+        // 3. Visuals
+        let lamp = document.getElementById('lamp-'+decryptedChar);
+        if(lamp) {
+            lamp.classList.add('active');
+            setTimeout(() => lamp.classList.remove('active'), 250);
+        }
+
+        // 4. Update Log
+        let level = LEVELS[currentLevel];
+        if (userInput.length < level.target.length) {
+            userInput += decryptedChar;
+            document.getElementById('decrypted-output').innerText = userInput;
+        }
+
+        // 5. Check Win
+        checkWin();
+
+        // 6. Update Guide
+        updateGuide();
+    }
+
+    function spinRotor(idx, dir) {
+        if (idx === 2) playSound('rotor');
+        rotors[idx] += dir;
+
+        if(rotors[idx] > 25) rotors[idx] = 0;
+        if(rotors[idx] < 0) rotors[idx] = 25;
+
+        document.getElementById('rotor-'+idx).innerText = ALPHABET[rotors[idx]];
+
+        if (idx === 2 && rotors[idx] === 0 && dir === 1) spinRotor(1, dir);
+        else if (idx === 1 && rotors[idx] === 0 && dir === 1) spinRotor(0, dir);
+    }
+
+    function changeRotor(idx, dir) {
+        if(isAutoSolving) return;
+        playSound('rotor');
+        rotors[idx] += dir;
+        if(rotors[idx] > 25) rotors[idx] = 0;
+        if(rotors[idx] < 0) rotors[idx] = 25;
+        document.getElementById('rotor-'+idx).innerText = ALPHABET[rotors[idx]];
+        resetProgress();
+    }
+
+    function handleSocket(char) {
+        playSound('plug');
+        const socketEl = document.getElementById('socket-' + char);
+
+        // remove existing pair
+        if(plugs[char]) {
+            let partner = plugs[char];
+            delete plugs[char]; delete plugs[partner];
+            let elA = document.getElementById('socket-'+char);
+            let elB = document.getElementById('socket-'+partner);
+            if(elA) { elA.classList.remove('connected'); elA.style.boxShadow = ''; elA.style.borderColor = ''; }
+            if(elB) { elB.classList.remove('connected'); elB.style.boxShadow = ''; elB.style.borderColor = ''; }
+            selectedSocket = null;
+            requestAnimationFrame(drawWires);
+            resetProgress();
+            return;
+        }
+        // start connection (select first)
+        if(!selectedSocket) {
+            selectedSocket = char;
+            socketEl.style.borderColor = 'var(--accent-gold)';
+            socketEl.style.boxShadow = 'var(--socket-selected-shadow)';
+            return;
+        }
+        // finish connection (connect selectedSocket <-> char)
+        if(selectedSocket === char) {
+            socketEl.style.borderColor = ''; socketEl.style.boxShadow = ''; selectedSocket = null; return;
+        }
+        // set symmetric mapping for runtime and visually mark both
+        plugs[selectedSocket] = char; plugs[char] = selectedSocket;
+        let elSel = document.getElementById('socket-'+selectedSocket);
+        let elOther = document.getElementById('socket-'+char);
+        if(elSel) { elSel.style.borderColor = 'var(--accent-gold)'; elSel.style.boxShadow = 'var(--socket-selected-shadow)'; elSel.classList.add('connected'); }
+        if(elOther) { elOther.style.borderColor = 'var(--accent-gold)'; elOther.style.boxShadow = 'var(--socket-selected-shadow)'; elOther.classList.add('connected'); }
+        selectedSocket = null;
+        requestAnimationFrame(drawWires);
+        resetProgress();
+    }
+
+    function drawWires() {
+        const svg = document.getElementById('wire-svg');
+        svg.innerHTML = '';
+        let drawn = new Set();
+        document.querySelectorAll('.socket').forEach(s => {
+            if(!s.classList.contains('connected') && s.id.replace('socket-', '') !== selectedSocket) {
+                s.style.borderColor = '';
+                s.style.boxShadow = '';
+            }
+        });
+
+        for(let a in plugs) {
+            let b = plugs[a];
+            if(!b) continue;
+            if(drawn.has(a) || drawn.has(b)) continue;
+            drawn.add(a); drawn.add(b);
+
+            let sA = document.getElementById('socket-'+a);
+            let sB = document.getElementById('socket-'+b);
+            if(!sA || !sB) continue;
+
+            sA.classList.add('connected'); sB.classList.add('connected');
+            sA.style.borderColor = 'var(--accent-gold)';
+            sB.style.borderColor = 'var(--accent-gold)';
+            sA.style.boxShadow = 'var(--socket-selected-shadow)';
+            sB.style.boxShadow = 'var(--socket-selected-shadow)';
+
+            let rA = sA.getBoundingClientRect();
+            let rB = sB.getBoundingClientRect();
+            let contR = document.getElementById('plug-area').getBoundingClientRect();
+            
+            // Adjust calculations for scaling (getBoundingClientRect accounts for scale, but coordinate math needs to match SVG context)
+            // However, since SVG is inside the scaled container, we can use local offset if we calculate it carefully.
+            // Simplified: calculate center based on relative offset
+            
+            // We use offsetLeft/Top because they are relative to the parent (which is scaled with them)
+            // This is safer than getBoundingClientRect when using CSS transform scale
+            
+            const getCenter = (el) => {
+                return {
+                    x: el.offsetLeft + el.offsetWidth / 2,
+                    y: el.offsetTop + el.offsetHeight / 2
+                };
+            };
+            
+            let cA = getCenter(sA.parentElement); // Use socket-container for positioning
+            let cB = getCenter(sB.parentElement); 
+
+            // Fine tuning because the socket is inside the socket-container
+            // The logic above using getBoundingClientRect was correct for desktop but breaks on Scale
+            // Let's use the offset method which is scale-independent relative to the parent
+            
+            let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            // Hardcoded offset adjustments based on CSS layout to hit the center of the socket dot
+            line.setAttribute('x1', sA.parentElement.offsetLeft + sA.offsetLeft + 5); 
+            line.setAttribute('y1', sA.parentElement.offsetTop + sA.offsetTop + 5);
+            line.setAttribute('x2', sB.parentElement.offsetLeft + sB.offsetLeft + 5);
+            line.setAttribute('y2', sB.parentElement.offsetTop + sB.offsetTop + 5);
+            svg.appendChild(line);
+        }
+    }
+
+    // --- CHECK WIN & GUIDE ---
+    function checkWin() {
+        let level = LEVELS[currentLevel];
+        let out = document.getElementById('decrypted-output');
+        out.classList.remove('error');
+
+        if(userInput.length === level.target.length) {
+            if(userInput === level.target) {
+                hasWon = true;
+
+                // show story in win modal (use endStory if present)
+                let endText = level.endStory ? level.endStory : ("message decoded: " + level.target);
+                // special behavior for final level
+                let isLast = currentLevel + 1 >= LEVELS.length;
+                if(isLast) {
+                    document.getElementById('win-title').innerText = "OPERATION COMPLETE";
+                    document.getElementById('win-title').style.color = "#FFD700";
+                    document.getElementById('win-btn').innerText = "BACK TO START";
+                    document.getElementById('win-btn').onclick = () => {
+                        // hide win modal, show start screen and reset to level 0
+                        document.getElementById('win-screen').classList.remove('visible');
+                        showStartScreen();
+                        loadLevel(0);
+                    };
+                    // final message includes extra sentence confirming safety
+                    document.getElementById('win-story').innerText = endText + " shift ended — the sector is secure. back to start.";
+                } else {
+                    document.getElementById('win-title').innerText = "DECODED!";
+                    document.getElementById('win-title').style.color = "green";
+                    document.getElementById('win-btn').innerText = "NEXT LEVEL";
+                    document.getElementById('win-btn').onclick = nextLevel;
+                    document.getElementById('win-story').innerText = endText;
+                }
+
+                setTimeout(() => document.getElementById('win-screen').classList.add('visible'), 400);
+            } else {
+                out.classList.add('error');
+                if(!isAutoSolving) setTimeout(resetProgress, 1000);
+            }
+        }
+    }
+
+    function updateGuide() {
+        if(hasWon) {
+            document.querySelectorAll('.key-btn').forEach(k => k.classList.remove('guide-highlight'));
+            return;
+        }
+
+        let nextIdx = userInput.length;
+        if(nextIdx < solutionKeySequence.length) {
+            let nextChar = solutionKeySequence[nextIdx];
+            if(nextChar) {
+                document.querySelectorAll('.key-btn').forEach(k => k.classList.remove('guide-highlight'));
+                let key = document.getElementById('key-'+nextChar);
+                if(key) key.classList.add('guide-highlight');
+            }
+        } else {
+            document.querySelectorAll('.key-btn').forEach(k => k.classList.remove('guide-highlight'));
+        }
+    }
+
+    function resetProgress() {
+        userInput = "";
+        document.getElementById('decrypted-output').innerText = "";
+        document.getElementById('decrypted-output').classList.remove('error');
+        updateGuide();
+    }
+
+    function resetLevel() {
+        if(isAutoSolving) return;
+        loadLevel(currentLevel);
+    }
+
+    // --- AUTO SOLVE ---
+    async function revealAnswer() {
+        if (isAutoSolving) return;
+        isAutoSolving = true;
+
+        // Reset
+        let level = LEVELS[currentLevel];
+        userInput = "";
+        document.getElementById('decrypted-output').innerText = "";
+
+        // Force Set Rotors to Solution
+        rotors = [...level.solutionRotors];
+        rotors.forEach((v, i) => document.getElementById('rotor-'+i).innerText = ALPHABET[v]);
+
+        // Force Set Plugs to symmetric Solution
+        plugs = normalizePlugs(level.solutionPlugs || {});
+        requestAnimationFrame(drawWires);
+
+        // recompute guide & ensure solutionKeySequence exists
+        computeLevelSolution(level);
+        updateGuide();
+
+        await new Promise(r => setTimeout(r, 600));
+
+        // Type Loop using the CORRECT solution sequence
+        let chars = solutionKeySequence.split('');
+        for(let char of chars) {
+            spinRotor(2, 1);
+            playSound('click');
+            let decrypted = getEnigmaChar(char, rotors, plugs); // Should match target now
+
+            let lamp = document.getElementById('lamp-'+decrypted);
+            if(lamp) lamp.classList.add('active');
+            let key = document.getElementById('key-'+char);
+            if(key) key.classList.add('guide-highlight');
+
+            userInput += decrypted;
+            document.getElementById('decrypted-output').innerText = userInput;
+
+            await new Promise(r => setTimeout(r, 300));
+            if(lamp) lamp.classList.remove('active');
+            if(key) key.classList.remove('guide-highlight');
+            await new Promise(r => setTimeout(r, 150));
+        }
+
+        checkWin();
+        isAutoSolving = false;
+    }
+
+    // --- NAVIGATION ---
+    function loadLevel(idx) {
+        currentLevel = idx;
+        userInput = "";
+        plugs = {};
+        selectedSocket = null;
+        hasWon = false;
+        isAutoSolving = false;
+
+        let level = LEVELS[idx];
+
+        // Set Rotors to 'A' (Visual reset)
+        rotors = [0,0,0];
+        ["0","1","2"].forEach(i => document.getElementById('rotor-'+i).innerText = 'A');
+
+        document.getElementById('decrypted-output').innerText = "";
+        document.getElementById('decrypted-output').classList.remove('error');
+        document.getElementById('hint-display').style.display = 'none';
+
+        document.getElementById('target-text').innerText = "TARGET: " + level.target;
+
+        // set story for this level
+        document.getElementById('story-text').innerText = level.story || "mission briefing: set your rotors and plugs, then press keys to decode.";
+
+        // clear socket visuals
+        document.querySelectorAll('.socket').forEach(s => { s.classList.remove('connected'); s.style.borderColor = ''; s.style.boxShadow = ''; });
+        requestAnimationFrame(drawWires);
+
+        // compute solution once based on ideal settings
+        computeLevelSolution(level);
+
+        updateGuide();
+    }
+
+    function nextLevel() {
+        document.getElementById('win-screen').classList.remove('visible');
+        if(currentLevel + 1 < LEVELS.length) loadLevel(currentLevel + 1);
+    }
+
+    function showHint() {
+        let el = document.getElementById('hint-display');
+        el.innerText = LEVELS[currentLevel].hint;
+        el.style.display = 'block';
+    }
+
+    function showStartScreen() {
+        document.getElementById('start-screen').classList.add('visible');
+        document.getElementById('win-screen').classList.remove('visible');
+        document.getElementById('info-screen').classList.remove('visible');
+    }
+    function startGame() {
+        document.getElementById('start-screen').classList.remove('visible');
+        loadLevel(0);
+    }
+
+    function toggleInfo() {
+        let el = document.getElementById('info-screen');
+        if(el.classList.contains('visible')) el.classList.remove('visible');
+        else el.classList.add('visible');
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        document.getElementById('mute-icon').className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+    }
+
+    init();
+    // Re-adjust scale if they resize/rotate the browser
+    window.addEventListener('resize', () => {
+        adjustLayoutForMobile();
+        requestAnimationFrame(drawWires);
+    });
+</script>
+</body>
+</html>

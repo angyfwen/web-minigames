@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Solar Ascent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --sky-1: #42a5f5;
+            --sky-2: #90caf9;
+            --sky-3: #e3f2fd;
+            --font-title: 'Chewy', cursive;
+            --font-body: 'Fredoka', sans-serif;
+            --hit-zone: #76ff03; 
+            --hit-pest: #ff1744; /* Danger Red */
+            --gray-track: rgba(0,0,0,0.2);
+        }
+
+        /* MOBILE FIX: Remove tap highlight color */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; overflow: hidden;
+            font-family: var(--font-body);
+            background: linear-gradient(to bottom, var(--sky-1), var(--sky-2), var(--sky-3));
+            height: 100vh; 
+            /* MOBILE FIX: Use dvh for mobile browsers */
+            height: 100dvh;
+            width: 100vw;
+            display: flex; justify-content: center; align-items: center;
+            user-select: none;
+            /* MOBILE FIX: Prevent gestures/scrolling */
+            touch-action: none;
+        }
+
+        #game-stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+
+        /* --- BACKGROUND LAYERS --- */
+        #stars-container {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            pointer-events: none; opacity: 0; transition: opacity 0.5s ease; z-index: 0;
+        }
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+        @keyframes twinkle { from {opacity:0.3;} to {opacity:1;} }
+
+        /* The Sun */
+        .actual-sun {
+            position: absolute; top: 50px; right: 50px;
+            width: 90px; height: 90px;
+            background: #fdd835; border-radius: 50%;
+            box-shadow: 0 0 60px #fbc02d; z-index: 1;
+            will-change: transform; 
+        }
+
+        /* Moving World */
+        #world-layer {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 2;
+            will-change: transform; 
+        }
+
+        /* HILL SHAPES */
+        .hill-layer {
+            position: absolute; bottom: -50px; left: -20%; width: 140%; 
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
+        .h1 { height: 200px; background: #33691e; z-index: 5; }
+        .h2 { height: 280px; background: #558b2f; bottom: -80px; left: -10%; z-index: 4; }
+        .h3 { height: 400px; background: #7cb342; bottom: -120px; left: -30%; z-index: 3; }
+        .h4 { height: 500px; background: #9ccc65; bottom: -150px; left: 0%; z-index: 2; }
+
+        /* STATIC TREES */
+        .tree {
+            position: absolute; bottom: 150px; 
+            font-size: 3rem; z-index: 6;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.2));
+            transform-origin: bottom center;
+        }
+        
+        .cloud { 
+            position: absolute; color: rgba(255,255,255,0.85); font-size: 6rem; z-index: 2; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            animation: floatCloud linear infinite;
+        }
+        @keyframes floatCloud { from { left: -300px; } to { left: 120%; } }
+
+        .marker {
+            position: absolute; left: 5%; width: 90%; border-bottom: 2px dashed rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.95); font-family: var(--font-title); font-size: 1.8rem;
+            text-align: right; padding-right: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; pointer-events: none;
+            display: none; 
+            flex-direction: column; justify-content: space-between;
+        }
+
+        .hud-top {
+            padding: 20px; display: flex; justify-content: space-between; align-items: flex-start;
+            pointer-events: auto;
+        }
+        
+        .badge-container { display: flex; gap: 15px; }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.9); padding: 8px 20px; border-radius: 50px;
+            font-family: var(--font-title); font-size: 1.5rem; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px;
+            color: #558b2f; border: 3px solid #33691e; transition: all 0.2s;
+        }
+        .timer-badge { color: #d32f2f; border-color: #c62828; }
+
+        /* URGENT SHAKE ANIMATION */
+        .shake-urgent {
+            animation: shakeUrgent 0.2s infinite;
+            background: #ffcdd2; /* Reddish tint */
+            transform-origin: center;
+        }
+        @keyframes shakeUrgent {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .btn-round {
+            width: 50px; height: 50px; border-radius: 50%; border: 3px solid #fff;
+            background: rgba(0,0,0,0.2); color: white; font-size: 1.2rem; cursor: pointer;
+            backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center;
+            transition: 0.2s;
+        }
+        .btn-round:hover { background: white; color: #333; }
+
+        /* --- QTE RING --- */
+        #qte-wrapper {
+            position: absolute; width: 160px; height: 160px;
+            top: 50%; left: 50%; z-index: 40; pointer-events: auto;
+            display: none; justify-content: center; align-items: center;
+        }
+        #qte-wrapper.active { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from {transform: scale(0);} to {transform: scale(1);} }
+
+        .qte-track {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%; border: 14px solid var(--gray-track);
+            z-index: 1; box-sizing: border-box;
+        }
+
+        .qte-zone {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(transparent 0deg, var(--hit-zone) 0deg, transparent 0deg); 
+            -webkit-mask: radial-gradient(transparent 58%, black 60%);
+            mask: radial-gradient(transparent 58%, black 60%);
+            z-index: 2;
+        }
+
+        .qte-needle-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 3; pointer-events: none;
+        }
+
+        .qte-indicator-ball {
+            position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+            width: 24px; height: 24px; background: white; border-radius: 50%;
+            box-shadow: 0 0 10px black;
+        }
+
+        .qte-icon {
+            width: 100px; height: 100px; border-radius: 50%; 
+            font-size: 3.5rem; display: flex; justify-content: center; align-items: center;
+            z-index: 4; position: relative; color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3); border: 5px solid white;
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .qte-icon:active { transform: scale(0.9); }
+
+        .icon-sun { background: #fbc02d; text-shadow: 2px 2px 0 #f57f17; }
+        .icon-water { background: #039be5; text-shadow: 2px 2px 0 #01579b; }
+        .icon-air { background: #78909c; text-shadow: 2px 2px 0 #37474f; }
+        
+        /* PEST IS RED AND SCARY */
+        .icon-pest { 
+            background: #d32f2f; 
+            text-shadow: 2px 2px 0 #b71c1c; 
+            border-color: #ff8a80;
+            animation: shake 0.5s infinite;
+        } 
+        @keyframes shake { 0% {transform: translate(1px, 1px) rotate(0deg);} 10% {transform: translate(-1px, -2px) rotate(-1deg);} 20% {transform: translate(-3px, 0px) rotate(1deg);} 30% {transform: translate(3px, 2px) rotate(0deg);} 40% {transform: translate(1px, -1px) rotate(1deg);} 50% {transform: translate(-1px, 2px) rotate(-1deg);} 60% {transform: translate(-3px, 1px) rotate(0deg);} 70% {transform: translate(3px, 1px) rotate(-1deg);} 80% {transform: translate(-1px, -1px) rotate(1deg);} 90% {transform: translate(1px, 2px) rotate(0deg);} 100% {transform: translate(1px, -2px) rotate(-1deg);} }
+
+        .feedback-text {
+            position: absolute; font-family: var(--font-title); font-size: 3rem;
+            color: white; text-shadow: 2px 2px 0 black; text-align: center; width: 200px;
+            pointer-events: none; animation: floatUp 0.8s forwards; z-index: 100;
+            left: 50%; margin-left: -100px; top: 60%;
+        }
+        @keyframes floatUp { 0% {transform: translateY(0) scale(0.5); opacity:0;} 100% {transform: translateY(-80px) scale(1.2); opacity:0;} }
+
+        /* --- BIG CENTER MESSAGE --- */
+        #big-msg {
+            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
+            font-family: var(--font-title); font-size: 4rem;
+            background: white; padding: 15px 50px; border-radius: 50px;
+            border: 6px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 80; display: none; align-items: center; gap: 20px;
+            animation: dropIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            white-space: nowrap;
+        }
+        @keyframes dropIn { from {transform: translate(-50%, -100%); opacity:0;} to {transform: translate(-50%, 0); opacity:1;} }
+
+        /* --- EPIC START SCREEN --- */
+        #start-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%; z-index:60;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s; pointer-events: auto;
+            backdrop-filter: blur(3px);
+        }
+
+        .start-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            padding: 50px 70px;
+            border-radius: 50px;
+            border: 5px solid white;
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.2),
+                0 0 0 10px rgba(255,255,255,0.3); 
+            text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+            animation: floatCard 4s ease-in-out infinite;
+        }
+        @keyframes floatCard { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
+        
+        .logo-container {
+            position: relative; width: 140px; height: 140px; margin-bottom: 15px;
+            animation: bounceLogo 2s infinite ease-in-out;
+        }
+        @keyframes bounceLogo { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.1);} }
+
+        .logo-sun {
+            font-size: 8rem; color: #fbc02d; 
+            position: absolute; top: 0; left: 0; width: 100%; text-align: center;
+            filter: drop-shadow(0 0 20px rgba(253, 216, 53, 0.6));
+            animation: spinSlow 12s linear infinite;
+        }
+        .logo-plant {
+            font-size: 5.5rem; color: #558b2f;
+            position: absolute; bottom: 5px; left: 0; width: 100%; text-align: center;
+            filter: drop-shadow(0 4px 0 white);
+        }
+        @keyframes spinSlow { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
+
+        .title-main { 
+            font-family: var(--font-title); font-size: 5.5rem; color: #7cb342; 
+            text-shadow: 3px 3px 0 #33691e, 0 0 20px white; 
+            line-height: 0.9; margin-bottom: 30px; margin-top: 10px;
+        }
+
+        .btn-play {
+            background: linear-gradient(to bottom, #76ff03, #64dd17); 
+            color: #1b5e20; padding: 20px 90px; font-size: 3rem;
+            border: 5px solid white; border-radius: 70px; font-family: var(--font-title); cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25); 
+            margin-bottom: 25px;
+            animation: pulseBtn 1.5s infinite;
+            transition: transform 0.2s;
+            text-shadow: 0 2px 0 rgba(255,255,255,0.4);
+        }
+        .btn-play:hover { transform: scale(1.1); animation: none; filter: brightness(1.1); }
+        @keyframes pulseBtn { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+
+        .btn-info {
+            background: #e1f5fe; color: #0277bd; font-size: 1.3rem;
+            padding: 12px 40px; border-radius: 40px; border: 3px solid #0277bd;
+            font-weight: 800; cursor: pointer; font-family: var(--font-body);
+            transition: all 0.2s; letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .btn-info:hover { background: #0277bd; color: white; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+
+        /* --- MODALS --- */
+        .modal {
+            display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index:70;
+            justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .modal.show { opacity: 1; }
+        
+        .modal-box {
+            background: white; padding: 40px; border-radius: 20px; text-align: center;
+            border: 5px solid #7cb342; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%; max-width: 450px;
+            /* MOBILE FIX: Scrollable modal if content is long */
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-h { font-family: var(--font-title); font-size: 2.2rem; color: #33691e; line-height: 1; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .info-list { text-align: left; margin-bottom: 20px; color: #555; }
+        .info-li { margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4; display: flex; align-items: flex-start;}
+        .info-li i { width: 35px; text-align: center; margin-right: 15px; font-size: 1.3rem; margin-top: 2px;}
+
+        /* =========================================
+           MOBILE OPTIMIZATIONS (CSS Only)
+           ========================================= */
+        @media (max-width: 900px) {
+            /* Start Card sizing */
+            .start-card {
+                padding: 30px 20px;
+                width: 85%;
+                max-width: 350px;
+            }
+            .logo-container { width: 100px; height: 100px; }
+            .logo-sun { font-size: 6rem; }
+            .logo-plant { font-size: 4rem; }
+            
+            .title-main { font-size: 3.5rem; margin-bottom: 20px; }
+            .btn-play { font-size: 2rem; padding: 15px 50px; }
+            .btn-info { font-size: 1rem; padding: 10px 25px; }
+
+            /* HUD tweaks */
+            .hud-top {
+                padding: 10px;
+                /* Stack badges slightly or reduce gap */
+                gap: 10px;
+            }
+            .badge {
+                font-size: 1rem;
+                padding: 5px 15px;
+                border-width: 2px;
+            }
+            .btn-round {
+                width: 40px; height: 40px; font-size: 1rem;
+            }
+
+            /* QTE Ring scaling */
+            #qte-wrapper {
+                /* Slightly smaller ring on mobile */
+                transform: translate(-50%, -50%) scale(0.9);
+                left: 50%; /* Ensure centering */
+                top: 50%;
+            }
+
+            /* Feedback text */
+            .feedback-text { font-size: 2rem; }
+
+            /* Big Message (Amazing!) */
+            #big-msg { 
+                font-size: 2.5rem; 
+                padding: 10px 30px; 
+                border-width: 4px; 
+            }
+
+            /* Modal adjustments */
+            .modal-box { padding: 25px; }
+            .modal-h { font-size: 1.5rem; }
+            .info-li { font-size: 0.9rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-stage">
+        
+        <div id="stars-container"></div>
+        <div class="actual-sun"></div>
+
+        <div id="world-layer">
+            <div class="hill-layer h4"></div>
+            <div class="hill-layer h3"></div>
+            <div class="hill-layer h2"></div>
+            <div class="hill-layer h1"></div>
+
+            <div class="tree" style="left: 10%; font-size: 3.5rem;">🌲</div>
+            <div class="tree" style="left: 25%; font-size: 2.2rem;">🌲</div>
+            <div class="tree" style="left: 70%; font-size: 4rem;">🌲</div>
+            <div class="tree" style="left: 85%; font-size: 2.8rem;">🌲</div>
+            <div class="tree" style="left: 50%; font-size: 2rem;">🌲</div>
+        </div>
+
+        <canvas id="game-canvas"></canvas>
+
+        <div id="qte-wrapper">
+            <div class="qte-track"></div>
+            <div id="qte-zone" class="qte-zone"></div>
+            <div id="qte-needle" class="qte-needle-container">
+                <div class="qte-indicator-ball"></div>
+            </div>
+            <div id="qte-btn" class="qte-icon icon-sun">
+                <i id="qte-symbol" class="fa-solid fa-sun"></i>
+            </div>
+        </div>
+
+        <div id="ui-layer">
+            <div class="hud-top">
+                <div class="badge-container">
+                    <div class="badge">
+                        <i class="fa-solid fa-ruler-vertical"></i> <span id="height-val">0</span> cm
+                    </div>
+                    <div id="timer-badge-el" class="badge timer-badge">
+                        <i class="fa-solid fa-stopwatch"></i> <span id="timer-val">60</span>s
+                    </div>
+                </div>
+                
+                <div class="badge-container">
+                    <button class="btn-round" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
+                    <button class="btn-round" onclick="triggerReset()" style="background:#ef5350; border-color:#ef5350"><i class="fa-solid fa-rotate-left"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="big-msg">
+            <i class="fa-solid fa-trophy"></i> AMAZING!
+        </div>
+
+        <div id="start-overlay">
+            <div class="start-card">
+                <div class="logo-container">
+                    <div class="logo-sun"><i class="fa-solid fa-sun"></i></div>
+                    <div class="logo-plant"><i class="fa-solid fa-seedling"></i></div>
+                </div>
+                <div class="title-main">SOLAR<br>ASCENT</div>
+                <button class="btn-play" onclick="startGame()">PLAY</button>
+                <button class="btn-info" onclick="showEdu()"><i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE</button>
+            </div>
+        </div>
+
+        <div id="edu-modal" class="modal">
+            <div class="modal-box" style="border-color: #558b2f;">
+                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> How is this educational?</div>
+                <div class="info-list">
+                    <div class="info-li"><i class="fa-solid fa-seedling"></i> <div>This game simulates how plants grow!</div></div>
+                    <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>Light:</strong> Provides energy.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-droplet" style="color:#039be5"></i> <div><strong>Water:</strong> Travels up the stem.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-wind" style="color:#78909c"></i> <div><strong>CO2:</strong> Taken from the air.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-bug" style="color:#d32f2f"></i> <div><strong>Pests:</strong> DO NOT CLICK! Wait for them to leave!</div></div>
+                </div>
+                <button class="btn-info" style="background:#558b2f; color:white; border-color:#558b2f" onclick="closeModals()">GOT IT</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const HEAD_OFFSET = 350; 
+        const TARGET_HEIGHT_CM = 500;
+        const CM_PER_HIT = 20; 
+        const PIXELS_PER_CM = 5; 
+        
+        // Audio
+        const AudioSys = {
+            ctx: null, muted: false,
+            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            playTone(freq, type='sine', vol=0.1, dur=0.3) {
+                if(this.muted || !this.ctx) return;
+                const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+                o.type = type; o.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                g.gain.setValueAtTime(vol, this.ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                o.connect(g); g.connect(this.ctx.destination);
+                o.start(); o.stop(this.ctx.currentTime + dur);
+            },
+            tick(urgent) {
+                if(this.muted) return;
+                this.init();
+                if(urgent) {
+                    this.playTone(800, 'triangle', 0.15, 0.1);
+                    setTimeout(() => this.playTone(600, 'triangle', 0.15, 0.1), 100); 
+                } else {
+                    this.playTone(400, 'sine', 0.05, 0.1); 
+                }
+            },
+            hit() { this.init(); this.playTone(880, 'sine', 0.2); setTimeout(()=>this.playTone(1174, 'sine', 0.2), 100); }, 
+            miss() { this.init(); this.playTone(200, 'sawtooth', 0.15); },
+            win() { this.init(); [523, 659, 783, 1046, 1318].forEach((f,i)=>setTimeout(()=>this.playTone(f,'sine', 0.3), i*150)); },
+            lose() { this.init(); this.playTone(150, 'sawtooth', 0.4); setTimeout(()=>this.playTone(100, 'sawtooth', 0.4), 300); }
+        };
+
+        function toggleMute() {
+            AudioSys.muted = !AudioSys.muted;
+            document.getElementById('snd-icon').className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        }
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = canvas.width = document.body.clientWidth;
+            height = canvas.height = document.body.clientHeight;
+        }
+        window.addEventListener('resize', resize); 
+
+        // State
+        let gameActive = false;
+        let isIntro = false;
+        let isRewinding = false;
+        let mainLoopId; 
+
+        let flowerIntroY = 0; 
+        let logicHeightCm = 0;
+        let visualHeightCm = 0;
+        
+        let timeLeft = 60;
+        let globalTimerInt;
+        
+        let currentTargetType = null;
+        let targetStartAngle = 0;
+        let targetEndAngle = 0;
+        let needleAngle = 0;
+        
+        // PEST LOGIC
+        let pestTimeout = null;
+
+        const NEEDLE_SPEED_CONST = 3.0; 
+
+        const SKY_STOPS = [
+            { pct: 0,  c1: [66, 165, 245], c2: [144, 202, 249] }, 
+            { pct: 0.4, c1: [255, 167, 38], c2: [255, 204, 128] }, 
+            { pct: 0.7, c1: [106, 27, 154], c2: [142, 36, 170]  }, 
+            { pct: 1.0, c1: [0, 0, 0],     c2: [10, 10, 30]     }  
+        ];
+
+        const EDU_TEXT = {
+            sun: ["ENERGY!", "PHOTON!", "LIGHT!", "SYNTHESIS!", "WARMTH!"],
+            water: ["H2O!", "XYLEM!", "DRINK!", "ROOTS!", "ABSORB!"],
+            air: ["CO2!", "CARBON!", "STOMATA!", "BREATHE!", "GAS!"],
+            pest: ["SQUASH!", "GOTCHA!", "SAVED!", "PROTECT!", "SAFE!"]
+        };
+
+        /* --- INITIALIZATION --- */
+        function initWorld() {
+            // STARS
+            const layer = document.getElementById('stars-container');
+            layer.innerHTML = '';
+            for(let i=0; i<300; i++) {
+                let s = document.createElement('div');
+                s.className = 'star';
+                s.style.left = Math.random()*100 + '%';
+                s.style.top = Math.random()*100 + '%';
+                let size = Math.random()*3 + 1;
+                s.style.width = size + 'px'; s.style.height = size + 'px';
+                s.style.animationDuration = (Math.random()*3+1)+'s';
+                layer.appendChild(s);
+            }
+            
+            // WORLD
+            const wLayer = document.getElementById('world-layer');
+            wLayer.innerHTML = `
+                <div class="hill-layer h4"></div>
+                <div class="hill-layer h3"></div>
+                <div class="hill-layer h2"></div>
+                <div class="hill-layer h1"></div>
+            `;
+            
+            wLayer.innerHTML += `
+                <div class="tree" style="left: 10%; font-size: 3.5rem;">🌲</div>
+                <div class="tree" style="left: 25%; font-size: 2.2rem;">🌲</div>
+                <div class="tree" style="left: 70%; font-size: 4rem;">🌲</div>
+                <div class="tree" style="left: 85%; font-size: 2.8rem;">🌲</div>
+                <div class="tree" style="left: 50%; font-size: 2rem;">🌲</div>
+            `;
+
+            const groundStart = HEAD_OFFSET; 
+            for(let i=100; i<=500; i+=100) {
+                let m = document.createElement('div');
+                m.className = 'marker';
+                let pixelHeight = groundStart + (i * PIXELS_PER_CM);
+                m.style.bottom = pixelHeight + 'px'; 
+                m.innerText = i + " cm";
+                wLayer.appendChild(m);
+                spawnCloud(wLayer, pixelHeight);
+                spawnCloud(wLayer, pixelHeight + 80);
+            }
+        }
+
+        function spawnCloud(layer, bottomPx) {
+            let c = document.createElement('div');
+            c.className = 'cloud';
+            c.style.bottom = (bottomPx + Math.random()*200 - 100) + 'px';
+            c.style.left = -200 + 'px';
+            c.innerText = '☁';
+            c.style.animationDuration = (35 + Math.random()*20) + 's';
+            c.style.animationDelay = (Math.random() * -20) + 's';
+            layer.appendChild(c);
+        }
+
+        /* --- PHYSICS --- */
+        function updateSkyAndWorld() {
+            let speed = (gameActive) ? 0.05 : 0.04;
+            
+            visualHeightCm += (logicHeightCm - visualHeightCm) * speed;
+            if(Math.abs(logicHeightCm - visualHeightCm) < 0.05) visualHeightCm = logicHeightCm;
+
+            const scrollY = visualHeightCm * PIXELS_PER_CM;
+            document.getElementById('world-layer').style.transform = `translateY(${scrollY}px)`;
+            document.getElementById('height-val').innerText = Math.floor(visualHeightCm);
+
+            const progress = Math.min(1, Math.max(0, visualHeightCm / TARGET_HEIGHT_CM));
+            let startStop = SKY_STOPS[0];
+            let endStop = SKY_STOPS[SKY_STOPS.length-1];
+            
+            for(let i=0; i<SKY_STOPS.length-1; i++) {
+                if(progress >= SKY_STOPS[i].pct && progress <= SKY_STOPS[i+1].pct) {
+                    startStop = SKY_STOPS[i];
+                    endStop = SKY_STOPS[i+1];
+                    break;
+                }
+            }
+
+            const range = endStop.pct - startStop.pct;
+            const localPct = (progress - startStop.pct) / range;
+            const c1 = interpolateColor(startStop.c1, endStop.c1, localPct);
+            const c2 = interpolateColor(startStop.c2, endStop.c2, localPct);
+            document.body.style.background = `linear-gradient(to bottom, rgb(${c1[0]},${c1[1]},${c1[2]}), rgb(${c2[0]},${c2[1]},${c2[2]}))`;
+
+            if(progress > 0.6) {
+                document.getElementById('stars-container').style.opacity = (progress - 0.6) * 2.5;
+            } else {
+                document.getElementById('stars-container').style.opacity = 0;
+            }
+        }
+
+        function interpolateColor(c1, c2, factor) {
+            return [
+                Math.round(c1[0] + factor * (c2[0] - c1[0])),
+                Math.round(c1[1] + factor * (c2[1] - c1[1])),
+                Math.round(c1[2] + factor * (c2[2] - c1[2]))
+            ];
+        }
+
+        /* --- GAME FLOW --- */
+        function startGame() {
+            AudioSys.init();
+            
+            if(mainLoopId) cancelAnimationFrame(mainLoopId);
+
+            const ov = document.getElementById('start-overlay');
+            ov.style.opacity = '0';
+            setTimeout(() => ov.style.display = 'none', 500);
+            
+            resize();
+            isIntro = true;
+            isRewinding = false;
+            flowerIntroY = height + 300; 
+            const targetY = height - HEAD_OFFSET;
+
+            const introInterval = setInterval(() => {
+                flowerIntroY -= 15;
+                if(flowerIntroY <= targetY) {
+                    flowerIntroY = targetY;
+                    clearInterval(introInterval);
+                    isIntro = false;
+                    gameActive = true;
+                    document.getElementById('ui-layer').style.display = 'flex';
+                    pickNewTarget();
+                    startTimer();
+                }
+            }, 16);
+
+            logicHeightCm = 0;
+            visualHeightCm = 0;
+            timeLeft = 60;
+            needleAngle = 0; 
+            
+            mainLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function triggerReset() {
+            closeModals();
+            document.getElementById('ui-layer').style.display = 'none';
+            document.getElementById('qte-wrapper').style.display = 'none';
+            document.getElementById('big-msg').style.display = 'none'; 
+            document.getElementById('timer-badge-el').classList.remove('shake-urgent'); 
+
+            gameActive = false;
+            clearInterval(globalTimerInt);
+            if(pestTimeout) clearTimeout(pestTimeout);
+            
+            logicHeightCm = 0; 
+            isRewinding = true;
+        }
+
+        function startTimer() {
+            clearInterval(globalTimerInt);
+            const timerBadge = document.getElementById('timer-badge-el');
+            document.getElementById('timer-val').innerText = timeLeft;
+            
+            // Clean state
+            timerBadge.classList.remove('shake-urgent');
+
+            globalTimerInt = setInterval(() => {
+                if(!gameActive) return;
+                
+                timeLeft--;
+                document.getElementById('timer-val').innerText = timeLeft;
+                
+                const isUrgent = timeLeft <= 10;
+                
+                AudioSys.tick(isUrgent);
+
+                if(isUrgent) {
+                    timerBadge.classList.add('shake-urgent');
+                } else {
+                    timerBadge.classList.remove('shake-urgent');
+                }
+
+                if(timeLeft <= 0) endGame(false);
+            }, 1000);
+        }
+
+        /* --- MINIGAME --- */
+        function pickNewTarget() {
+            if (!gameActive) return;
+            
+            if(pestTimeout) clearTimeout(pestTimeout);
+
+            const rand = Math.random();
+            // 20% Chance for PEST (Don't Click)
+            if(rand < 0.2) {
+                currentTargetType = 'pest';
+                // Wait for 1.5s then leave
+                pestTimeout = setTimeout(() => {
+                    if(gameActive) {
+                        showFeedback("SAFE!", "#76ff03");
+                        pickNewTarget();
+                    }
+                }, 1500);
+            } else {
+                const types = ['sun', 'water', 'air'];
+                currentTargetType = types[Math.floor(Math.random() * 3)];
+            }
+
+            const zoneSize = 60; 
+            targetStartAngle = 45 + Math.random() * (270 - zoneSize);
+            targetEndAngle = targetStartAngle + zoneSize;
+            
+            needleAngle = 0;
+            updateMinigameUI();
+        }
+
+        function updateMinigameUI() {
+            if (!gameActive || !currentTargetType) return;
+            const wrap = document.getElementById('qte-wrapper');
+            const zone = document.getElementById('qte-zone');
+            const btn = document.getElementById('qte-btn');
+            const sym = document.getElementById('qte-symbol');
+            
+            wrap.style.display = 'flex';
+
+            const offsetX = (Math.random() - 0.5) * 200;
+            const offsetY = (Math.random() - 0.5) * 150;
+            wrap.style.left = `calc(50% + ${offsetX}px)`;
+            wrap.style.top = `calc(40% + ${offsetY}px)`;
+            
+            wrap.classList.remove('active');
+            void wrap.offsetWidth;
+            wrap.classList.add('active');
+
+            btn.className = `qte-icon icon-${currentTargetType}`;
+            
+            // Icon Logic
+            if(currentTargetType === 'sun') sym.className = 'fa-solid fa-sun';
+            else if(currentTargetType === 'water') sym.className = 'fa-solid fa-droplet';
+            else if(currentTargetType === 'air') sym.className = 'fa-solid fa-wind';
+            else sym.className = 'fa-solid fa-bug'; // PEST
+
+            // Color Logic
+            let zoneColor;
+            if(currentTargetType === 'pest') zoneColor = getComputedStyle(document.documentElement).getPropertyValue('--hit-pest').trim();
+            else zoneColor = getComputedStyle(document.documentElement).getPropertyValue('--hit-zone').trim();
+
+            zone.style.background = `conic-gradient(transparent ${targetStartAngle}deg, ${zoneColor} ${targetStartAngle}deg ${targetEndAngle}deg, transparent ${targetEndAngle}deg)`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') checkHit(e);
+        });
+        document.getElementById('qte-btn').addEventListener('mousedown', checkHit);
+
+        function checkHit(e) {
+            if (!gameActive) return;
+            if (e && e.preventDefault) e.preventDefault();
+            
+            if(currentTargetType === 'pest') {
+                // If you click a pest AT ALL, you fail immediately.
+                fail();
+                return;
+            }
+
+            const hit = (needleAngle >= targetStartAngle - 10 && needleAngle <= targetEndAngle + 10);
+            if (hit) success();
+            else fail();
+        }
+
+        function success() {
+            if(pestTimeout) clearTimeout(pestTimeout);
+            AudioSys.hit();
+            
+            const wordList = EDU_TEXT[currentTargetType] || ["NICE!"];
+            const word = wordList[Math.floor(Math.random() * wordList.length)];
+            
+            showFeedback(word, "#76ff03");
+            logicHeightCm += CM_PER_HIT; 
+            
+            if (logicHeightCm >= TARGET_HEIGHT_CM) {
+                endGame(true);
+            } else {
+                pickNewTarget();
+            }
+        }
+
+        function fail() {
+            if(pestTimeout) clearTimeout(pestTimeout);
+            AudioSys.miss();
+            
+            if(currentTargetType === 'pest') {
+                showFeedback("OUCH!", "#ff1744");
+                // Penalty for biting
+                if(logicHeightCm > 0) logicHeightCm = Math.max(0, logicHeightCm - (CM_PER_HIT));
+            } else {
+                showFeedback("MISS!", "#ff1744");
+                if(logicHeightCm > 0) logicHeightCm = Math.max(0, logicHeightCm - CM_PER_HIT);
+            }
+            
+            // Move to next target immediately if failed
+            pickNewTarget();
+        }
+
+        function showFeedback(text, color) {
+            const el = document.createElement('div');
+            el.className = 'feedback-text';
+            el.innerText = text;
+            el.style.position = 'absolute';
+            el.style.left = document.getElementById('qte-wrapper').style.left;
+            el.style.top = document.getElementById('qte-wrapper').style.top;
+            el.style.transform = 'translate(-50%, -100%)';
+            el.style.color = 'white';
+            el.style.fontFamily = 'Chewy';
+            el.style.fontSize = '3rem';
+            el.style.textShadow = `0 0 10px ${color}, 2px 2px 0 black`;
+            el.style.pointerEvents = 'none';
+            el.style.zIndex = 100;
+            el.animate([
+                { opacity: 1, transform: 'translate(-50%, -100%) scale(1)' },
+                { opacity: 0, transform: 'translate(-50%, -200%) scale(1.5)' }
+            ], { duration: 800, fill: 'forwards' });
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function endGame(win) {
+            gameActive = false;
+            clearInterval(globalTimerInt);
+            if(pestTimeout) clearTimeout(pestTimeout);
+            document.getElementById('timer-badge-el').classList.remove('shake-urgent');
+
+            document.getElementById('qte-wrapper').style.display = 'none';
+            document.getElementById('ui-layer').style.display = 'none';
+            
+            const msgEl = document.getElementById('big-msg');
+            
+            if(win) {
+                AudioSys.win();
+                msgEl.innerHTML = '<i class="fa-solid fa-trophy"></i> AMAZING!';
+                msgEl.style.color = '#558b2f';
+                msgEl.style.borderColor = '#33691e';
+            } else {
+                AudioSys.lose();
+                msgEl.innerHTML = '<i class="fa-solid fa-bell"></i> TIME\'S UP!';
+                msgEl.style.color = '#d32f2f';
+                msgEl.style.borderColor = '#b71c1c';
+            }
+            
+            msgEl.style.display = 'flex';
+
+            setTimeout(() => {
+                triggerReset(); 
+            }, 2000);
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, width, height);
+            
+            if(gameActive) {
+                needleAngle += NEEDLE_SPEED_CONST;
+                if (needleAngle >= 360) needleAngle = 0;
+                document.getElementById('qte-needle').style.transform = `rotate(${needleAngle}deg)`;
+            }
+
+            updateSkyAndWorld();
+            drawFlower();
+
+            if(isRewinding && visualHeightCm < 1.0) {
+                isRewinding = false;
+                const startOv = document.getElementById('start-overlay');
+                startOv.style.display = 'flex';
+                setTimeout(() => startOv.style.opacity = '1', 50);
+            }
+
+            mainLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- NEW DRAWING FUNCTIONS ---
+        function drawFlower() {
+            const centerX = width / 2;
+            const headScreenY = (isIntro) ? flowerIntroY : (height - HEAD_OFFSET);
+            
+            // Draw Leaves (REMOVED as requested)
+
+            // Draw Stem
+            const stemGrad = ctx.createLinearGradient(centerX - 20, 0, centerX + 20, 0);
+            stemGrad.addColorStop(0, '#33691e');
+            stemGrad.addColorStop(0.5, '#558b2f');
+            stemGrad.addColorStop(1, '#33691e');
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = stemGrad; 
+
+            ctx.beginPath();
+            
+            let currentY = headScreenY;
+            let currentX = centerX;
+            ctx.moveTo(currentX, currentY);
+
+            let i = 0;
+            while(currentY < height + 100) {
+                const thickness = 35; 
+                const sway = Math.sin(Date.now() * 0.002 + (i * 0.3)) * (5 + i*0.2); 
+                const nextY = currentY + 50; 
+                const nextX = centerX + sway;
+                ctx.lineWidth = thickness;
+                ctx.quadraticCurveTo(currentX, currentY + 25, nextX, nextY);
+                currentX = nextX;
+                currentY = nextY;
+                i++;
+            }
+            ctx.stroke();
+
+            // Draw Improved Head
+            drawHead(centerX, headScreenY);
+        }
+
+        function drawHead(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            // Slight rotation for the whole head
+            ctx.rotate(Math.sin(Date.now()*0.002)*0.05);
+
+            // Calculate dynamic size based on growth
+            // NEW GROWTH LOGIC: Starts at 60, grows aggressively
+            const extraScale = (visualHeightCm / 100) * 25; // 2.5x previous growth rate
+            const petalLen = 60 + extraScale;
+            const centerRad = 55;
+
+            // --- LAYER 1: Back Petals (Darker) ---
+            const count = 20;
+            ctx.fillStyle = '#f9a825'; // Darker Orange/Yellow
+            for(let i=0; i<count; i++) {
+                ctx.save();
+                ctx.rotate((Math.PI*2/count) * i);
+                drawPetal(petalLen, 20); 
+                ctx.restore();
+            }
+
+            // --- LAYER 2: Front Petals (Bright) ---
+            ctx.fillStyle = '#ffeb3b'; // Bright Yellow
+            ctx.rotate((Math.PI/count)); // Offset rotation
+            for(let i=0; i<count; i++) {
+                ctx.save();
+                ctx.rotate((Math.PI*2/count) * i);
+                drawPetal(petalLen * 0.9, 18); 
+                ctx.restore();
+            }
+
+            // --- CENTER: Fibonacci Spiral (Seeds) ---
+            // Draw brown background circle first
+            ctx.beginPath();
+            ctx.arc(0, 0, centerRad, 0, Math.PI*2);
+            ctx.fillStyle = '#3e2723';
+            ctx.fill();
+            ctx.strokeStyle = '#3e2723';
+            ctx.stroke();
+
+            // Draw Seeds
+            ctx.fillStyle = '#5d4037';
+            const seedCount = 150;
+            const goldenAngle = 137.5 * (Math.PI / 180);
+            
+            for (let i = 0; i < seedCount; i++) {
+                // Radius increases with square root of index
+                const r = 4 * Math.sqrt(i);
+                if(r > centerRad - 5) continue; // Keep inside
+                const theta = i * goldenAngle;
+                
+                const seedX = r * Math.cos(theta);
+                const seedY = r * Math.sin(theta);
+                
+                ctx.beginPath();
+                ctx.arc(seedX, seedY, 2.5, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // Helper to draw a nice bezier petal
+        function drawPetal(len, wid) {
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            // Curve out
+            ctx.quadraticCurveTo(wid, len/3, 0, len);
+            // Curve back
+            ctx.quadraticCurveTo(-wid, len/3, 0, 0);
+            ctx.fill();
+            // Subtle center line
+            ctx.strokeStyle = 'rgba(230, 81, 0, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function showEdu() { 
+            const m = document.getElementById('edu-modal');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.add('show'), 10);
+        }
+        function closeModals() { 
+            const em = document.getElementById('edu-modal');
+            em.classList.remove('show');
+            setTimeout(() => {
+                em.style.display = 'none';
+            }, 300);
+        }
+
+        resize();
+        initWorld(); 
+    </script>
+</body>
+</html>
