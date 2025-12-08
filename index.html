@@ -136,20 +136,28 @@
     align-items: center; justify-content: center;
     transition: opacity 0.5s ease;
     cursor: pointer; /* Show it's clickable */
+    padding: 20px; /* Added padding for mobile */
+    text-align: center; /* Center text on mobile */
   }
   .loader-text { 
     font-family: 'Space Grotesk', sans-serif; 
-    font-size: 24px; font-weight: 700;
+    font-size: clamp(20px, 5vw, 24px); /* Responsive font size */
+    font-weight: 700;
     background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     animation: pulse 1s infinite alternate;
+    line-height: 1.4;
   }
+  /* Mobile break utility */
+  .mobile-break { display: none; }
+  
   .loader-subtext {
     font-family: 'Inter', sans-serif;
     color: var(--text-muted);
     font-size: 14px;
     opacity: 0.8;
     animation: pulse 2s infinite alternate-reverse;
+    max-width: 90%;
   }
   @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
 
@@ -431,6 +439,7 @@
     .preset { width: 48px; height: 48px; }
     .card { padding: 12px; }
     .modal iframe { height: 60vh; }
+    .mobile-break { display: block; } /* Show break on mobile */
   }
 </style>
 </head>
@@ -844,10 +853,11 @@ function setBg(url){
   }, 200);
 }
 
-// Restore Preset
-const savedPreset = localStorage.getItem('bgPreset');
-if(savedPreset !== null && presetInfo[savedPreset]){ setBg(presetInfo[savedPreset].url); }
-else { setBg(presetInfo[0].url); }
+// Randomize BG on first load
+function setRandomBg() {
+    const randomIdx = Math.floor(Math.random() * presetInfo.length);
+    setBg(presetInfo[randomIdx].url);
+}
 
 // Favorites
 function getFavs(){ try { return JSON.parse(localStorage.getItem('wf_favs_v2')||'[]') } catch(e){ return [] } }
@@ -970,8 +980,11 @@ function setLoaderReady() {
   
   if (!loader || loader.style.display === 'none') return;
   
-  // Update text
-  text.textContent = "loading is done click anywhere! (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧";
+  // Random Background Set
+  setRandomBg();
+
+  // Update text with mobile break
+  text.innerHTML = 'loading is done click anywhere!<br class="mobile-break"> (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧';
   sub.textContent = "click to unleash the chaos";
   
   // Add one-time click listener to start everything
