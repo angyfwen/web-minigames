@@ -135,6 +135,7 @@
     display: flex; flex-direction: column; gap: 16px;
     align-items: center; justify-content: center;
     transition: opacity 0.5s ease;
+    cursor: pointer; /* Show it's clickable */
   }
   .loader-text { 
     font-family: 'Space Grotesk', sans-serif; 
@@ -602,6 +603,8 @@ const sfx = {
 /* MUSIC ENGINE - FIXED PATHS for GitHub */
 const BG_MUSIC_URL = "audios/ac_3pm.mp3";
 const JOJO_SFX_URL = "audios/oraoraora.mp3";
+// Jojo background gif
+const JOJO_BG_GIF = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZobzNlampmZGM1dHJ5cXNhbThkNTVibzRsZmdkdTliOWs1NjNvbCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TyFdAtfZBODNC/giphy.gif";
 
 let bgAudio = new Audio(BG_MUSIC_URL);
 bgAudio.loop = true;
@@ -694,32 +697,37 @@ function stopJojoMusic() {
   }
 }
 
-// Auto-play logic
-function tryAutoPlay() {
-    const btn = document.getElementById('music-toggle');
-    const promise = bgAudio.play();
-    
-    if(promise !== undefined){
-        promise.then(() => {
-            isBgPlaying = true;
-            btn.classList.add('active');
-            btn.style.opacity = "1";
-        }).catch(error => {
-            // Autoplay blocked or file missing
-            console.log("Autoplay prevented:", error);
-            document.addEventListener('click', () => {
-                if(!isBgPlaying && !document.body.classList.contains('chaos-mode')) {
-                    bgAudio.play().then(() => {
-                      isBgPlaying = true;
-                      btn.classList.add('active');
-                      btn.style.opacity = "1";
-                      btn.innerHTML = "🎵";
-                    }).catch(e => {});
-                }
-            }, {once:true});
-        });
+// Search
+document.getElementById('search').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  
+  // Easter egg: Trigger chaos if 'jojo' is typed
+  if (q === 'jojo') {
+    if (!document.body.classList.contains('chaos-mode')) {
+      document.body.classList.add('chaos-mode');
+      playJojoMusic(); // Play music!
+      setBg(JOJO_BG_GIF); // Set new BG
     }
-}
+  } else {
+    // Only stop chaos if it was previously active
+    if (document.body.classList.contains('chaos-mode')) {
+      document.body.classList.remove('chaos-mode');
+      stopJojoMusic(); // Stop music!
+      // Restore original BG
+      const savedPreset = localStorage.getItem('bgPreset');
+      if(savedPreset !== null && presetInfo[savedPreset]){
+          setBg(presetInfo[savedPreset].url);
+      } else {
+          setBg(presetInfo[0].url);
+      }
+    }
+  }
+
+  document.querySelectorAll('.card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? 'flex' : 'none';
+  });
+});
 
 // Initialize audio on first interaction
 document.addEventListener('click', () => sfx.init(), {once:true});
@@ -841,30 +849,6 @@ const savedPreset = localStorage.getItem('bgPreset');
 if(savedPreset !== null && presetInfo[savedPreset]){ setBg(presetInfo[savedPreset].url); }
 else { setBg(presetInfo[0].url); }
 
-// Search
-document.getElementById('search').addEventListener('input', (e) => {
-  const q = e.target.value.toLowerCase();
-  
-  // Easter egg: Trigger chaos if 'jojo' is typed
-  if (q === 'jojo') {
-    if (!document.body.classList.contains('chaos-mode')) {
-      document.body.classList.add('chaos-mode');
-      playJojoMusic(); // Play music!
-    }
-  } else {
-    // Only stop chaos if it was previously active
-    if (document.body.classList.contains('chaos-mode')) {
-      document.body.classList.remove('chaos-mode');
-      stopJojoMusic(); // Stop music!
-    }
-  }
-
-  document.querySelectorAll('.card').forEach(card => {
-    const text = card.textContent.toLowerCase();
-    card.style.display = text.includes(q) ? 'flex' : 'none';
-  });
-});
-
 // Favorites
 function getFavs(){ try { return JSON.parse(localStorage.getItem('wf_favs_v2')||'[]') } catch(e){ return [] } }
 function isFav(id){ return getFavs().includes(id) }
@@ -979,25 +963,43 @@ const loadingJokes = [
 ];
 document.getElementById('loader-subtext').textContent = loadingJokes[Math.floor(Math.random()*loadingJokes.length)];
 
-function removeLoader() {
+function setLoaderReady() {
   const loader = document.getElementById('loader');
+  const text = loader.querySelector('.loader-text');
+  const sub = document.getElementById('loader-subtext');
+  
   if (!loader || loader.style.display === 'none') return;
   
-  loader.style.opacity = '0';
-  setTimeout(() => {
-      loader.style.display = 'none';
-      tryAutoPlay();
-  }, 500);
+  // Update text
+  text.textContent = "loading is done click anywhere! (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧";
+  sub.textContent = "click to unleash the chaos";
+  
+  // Add one-time click listener to start everything
+  document.addEventListener('click', () => {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+          loader.style.display = 'none';
+          // Since we are inside a click event, we can play audio directly!
+          const btn = document.getElementById('music-toggle');
+          if(!isBgPlaying && !document.body.classList.contains('chaos-mode')) {
+             bgAudio.play().then(() => {
+                isBgPlaying = true;
+                btn.classList.add('active');
+                btn.style.opacity = "1";
+             }).catch(e => console.log(e));
+          }
+      }, 500);
+  }, {once: true});
 }
 
 // Option A: When everything is ready (normal behavior)
 window.addEventListener('load', () => {
   // Wait just a tiny bit (100ms) for smoothness, then vanish
-  setTimeout(removeLoader, 100); 
+  setTimeout(setLoaderReady, 100); 
 });
 
 // Option B: Safety switch (force remove after 3s if internet is slow)
-setTimeout(removeLoader, 3000);
+setTimeout(setLoaderReady, 3000);
 </script>
 </body>
 </html>
