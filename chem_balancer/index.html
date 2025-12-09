@@ -320,13 +320,14 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                /* Apply scaling and slight translation for center balancing */
-                transform: scale(0.80) translateY(15px); /* Scaled to 80% */
+                /* 🚂 CRITICAL CHANGE 1: Scale set to 80% */
+                transform: scale(0.80) translateY(15px); 
                 transform-origin: center top; 
                 height: 100vh;
                 min-height: 100vh;
                 padding: 0; 
-                overflow: hidden; /* DONT SCROLL */
+                /* 🚂 CRITICAL CHANGE 2: No scrolling on the main active screen */
+                overflow: hidden !important; 
             }
 
             /* Resetting element heights/margins for the transformed screen */
@@ -359,7 +360,7 @@
                 padding: 8px 6px;
                 gap: 8px;
                 margin-bottom: 0.5rem;
-                flex-wrap: wrap; /* Ensure elements wrap if space is too tight */
+                flex-wrap: wrap; 
             }
             
             /* Reordering mobile header elements for better flow */
