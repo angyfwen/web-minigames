@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Train Linker</title>
+    <title>Magnetic Train</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,15 +335,14 @@
 
             /* GAME LAYOUT */
             .game-wrapper { 
-                width: 95%; 
-                /* 🚂 CRITICAL CHANGE: Increase top/bottom margin for more space */
-                /* Increased margins from 5px to 20px */
-                margin-top: 20px; 
-                margin-bottom: 20px; 
-                /* Recalculate height to accommodate larger margins (20px + 20px = 40px total margin) */
-                /* 100vh - (40px total margin + height of controls + gap) */
-                /* 100vh - 40px - 50px (controls h) - 10px (gap) = 100vh - 100px */
-                height: calc(100vh - 100px); 
+                /* 🚂 CHANGE 1: Made narrower (95% -> 90%) to make containers slightly smaller on screen */
+                width: 90%; 
+                /* 🚂 CHANGE 2: Increased vertical margins for more space from below and up */
+                margin-top: 30px; 
+                margin-bottom: 30px; 
+                /* 🚂 CHANGE 3: Recalculate height based on 30px margins */
+                /* 100vh - (30px top + 30px bottom + 50px controls h + 10px gap) = 100vh - 120px */
+                height: calc(100vh - 120px); 
                 gap: 10px; 
             }
             
@@ -381,8 +380,8 @@
             .train-car::after { right: -15px; width: 25px; height: 12px; top: 40px; }
             .train-car::before { left: -10px; width: 15px; height: 12px; top: 40px; }
 
-            /* CONTROLS (No changes needed here, keeping previous adjustments) */
-            .controls { height: 50px; gap: 8px; margin-bottom: 0; } /* Removed margin-bottom 5px, using wrapper margin instead */
+            /* CONTROLS (Removed redundant margin-bottom) */
+            .controls { height: 50px; gap: 8px; margin-bottom: 0; } 
             .ctrl-btn { font-size: 0.8rem; padding: 0 15px; height: 45px; border-radius: 15px; }
             
             /* MODALS */
