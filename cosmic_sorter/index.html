@@ -686,4 +686,241 @@ presetInfo.forEach((p, i) => {
   btn.innerHTML = `<span aria-hidden="true">${p.emoji}</span>`;
   btn.title = `preset ${i+1}`;
   btn.addEventListener('click', ()=> { 
-    sfx
+    sfx.play('click');
+    setBg(p.url); 
+    localStorage.setItem('bgPreset', i); 
+  });
+  btn.addEventListener('mouseenter', () => sfx.play('hover'));
+  presetRow.appendChild(btn);
+});
+
+/* Render Grid */
+const grid = document.getElementById('games-grid');
+
+games.forEach((g, index) => {
+  const card = document.createElement('div'); 
+  card.className = 'card';
+  card.style.animationDelay = `${index * 0.05}s`;
+
+  card.innerHTML = `
+    <div class="top">
+      <div class="icon-box" aria-hidden="true">${g.icon}</div>
+      <div class="card-info">
+        <h3>${g.title}</h3>
+        <p>${g.desc}</p>
+      </div>
+    </div>
+
+    <div class="thumb-wrap" role="img" aria-label="${g.title} thumbnail">
+      <div class="fallback">
+        <div style="width:24px; opacity:0.5">${g.icon}</div>
+        <small style="font-size:10px; text-transform:uppercase; letter-spacing:1px">No Preview</small>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="play-btn" href="${g.url}" target="_blank" rel="noopener">Play</a>
+      <div class="secondary-actions">
+        <button class="icon-btn preview-btn" title="Preview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+        <button class="icon-btn fav-btn" data-id="${g.id}" title="Favorite">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+        <button class="icon-btn share-btn" data-id="${g.id}" title="Share Link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </button>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+
+  card.addEventListener('mouseenter', () => sfx.play('hover'));
+  const playBtn = card.querySelector('.play-btn');
+  playBtn.addEventListener('mouseenter', (e) => { e.stopPropagation(); sfx.play('hover'); });
+  playBtn.addEventListener('click', () => sfx.play('click'));
+  
+  card.querySelectorAll('.icon-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', (e) => { e.stopPropagation(); sfx.play('hover'); });
+    btn.addEventListener('click', () => sfx.play('click'));
+  });
+
+  const thumbWrap = card.querySelector('.thumb-wrap');
+  const img = new Image();
+  img.src = `https://image.thum.io/get/width/600/crop/800/noanimate/${g.url}`;
+  img.alt = `${g.title} preview`;
+  
+  img.onload = () => {
+    thumbWrap.innerHTML = '';
+    thumbWrap.appendChild(img);
+  };
+
+  card.querySelector('.preview-btn').addEventListener('click', () => openPreview(g.id));
+  thumbWrap.addEventListener('click', () => openPreview(g.id));
+  
+  const favBtn = card.querySelector('.fav-btn');
+  favBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFav(g.id, favBtn); });
+  if(isFav(g.id)) {
+      favBtn.classList.add('hearted');
+      favBtn.querySelector('svg').style.fill = "currentColor";
+  }
+
+  card.querySelector('.share-btn').addEventListener('click', (e) => { e.stopPropagation(); shareGame(g.id); });
+});
+
+/* Logic Utils */
+const bgImg = document.getElementById('bg-image');
+function setBg(url){
+  if(!url){ bgImg.style.opacity = '0'; return; }
+  bgImg.style.opacity = '0';
+  setTimeout(() => {
+    bgImg.src = url;
+    bgImg.onload = () => { bgImg.style.opacity = document.documentElement.classList.contains('light') ? '0.08' : '0.4'; };
+  }, 200);
+}
+
+function setRandomBg() {
+    const randomIdx = Math.floor(Math.random() * presetInfo.length);
+    setBg(presetInfo[randomIdx].url);
+}
+
+function getFavs(){ try { return JSON.parse(localStorage.getItem('wf_favs_v2')||'[]') } catch(e){ return [] } }
+function isFav(id){ return getFavs().includes(id) }
+function toggleFav(id, btn){
+  const arr = getFavs();
+  const i = arr.indexOf(id);
+  const svg = btn.querySelector('svg');
+  if(i === -1) {
+    arr.push(id);
+    btn.classList.add('hearted');
+    svg.style.fill = "currentColor";
+  } else {
+    arr.splice(i,1);
+    btn.classList.remove('hearted');
+    svg.style.fill = "none";
+  }
+  localStorage.setItem('wf_favs_v2', JSON.stringify(arr));
+}
+
+const modal = document.getElementById('modal');
+const iframe = document.getElementById('modal-iframe');
+const spinner = document.getElementById('modal-spinner');
+const externalLink = document.getElementById('modal-external'); 
+
+function openPreview(id){
+  sfx.play('click');
+  const g = games.find(x => x.id === id);
+  if(!g) return;
+  
+  document.getElementById('modal-title').textContent = g.title;
+  externalLink.href = g.url;
+  
+  spinner.style.display = 'block';
+  iframe.src = '';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(() => {
+    iframe.src = g.url;
+    iframe.onload = () => spinner.style.display = 'none';
+  }, 100);
+}
+document.getElementById('modal-close').addEventListener('click', () => {
+  sfx.play('click');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  iframe.src = 'about:blank';
+});
+modal.addEventListener('click', (e) => { if(e.target === modal) document.getElementById('modal-close').click(); });
+
+function shareGame(id){
+  const g = games.find(x => x.id === id);
+  const url = g ? g.url : location.href;
+  
+  if(navigator.share) navigator.share({ title: g ? g.title : id, url });
+  else {
+    navigator.clipboard.writeText(url);
+    alert('Link copied to clipboard!');
+  }
+}
+
+document.getElementById('music-toggle').addEventListener('click', toggleBgMusic);
+
+const modeToggle = document.getElementById('mode-toggle');
+modeToggle.addEventListener('mouseenter', () => sfx.play('hover'));
+modeToggle.addEventListener('click', () => {
+  sfx.play('click');
+  document.documentElement.classList.toggle('light');
+  const isLight = document.documentElement.classList.contains('light');
+  localStorage.setItem('siteMode', isLight ? 'light' : 'dark');
+  modeToggle.textContent = isLight ? '🌞' : '✨';
+  if(bgImg.src) bgImg.style.opacity = isLight ? '0.08' : '0.4';
+});
+if(localStorage.getItem('siteMode') === 'light') {
+  document.documentElement.classList.add('light');
+  modeToggle.textContent = '🌞';
+}
+
+document.getElementById('footer-note').textContent = "this is a FOOTer ;-; • tap emojis to summon cool bg gifs • too sleepy to explain, just click shit and scream • (psst: search 'jojo')";
+
+let lastTrailTime = 0;
+document.addEventListener('mousemove', (e) => {
+  const now = Date.now();
+  if (now - lastTrailTime > 100) { 
+    lastTrailTime = now;
+    const el = document.createElement('div');
+    el.className = 'menacing-trail';
+    el.textContent = 'ゴ';
+    el.style.left = `${e.clientX}px`;
+    el.style.top = `${e.clientY}px`;
+    el.style.transform = `rotate(${Math.random() * 20 - 10}deg)`; 
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+});
+
+const loadingJokes = [
+  "summoning the chaos... ( ﾉ ﾟｰﾟ)ﾉ",
+  "i swear youre getting there just wait plz (´。＿。｀)",
+  "downloading more ram... jk (¬‿¬)",
+  "convincing the browser to cooperate... (ง •_•)ง",
+  "loading pixels one by one... (┬┬﹏┬┬)",
+  "making coffee for the server ☕ ( ´･･)ﾉ(._.`)"
+];
+document.getElementById('loader-subtext').textContent = loadingJokes[Math.floor(Math.random()*loadingJokes.length)];
+
+function setLoaderReady() {
+  const loader = document.getElementById('loader');
+  const text = loader.querySelector('.loader-text');
+  const sub = document.getElementById('loader-subtext');
+  
+  if (!loader || loader.style.display === 'none') return;
+  
+  setRandomBg();
+
+  text.innerHTML = 'loading is done click anywhere!<br class="mobile-break"> (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧';
+  sub.textContent = "click to unleash the chaos";
+  
+  document.addEventListener('click', () => {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+          loader.style.display = 'none';
+          const btn = document.getElementById('music-toggle');
+          if(!isBgPlaying && !document.body.classList.contains('chaos-mode')) {
+             bgAudio.play().then(() => {
+                isBgPlaying = true;
+                btn.classList.add('active');
+                btn.style.opacity = "1";
+             }).catch(e => console.log(e));
+          }
+      }, 500);
+  }, {once: true});
+}
+
+window.addEventListener('load', () => {
+  setTimeout(setLoaderReady, 100); 
+});
+
+setTimeout(setLoaderReady, 3000);
+</script>
+</body>
+</html>
