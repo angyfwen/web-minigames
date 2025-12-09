@@ -304,22 +304,22 @@
         /* --- MOBILE OPTIMIZATION (FRIENDLY PATCH) --- */
         @media (max-width: 768px) {
             
-            /* 🚂 CRITICAL CHANGE: Apply scale and centering to the main screen wrapper */
+            /* 🚂 CRITICAL CHANGE 1: Apply scale and vertical centering to the main screen wrapper */
             .screen.active {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                /* Apply scaling and slight translation for center balancing */
-                transform: scale(0.85) translateY(15px); /* Scaled to 85% */
+                /* Scale to 75% and nudge down */
+                transform: scale(0.75) translateY(70px); 
                 transform-origin: center top; 
                 height: 100vh;
                 min-height: 100vh;
-                padding: 0; /* Remove existing padding */
+                padding: 0; 
             }
 
             body { 
-                overflow: hidden; /* Prevent body scroll, let transforms handle positioning */
+                overflow: hidden; 
                 height: 100vh;
                 display: flex;
                 align-items: center;
@@ -330,7 +330,6 @@
             .cyber-card { 
                 padding: 2rem 1.5rem; 
                 width: 90%;
-                /* Reset transform if any was applied here before */
                 transform: none; 
             }
             .panel-card {
@@ -338,11 +337,10 @@
                 padding: 0.9rem; 
                 border-radius: 16px; 
                 margin: 0 12px;
-                /* Reset transform if any was applied here before */
                 transform: none; 
             }
             
-            h1 { font-size: 2.8rem; } /* Shrink title */
+            h1 { font-size: 2.8rem; } 
             .reactor-core { width: 110px; height: 110px; margin-bottom: 1rem; }
             .reactor-icon { font-size: 3.6rem; }
 
@@ -360,15 +358,15 @@
                 margin-bottom: 0.5rem;
             }
             
-            /* convert the absolute center-badge into a normal flow element on mobile */
+            /* Reorder header elements */
             .center-badge-container {
-                position: static !important;  /* remove absolute positioning */
+                position: static !important;  
                 left: auto; top: auto; transform: none;
                 display: flex;
                 justify-content: center;
                 width: 100%;
-                margin: 6px 0;           /* small vertical spacing */
-                order: 3; /* Push badge below control buttons on small screens */
+                margin: 6px 0;           
+                order: 3; 
             }
             .game-header > div:nth-child(1) { order: 1; }
             .game-header > div:nth-child(3) { order: 2; }
@@ -387,9 +385,17 @@
             
             .btn-check { font-size: 1.1rem; padding: 0.8rem 2rem; max-width: 280px; width: 86%; }
 
-            /* MODAL FIXES (Inherit the 85% scale from the screen wrapper) */
+            /* 🚂 CRITICAL CHANGE 2: Recalculate playground width for 0.75 scale (180 / 0.75 = 240) */
+            .playground {
+                width: 240%; 
+                height: 100%;
+                border: none;
+                border-radius: 0;
+            }
+
+            /* MODAL FIXES (Inherit the 75% scale from the screen wrapper) */
             .modal-box { max-width: 360px; padding: 1.6rem; border-radius: 18px; }
-            .modal { backdrop-filter: none; } /* Blur filter is handled by scale transform better */
+            .modal { backdrop-filter: none; } 
             
             .modal-title { font-size: 1.8rem; }
             .modal-stars { font-size: 2.5rem; margin-bottom: 10px; }
