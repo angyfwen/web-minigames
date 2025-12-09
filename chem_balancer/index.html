@@ -13,14 +13,14 @@
     <style>
         :root {
             /* Neon Cyber Palette */
-            --bg-deep: #020617;       
+            --bg-deep: #020617;        
             --glass-panel: rgba(15, 23, 42, 0.95);
             --glass-border: rgba(6, 182, 212, 0.4);
-            --primary: #06b6d4;       /* Cyan */
-            --secondary: #8b5cf6;     /* Violet */
-            --accent: #f43f5e;        /* Rose */
-            --success: #10b981;       /* Emerald */
-            --gold: #f59e0b;          /* Gold */
+            --primary: #06b6d4;        /* Cyan */
+            --secondary: #8b5cf6;      /* Violet */
+            --accent: #f43f5e;         /* Rose */
+            --success: #10b981;        /* Emerald */
+            --gold: #f59e0b;           /* Gold */
             --text-main: #f8fafc;
         }
 
@@ -81,6 +81,10 @@
             width: 90%;
             overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
+            
+            /* 🚂 DESKTOP SCALE ADJUSTMENT (for consistency if window is resized) */
+            transform: scale(1); 
+            transition: transform 0.3s ease-in-out;
         }
 
         /* Hexagon Pattern Overlay for Start Card */
@@ -299,91 +303,97 @@
 
         /* --- MOBILE OPTIMIZATION (FRIENDLY PATCH) --- */
         @media (max-width: 768px) {
-            body { 
-                /* Allow scrolling on body for mobile if content overflows */
-                overflow-y: auto; 
-                height: auto; 
-                min-height: 100vh;
-                display: block; 
-            }
             
-            .screen { 
-                height: auto; 
-                min-height: 100vh; 
-                padding: 2rem 0;
+            /* 🚂 CRITICAL CHANGE: Apply scale and centering to the main screen wrapper */
+            .screen.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                /* Apply scaling and slight translation for center balancing */
+                transform: scale(0.85) translateY(15px); /* Scaled to 85% */
+                transform-origin: center top; 
+                height: 100vh;
+                min-height: 100vh;
+                padding: 0; /* Remove existing padding */
             }
 
+            body { 
+                overflow: hidden; /* Prevent body scroll, let transforms handle positioning */
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Resetting element heights/margins for the transformed screen */
+            .cyber-card { 
+                padding: 2rem 1.5rem; 
+                width: 90%;
+                /* Reset transform if any was applied here before */
+                transform: none; 
+            }
+            .panel-card {
+                width: 92%; 
+                padding: 0.9rem; 
+                border-radius: 16px; 
+                margin: 0 12px;
+                /* Reset transform if any was applied here before */
+                transform: none; 
+            }
+            
             h1 { font-size: 2.8rem; } /* Shrink title */
-            .reactor-core { width: 120px; height: 120px; }
-            .reactor-icon { font-size: 4rem; }
-            
-            .cyber-card { padding: 2rem 1.5rem; width: 90%; }
-            .panel-card { width: 92%; padding: 1rem; }
-            
-            .equation-area { padding: 1rem 0.5rem; min-height: auto; }
+            .reactor-core { width: 110px; height: 110px; margin-bottom: 1rem; }
+            .reactor-icon { font-size: 3.6rem; }
+
+            .equation-area { padding: 0.8rem; min-height: 110px; }
             .compound-wrapper { padding: 5px; }
             
             .chem-input { width: 45px; height: 45px; font-size: 1.4rem; }
             .comp-label { font-size: 1.4rem; }
             .atom-orb { width: 12px; height: 12px; }
             
-            .game-header { margin-bottom: 0.5rem; }
-            .atom-grid { gap: 0.5rem; }
-            .atom-card { min-width: 80px; padding: 5px; }
+            .game-header { 
+                height: auto;
+                padding: 8px 6px;
+                gap: 8px;
+                margin-bottom: 0.5rem;
+            }
             
-            .btn-check { font-size: 1.1rem; padding: 0.8rem 2rem; width: 90%; }
-
-            /* ---- mobile polish: smaller container + centered level badge ---- */
-            /* tighten up the game panel so it fits comfortably on phones */
-            .panel-card {
-              max-width: 420px;      /* narrower than desktop so side paddings don't overflow */
-              margin: 0 12px;        /* small horizontal margin so it doesn't touch edges */
-              padding: 0.9rem;       /* slightly smaller padding for compactness */
-              border-radius: 16px;   /* a bit less rounded for space economy */
-            }
-
-            /* make the header flow naturally and allow badge to sit centered */
-            .game-header {
-              height: auto;
-              padding: 8px 6px;
-              gap: 8px;
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-            }
-
             /* convert the absolute center-badge into a normal flow element on mobile */
             .center-badge-container {
-              position: static !important;  /* remove absolute positioning */
-              left: auto; top: auto; transform: none;
-              display: flex;
-              justify-content: center;
-              width: 100%;
-              margin: 6px 0;               /* small vertical spacing */
-              pointer-events: none;
+                position: static !important;  /* remove absolute positioning */
+                left: auto; top: auto; transform: none;
+                display: flex;
+                justify-content: center;
+                width: 100%;
+                margin: 6px 0;           /* small vertical spacing */
+                order: 3; /* Push badge below control buttons on small screens */
             }
+            .game-header > div:nth-child(1) { order: 1; }
+            .game-header > div:nth-child(3) { order: 2; }
+
 
             /* make the actual badge a touch-friendly size */
             #level-badge {
-              font-size: 0.85rem;
-              padding: 6px 10px;
+                font-size: 0.85rem;
+                padding: 6px 10px;
             }
 
-            /* reduce large hero/reactor spacing so start-screen and game header don't push content off */
-            .reactor-core { margin-bottom: 1rem; width: 110px; height: 110px; }
-            .reactor-icon { font-size: 3.6rem; }
-
-            /* reduce button icon sizes slightly to keep header compact */
             .btn-icon { width: 40px; height: 40px; font-size: 0.95rem; padding: 0; }
+            
+            .atom-grid { gap: 0.5rem; }
+            .atom-card { min-width: 80px; padding: 5px; }
+            
+            .btn-check { font-size: 1.1rem; padding: 0.8rem 2rem; max-width: 280px; width: 86%; }
 
-            /* slightly reduce min-height of equation area so it doesn't force scrolling */
-            .equation-area { min-height: 110px; padding: 0.8rem; }
-
-            /* keep check button readable but not full-bleed on tiny screens */
-            .btn-check { max-width: 280px; width: 86%; padding: 0.8rem 1.6rem; }
-
-            /* small tweak so the modal box doesn't overflow on tiny screens */
+            /* MODAL FIXES (Inherit the 85% scale from the screen wrapper) */
             .modal-box { max-width: 360px; padding: 1.6rem; border-radius: 18px; }
+            .modal { backdrop-filter: none; } /* Blur filter is handled by scale transform better */
+            
+            .modal-title { font-size: 1.8rem; }
+            .modal-stars { font-size: 2.5rem; margin-bottom: 10px; }
+            .modal-text { font-size: 1rem; margin: 10px 0; }
         }
     </style>
 </head>
