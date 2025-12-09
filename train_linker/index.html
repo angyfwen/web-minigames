@@ -26,7 +26,7 @@
         body {
             font-family: 'Nunito', sans-serif;
             margin: 0;
-            height: 100vh; 
+            height: 100vh; /* standard desktop/non-safari fallback */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -311,6 +311,8 @@
 
         /* --- MOBILE PATCH (SIDE SCROLLER & LAYOUT) --- */
         @media (max-width: 768px) {
+            
+            /* Keep body height fix for iOS Safari */
             body { 
                 position: fixed; 
                 width: 100%; 
@@ -320,7 +322,7 @@
                 background-size: 20px 20px;
             }
             .screen {
-                height: 100vh; 
+                height: 100vh; /* Make sure screens still take up the visible area */
             }
 
             /* START SCREEN FIX: More Space */
@@ -331,64 +333,57 @@
             .menu-buttons { gap: 25px; width: 90%; } 
             .btn-start, .btn-info { font-size: 1.1rem; padding: 12px; }
 
-            /* GAME LAYOUT - Adjusted for more vertical space */
+            /* GAME LAYOUT */
             .game-wrapper { 
-                width: 98%; /* slightly wider */
-                /* 🚨 CRITICAL CHANGE 1: Adjusted calc to give more space for the track */
-                /* reducing the total space taken by top/bottom padding/margins and controls */
-                /* 100vh - 2px (top) - 2px (bottom) - 40px (controls h) - 5px (gap) - 50px (hud h) = 100vh - 99px */
-                height: calc(100vh - 99px); 
-                gap: 5px; /* smaller gap */
-                margin-top: 2px; /* tiny top margin */
-                margin-bottom: 2px; /* tiny bottom margin */
+                width: 95%; 
+                /* 🚂 CRITICAL CHANGE: Increase top/bottom margin for more space */
+                /* Increased margins from 5px to 20px */
+                margin-top: 20px; 
+                margin-bottom: 20px; 
+                /* Recalculate height to accommodate larger margins (20px + 20px = 40px total margin) */
+                /* 100vh - (40px total margin + height of controls + gap) */
+                /* 100vh - 40px - 50px (controls h) - 10px (gap) = 100vh - 100px */
+                height: calc(100vh - 100px); 
+                gap: 10px; 
             }
             
-            /* COMPACT HUD - Made Tighter */
+            /* COMPACT HUD (No changes needed here, keeping previous adjustments) */
             .hud-bar { 
-                /* 🚨 CRITICAL CHANGE 2: Tighter padding */
-                padding: 5px 10px; 
-                gap: 2px; /* smaller gap */
-                min-height: 45px; /* slightly smaller minimum height */
+                padding: 8px 12px; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 50px;
             }
             .hud-left { 
-                position: absolute; top: 5px; left: 5px; transform: scale(0.8); transform-origin: left top; /* scaled down more */
+                position: absolute; top: 8px; left: 10px; transform: scale(0.85); transform-origin: left top; 
             }
             .level-badge { 
-                position: absolute; top: 5px; right: 5px; font-size: 0.8rem; padding: 5px 10px; /* smaller badge */
+                position: absolute; top: 8px; right: 10px; font-size: 0.9rem; padding: 6px 12px; 
             }
             .target-box { margin-top: 0; width: 100%; order: 3; padding-top: 5px; } 
             .hud-label { display: none; }
-            .target-seq { font-size: 1.2rem; margin-top: 20px; /* moved up slightly */ }
+            .target-seq { font-size: 1.3rem; margin-top: 25px; }
 
             /* PLAYGROUND: Make it wide */
             .playground-window {
-                /* the playground now has more flex-grow space because other containers are smaller! */
-                border-width: 5px; /* thinner border for more space */
+                position: relative; 
+            }
+            .playground {
+                width: 180%; /* WIDER than screen */
+                height: 100%;
+                border: none;
+                border-radius: 0;
             }
 
             /* Train adjustments for mobile */
-            .train-car { width: 100px; height: 60px; font-size: 1.6rem; border-width: 2px; border-radius: 10px 10px 4px 4px; } /* smaller car */
-            .wheels { bottom: -8px; }
-            .wheel { width: 20px; height: 20px; border-width: 2px; }
+            .train-car { width: 110px; height: 70px; font-size: 1.8rem; } 
+            .wheels { bottom: -10px; }
+            .wheel { width: 25px; height: 25px; }
 
-            /* Coupler Logic is handled in CSS so it connects visually with 100px cars */
-            .train-car::after { right: -12px; width: 20px; height: 10px; top: 35px; }
-            .train-car::before { left: -8px; width: 12px; height: 10px; top: 35px; }
+            /* Coupler Logic is handled in CSS so it connects visually with 110px cars */
+            .train-car::after { right: -15px; width: 25px; height: 12px; top: 40px; }
+            .train-car::before { left: -10px; width: 15px; height: 12px; top: 40px; }
 
-            /* CONTROLS - Made Tighter */
-            .controls { 
-                height: 40px; /* smaller height */
-                gap: 5px; /* smaller gap */
-                margin-bottom: 2px; 
-            }
-            .ctrl-btn { 
-                font-size: 0.75rem; 
-                padding: 0 10px; 
-                height: 38px; /* smaller height */
-                border-radius: 12px; 
-                box-shadow: 0 4px 0 rgba(0,0,0,0.2);
-            }
-            .ctrl-btn:active { transform: translateY(4px); box-shadow: none; border-bottom: none; }
+            /* CONTROLS (No changes needed here, keeping previous adjustments) */
+            .controls { height: 50px; gap: 8px; margin-bottom: 0; } /* Removed margin-bottom 5px, using wrapper margin instead */
+            .ctrl-btn { font-size: 0.8rem; padding: 0 15px; height: 45px; border-radius: 15px; }
             
             /* MODALS */
             .modal-card { width: 85%; padding: 20px; }
@@ -585,7 +580,7 @@
         
         // --- MOBILE DETECT ---
         const isMobile = window.innerWidth <= 768;
-        const CAR_W = isMobile ? 100 : 130; // UPDATED: CAR_W changed to 100px for mobile in CSS
+        const CAR_W = isMobile ? 110 : 130; // UPDATED: Logic now matches CSS width
         const SNAP_DIST = 60;
 
         // --- DOM ---
@@ -697,7 +692,7 @@
             c.el.style.left = c.x + 'px';
             c.el.style.top = c.y + 'px';
             if (c.next) {
-                // Fixed coupling distance based on device type
+                // FIXED: Tighter coupling distance based on device type
                 c.next.x = c.x + CAR_W + 5;
                 c.next.y = c.y;
                 updatePos(c.next);
