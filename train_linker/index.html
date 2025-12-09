@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Train Linker</title>
+    <title>Magnetic Train</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -342,8 +342,7 @@
 
             /* GAME LAYOUT */
             .game-wrapper { 
-                /* 🚂 FIX 1: New scale is 80% */
-                /* 🚂 FIX 2: Nudging it down with translateY and removing padding */
+                /* Scale and Nudge */
                 transform: scale(0.80) translateY(40px); /* Pushes the whole scaled block down */
                 transform-origin: center top; 
                 
@@ -360,8 +359,7 @@
             .playground-window {
                 flex-grow: 1;
                 /* Adjust height calculation to fill space between HUD and Controls */
-                /* Base height remains: 100% - HUD height (~130px) - Controls height (50px) - Gap (10px) */
-                height: calc(100% - 190px); /* Increased HUD estimation due to wrap/padding */
+                height: calc(100% - 190px); 
                 min-height: 300px;
             }
 
@@ -401,12 +399,30 @@
             .controls { height: 50px; gap: 8px; margin-bottom: 0; } 
             .ctrl-btn { font-size: 0.8rem; padding: 0 15px; height: 45px; border-radius: 15px; }
             
-            /* MODALS */
-            .modal-card { width: 85%; padding: 20px; }
-            .modal-title { font-size: 2rem; }
-            .info-grid { grid-template-columns: 1fr; gap: 10px; }
-            .info-item { padding: 10px; display: flex; align-items: center; text-align: left; gap: 15px; }
-            .info-icon { font-size: 2rem; margin-bottom: 0; }
+            /* --- MODALS FIX --- */
+            .modal-card { 
+                /* 🚂 Small adjustment: narrower and slightly thicker border-radius */
+                width: 80%; 
+                padding: 15px; /* Less internal padding */
+                border-radius: 20px;
+                border: 6px solid #ccc; /* Slightly thinner border */
+            }
+            .modal-title { font-size: 1.8rem; } /* Smaller font */
+            .modal-stars { font-size: 2.5rem; margin-bottom: 10px; } /* Smaller icon */
+            .modal-text { font-size: 1rem; margin: 10px 0; } /* Smaller text */
+            
+            /* INFO CARD FIX */
+            .info-card { 
+                width: 85%;
+                border-radius: 20px;
+            }
+            .info-inner { 
+                padding: 20px; 
+            }
+            .info-header { 
+                font-size: 1.5rem; 
+                margin-bottom: 15px;
+            }
         }
     </style>
 </head>
