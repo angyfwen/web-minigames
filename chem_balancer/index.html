@@ -304,47 +304,45 @@
         /* --- MOBILE OPTIMIZATION (FRIENDLY PATCH) --- */
         @media (max-width: 768px) {
             
-            /* 🚂 CRITICAL CHANGE: Apply 80% scale and centering to the main screen wrapper */
+            /* 🚂 FIX 1: Ensure body does not scroll and takes up full screen */
+            body { 
+                overflow: hidden !important; 
+                height: 100vh;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* 🚂 FIX 2: Apply 80% scale and centering to the main screen wrapper */
             .screen.active {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                /* 🚂 CHANGE 1: Scale down to 80% */
-                /* 🚂 CHANGE 2: Adjusted vertical position for better centering at 80% */
-                transform: scale(0.80) translateY(10px); 
+                /* Apply scaling and slight translation for center balancing */
+                transform: scale(0.80) translateY(15px); /* Scaled to 80% */
                 transform-origin: center top; 
                 height: 100vh;
                 min-height: 100vh;
                 padding: 0; 
-                overflow: hidden; /* Prevent vertical scrolling on the screen content */
-            }
-            
-            /* 🚂 CRITICAL FIX: Ensure body does not generate horizontal scroller */
-            body { 
-                overflow-x: hidden; /* Disable horizontal scrolling */
-                overflow-y: hidden; /* Disable vertical scrolling */
-                height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .cyber-card, .panel-card {
-                /* 🚂 FIX 3: Lock width to 100% of parent, which is the viewport * 0.8 */
-                width: 100%;
-                max-width: 420px; /* Kept max-width for sanity */
-                margin: 0; /* Remove horizontal margin */
-                padding: 0.9rem; 
-                border-radius: 16px; 
-                transform: none; 
-                box-sizing: border-box; /* Crucial for preventing width overflow */
+                overflow: hidden; /* DONT SCROLL */
             }
 
             /* Resetting element heights/margins for the transformed screen */
             .cyber-card { 
                 padding: 2rem 1.5rem; 
+                width: 90%;
+                transform: none; 
             }
-
+            .panel-card {
+                width: 92%; 
+                padding: 0.9rem; 
+                border-radius: 16px; 
+                margin: 0 12px;
+                transform: none; 
+            }
+            
             h1 { font-size: 2.8rem; } 
             .reactor-core { width: 110px; height: 110px; margin-bottom: 1rem; }
             .reactor-icon { font-size: 3.6rem; }
@@ -361,23 +359,23 @@
                 padding: 8px 6px;
                 gap: 8px;
                 margin-bottom: 0.5rem;
+                flex-wrap: wrap; /* Ensure elements wrap if space is too tight */
             }
             
-            /* convert the absolute center-badge into a normal flow element on mobile */
+            /* Reordering mobile header elements for better flow */
             .center-badge-container {
-                position: static !important;
+                position: static !important;  
                 left: auto; top: auto; transform: none;
                 display: flex;
                 justify-content: center;
                 width: 100%;
-                margin: 6px 0;
+                margin: 6px 0;           
                 order: 3; 
             }
             .game-header > div:nth-child(1) { order: 1; }
             .game-header > div:nth-child(3) { order: 2; }
 
 
-            /* make the actual badge a touch-friendly size */
             #level-badge {
                 font-size: 0.85rem;
                 padding: 6px 10px;
@@ -390,9 +388,9 @@
             
             .btn-check { font-size: 1.1rem; padding: 0.8rem 2rem; max-width: 280px; width: 86%; }
 
-            /* MODAL FIXES (Inherit the 80% scale from the screen wrapper) */
+            /* MODAL FIXES */
             .modal-box { max-width: 360px; padding: 1.6rem; border-radius: 18px; }
-            .modal { backdrop-filter: none; }
+            .modal { backdrop-filter: none; } 
             
             .modal-title { font-size: 1.8rem; }
             .modal-stars { font-size: 2.5rem; margin-bottom: 10px; }
