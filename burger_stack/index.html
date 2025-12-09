@@ -40,6 +40,7 @@
             font-family: 'Nunito', sans-serif;
             margin: 0;
             padding: 0;
+            /* Lock the screen completely */
             width: 100vw; 
             height: 100vh;
             position: fixed; 
@@ -66,7 +67,9 @@
             width: 100%; 
             height: 100%;
             display: none;
-            flex-direction: column; align-items: center; justify-content: center;
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; /* Default for Desktop */
             position: absolute; top: 0; left: 0;
         }
         
@@ -321,17 +324,25 @@
            ========================================= */
         @media (max-width: 900px) {
             
-            /* KEY FIX 1: Scale down and SHIFT UP */
+            /* KEY FIX: Scale down AND PUSH UP */
             .screen.active {
-                /* Shifts the entire game view UP by 5% of height to fix "too much space at top" */
-                transform: scale(0.80) translateY(-5%); 
-                transform-origin: center center;
+                /* Scale to 80% */
+                transform: scale(0.80);
+                /* Anchor to TOP CENTER to force it upwards */
+                transform-origin: top center;
+                
+                /* Layout */
+                display: flex;
+                justify-content: flex-start; /* Align contents to top */
+                align-items: center;
+                
+                /* Dimensions & Overflow */
                 height: 100%;
                 width: 100%;
                 overflow: hidden; 
-                display: flex;
-                justify-content: center;
-                align-items: center;
+                
+                /* Add a safety buffer for the notch */
+                padding-top: 60px;
             }
 
             .game-wrapper, .modal-card, .menu-card {
@@ -344,8 +355,8 @@
                 padding: 30px 20px; 
                 width: 85%; 
                 max-width: 350px;
-                margin-top: 50px;
-                margin-bottom: 50px;
+                /* Remove margins that push it down */
+                margin: 0;
                 transform: rotate(0deg); 
             }
             h1 { font-size: 2.8rem; }
@@ -358,9 +369,9 @@
                 width: 85%; 
                 max-width: 380px; 
                 padding: 25px;
-                max-height: 95vh;
+                max-height: 80vh;
                 overflow-y: auto; 
-                margin: auto; 
+                margin: 0 auto; 
             }
             .info-block { flex-direction: row; gap: 12px; margin-bottom: 15px; }
             .info-icon { font-size: 1.5rem; width: 40px; padding: 8px; }
@@ -375,7 +386,8 @@
                 min-height: 100dvh;
                 height: auto;
                 padding: 10px;
-                padding-top: 50px; /* Reduced from 80px to fix empty space */
+                /* Remove extra top padding since we align to top now */
+                padding-top: 10px; 
                 gap: 10px;
                 overflow-y: visible;
                 box-sizing: border-box;
@@ -444,7 +456,7 @@
             .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; }
 
             /* --- NAV BUTTONS --- */
-            .nav-btn { top: 10px; width: 40px; height: 40px; font-size: 1rem; } /* Moved up */
+            .nav-btn { top: 15px; width: 40px; height: 40px; font-size: 1rem; }
             .btn-home { left: 15px; }
             .btn-mute { right: 15px; }
             .btn-help { right: 65px; }
