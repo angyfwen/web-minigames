@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Magnetic Train</title>
+    <title>Train Linker</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +26,7 @@
         body {
             font-family: 'Nunito', sans-serif;
             margin: 0;
-            height: 100vh;
+            height: 100vh; /* standard desktop/non-safari fallback */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -311,9 +311,19 @@
 
         /* --- MOBILE PATCH (SIDE SCROLLER & LAYOUT) --- */
         @media (max-width: 768px) {
+            /* 🐛 FIX 1: Safari/Mobile Viewport Height Issue */
             body { 
-                position: fixed; width: 100%; height: 100%; overflow: hidden;
+                position: fixed; 
+                width: 100%; 
+                /* 🚨 CRITICAL CHANGE: Use min-height 100vh for iOS Safari 
+                   to force full viewport, and keep height 100% on .screen for overlay */
+                min-height: 100vh;
+                height: auto; 
+                overflow: hidden;
                 background-size: 20px 20px;
+            }
+            .screen {
+                height: 100vh; /* Make sure screens still take up the visible area */
             }
 
             /* START SCREEN FIX: More Space */
@@ -325,7 +335,16 @@
             .btn-start, .btn-info { font-size: 1.1rem; padding: 12px; }
 
             /* GAME LAYOUT */
-            .game-wrapper { width: 95%; height: 98vh; gap: 10px; margin-top: 5px; }
+            .game-wrapper { 
+                width: 95%; 
+                /* 🐛 FIX 2: Calculate height to fit between HUD and Controls */
+                /* The height is now viewport-based and accounts for the game's padding/margins.
+                   100vh - (top margin + bottom margin + height of controls + gap) */
+                height: calc(100vh - 10px - 5px - 50px - 10px); /* 100vh - 5px (top) - 5px (bottom) - 50px (controls h) - 10px (gap) */
+                gap: 10px; 
+                margin-top: 5px; 
+                margin-bottom: 5px;
+            }
             
             /* COMPACT HUD */
             .hud-bar { 
