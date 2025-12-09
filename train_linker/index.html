@@ -6,7 +6,7 @@
     <title>Train Linker</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.scom" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Titan+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -342,18 +342,16 @@
 
             /* GAME LAYOUT */
             .game-wrapper { 
-                /* 🚂 CRITICAL CHANGE 1: Scale to 80% */
-                transform: scale(0.80);
+                /* 🚂 FIX 1: New scale is 80% */
+                /* 🚂 FIX 2: Nudging it down with translateY and removing padding */
+                transform: scale(0.80) translateY(40px); /* Pushes the whole scaled block down */
                 transform-origin: center top; 
                 
-                /* Reset margins, width, and height so scaling works properly */
                 width: 100vw; 
                 max-width: none;
                 height: 100vh; 
                 margin: 0; 
-                /* 🚂 CRITICAL CHANGE 2: Less padding-top to shift content lower */
-                padding-top: 20px; 
-                padding-bottom: 50px; 
+                padding: 0; /* Remove top/bottom padding to let translateY handle position */
                 box-sizing: border-box; 
                 gap: 10px; 
             }
@@ -362,7 +360,8 @@
             .playground-window {
                 flex-grow: 1;
                 /* Adjust height calculation to fill space between HUD and Controls */
-                height: calc(100% - 130px - 50px - 10px); /* 100% - HUD height - Controls height - Gap */
+                /* Base height remains: 100% - HUD height (~130px) - Controls height (50px) - Gap (10px) */
+                height: calc(100% - 190px); /* Increased HUD estimation due to wrap/padding */
                 min-height: 300px;
             }
 
