@@ -19,7 +19,7 @@
             --bg-pattern: #8D121B;
 
             /* Ingredient Colors */
-            --bun-base: #FFB370;   
+            --bun-base: #FFB370;    
             --patty-base: #795548;
             --patty-shadow: #5D4037;
             --cheese-base: #FFD54F;
@@ -308,26 +308,30 @@
         .btn-help { right: 90px; } 
 
         /* =========================================
-           MOBILE OPTIMIZATIONS
-           ========================================= */
+            MOBILE OPTIMIZATIONS (Portrait & Landscape Phone)
+            ========================================= */
         @media (max-width: 900px) {
+            
+            /* --- MENU SCREEN SQUISH --- */
             .menu-card {
                 padding: 30px 20px; 
                 width: 85%; 
                 max-width: 350px;
                 margin-top: 50px;
                 margin-bottom: 50px;
+                transform: rotate(0deg); /* Prevent rotation on small screens */
             }
             h1 { font-size: 2.8rem; }
             .subtitle { font-size: 1.1rem; margin-bottom: 25px; }
             .btn-start { font-size: 1.5rem; padding: 15px; }
             .btn-info-main { font-size: 1rem; padding: 12px; }
 
+            /* --- MODAL SQUISH --- */
             .modal-card {
                 width: 85%; 
                 max-width: 380px; 
                 padding: 25px;
-                max-height: 80vh; 
+                max-height: 95vh; /* Allow for smaller screens */
                 overflow-y: auto; 
                 margin: auto; 
             }
@@ -341,20 +345,23 @@
             .info-text p { font-size: 0.9rem; }
             .close-btn { top: 10px; right: 15px; font-size: 1.5rem; }
 
+            /* --- GAME LAYOUT REARRANGEMENT --- */
             .game-wrapper {
                 display: flex;
-                flex-direction: column;
+                flex-direction: column; /* Stack everything vertically */
                 min-height: 100dvh;
                 height: auto;
                 padding: 10px;
                 padding-top: 80px; 
                 gap: 10px;
                 overflow-y: visible;
+                box-sizing: border-box;
             }
 
+            /* --- ORDER/TERMINAL (TOP SECTION) --- */
             .right-panel {
-                order: 1;
-                flex-direction: row;
+                order: 1; /* Move to the top */
+                flex-direction: row; /* Make ticket and terminal sit side-by-side */
                 height: auto;
                 width: 100%;
                 gap: 10px;
@@ -372,24 +379,26 @@
             
             .terminal {
                 flex: 1;
-                height: 150px; 
+                height: 150px; /* Give terminal a fixed height */
                 min-height: 150px;
                 padding: 10px;
                 font-size: 0.7rem;
             }
 
+            /* --- BURGER STACK (MIDDLE SECTION) --- */
             .plate-area {
                 order: 2;
                 flex: 1;
                 width: 100%;
                 justify-content: flex-end;
-                transform: scale(0.65);
+                transform: scale(0.75); /* Increased scale slightly for better visibility */
                 transform-origin: center bottom;
-                margin-bottom: 10px;
-                /* ADDED: Negative margin to pull the burger up and reduce space */
-                margin-top: -40px;
+                /* Pull the burger up to fill the vertical space better */
+                margin-bottom: 0;
+                margin-top: -80px; 
             }
 
+            /* --- CONTROLS (BOTTOM SECTION) --- */
             .controls-panel {
                 order: 3;
                 width: 100%;
@@ -399,7 +408,7 @@
             }
 
             .controls-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, 1fr); /* 3 columns for ingredient buttons */
                 gap: 8px;
                 margin-bottom: 5px; 
             }
@@ -409,14 +418,263 @@
                 font-size: 0.8rem;
             }
             
-            .ing-btn { padding: 15px 5px; font-size: 0.8rem; }
+            .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
             .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; }
 
+            /* --- NAV BUTTONS --- */
             .nav-btn { top: 15px; width: 40px; height: 40px; font-size: 1rem; }
             .btn-home { left: 15px; }
             .btn-mute { right: 15px; }
             .btn-help { right: 65px; }
         }
+
+        /* === tiny-portrait, no-scroll safety overrides ===
+   paste at end of your stylesheet (after existing mobile rules) === */
+/* ---------- mobile portrait: no page scroll, fit everything on-screen ---------- */
+@media (max-width: 420px) and (orientation: portrait) {
+  /* make viewport height consistent (safari-friendly) and prevent page scrolling */
+  html, body, #game-wrapper, .screen {
+    height: 100dvh !important;
+  }
+  body {
+    overflow: hidden !important;
+  }
+
+  /* tighten container spacing */
+  .game-wrapper {
+    padding: 8px 10px 6px !important;
+    gap: 6px !important;
+    min-height: 100dvh !important;
+    box-sizing: border-box;
+  }
+
+  /* right panel: put ticket + terminal stacked and compact */
+  .right-panel {
+    order: 1;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    height: auto;
+    margin-bottom: 0;
+  }
+  .ticket {
+    flex: none;
+    padding: 8px;
+    transform: none;
+  }
+  .ticket-header { font-size: 0.75rem; padding-bottom: 6px; margin-bottom: 6px; }
+  .target-view { min-height: 48px; gap: 6px; }
+  .mini-food { width: 56px; height: 9px; border-radius: 3px; }
+
+  /* terminal: fixed small area but still scrollable internally */
+  .terminal {
+    flex: none;
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+    padding: 8px !important;
+    font-size: 0.72rem !important;
+    overflow-y: auto;
+  }
+
+  /* plate: scale down the burger stack, but keep it tall enough for visuals */
+  .plate-area {
+    order: 2;
+    flex: 1 1 auto;
+    width: 100%;
+    justify-content: flex-end;
+    transform: scale(0.72);
+    transform-origin: center bottom;
+    margin-top: -40px;
+    padding-bottom: 6px;
+    min-height: 120px;
+  }
+
+  /* shrink plate so it doesn't overflow */
+  .plate { width: 260px !important; height: 40px !important; }
+
+  /* ingredient sizes reduced so the stack fits */
+  .f-bun-bot { width: 200px !important; height: 44px !important; border-radius: 12px; }
+  .f-patty { width: 210px !important; height: 44px !important; margin-bottom: -10px; }
+  .f-cheese { width: 220px !important; height: 20px !important; margin-bottom: -6px; }
+  .f-lettuce { width: 230px !important; height: 30px !important; margin-bottom: -8px; }
+  .f-tomato { width: 190px !important; height: 34px !important; margin-bottom: -8px; }
+  .f-bun-top { width: 230px !important; height: 68px !important; margin-bottom: -16px; }
+  .f-cheese::after { right: 36px !important; box-shadow: 50px 0 0 var(--cheese-base) !important; }
+
+  /* controls panel pinned to bottom-ish, compact & always visible */
+  .controls-panel {
+    order: 3;
+    flex: none;
+    width: 100%;
+    padding: 10px;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .controls-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px; margin-bottom: 6px; }
+  .ing-btn { padding: 9px 6px !important; font-size: 0.78rem !important; border-radius: 10px; }
+  .btn-pop, .btn-serve { padding: 10px !important; font-size: 1rem !important; border-radius: 10px; }
+
+  /* text / headings smaller to avoid pushing content */
+  h1 { font-size: 1.9rem !important; line-height: 1.05; }
+  .subtitle { font-size: 0.95rem !important; margin-bottom: 10px !important; }
+
+  /* shrink menu modal and buttons when opened */
+  .menu-card { padding: 16px 12px !important; width: 92% !important; max-width: 360px !important; transform: none !important; }
+  .modal-card { width: 92% !important; max-width: 380px !important; padding: 14px !important; }
+
+  /* nav buttons stay accessible within safe area */
+  .nav-btn { top: calc(env(safe-area-inset-top, 12px)) !important; }
+  .btn-home { left: 12px !important; }
+  .btn-mute { right: 12px !important; }
+  .btn-help { right: 56px !important; }
+
+  /* tone down index marker and move it a bit closer so it doesn't overflow */
+  .index-marker { left: -60px !important; font-size: 0.78rem !important; padding: 3px 8px !important; }
+
+  /* remove extra margins that could cause the page to overflow */
+  .screen { padding-bottom: 0 !important; }
+  .menu-card, .controls-panel, .modal-card { margin: 0 auto !important; }
+
+  /* keep animations snappy but not tall */
+  .food { margin-bottom: -6px !important; }
+}
+
+/* ===== force no page scroll on tiny phones (safari-friendly) ===== */
+html, body {
+  height: 100vh !important;      /* fallback */
+  height: 100dvh !important;     /* modern safari friendly */
+  overflow: hidden !important;   /* prevent page scroll */
+  -webkit-overflow-scrolling: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#game-wrapper {
+  position: fixed !important;    /* pin to viewport so content can't push page */
+  inset: 0 !important;           /* top:0; right:0; bottom:0; left:0 */
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;   /* keep any excess inside */
+  box-sizing: border-box !important;
+}
+
+/* ensure each 'screen' is exactly the wrapper height and doesn't create scroll */
+.screen {
+  height: 100% !important;
+  min-height: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* allow internal scrolling only where needed (terminal & modals) */
+.terminal {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  /* cap to visible area so it doesn't push page */
+  max-height: calc(100% - 220px) !important; /* fallback; will be overridden by smaller mobile rules */
+}
+
+/* modals should scroll internally if content is tall */
+.modal-overlay {
+  overflow: hidden !important;     /* overlay itself won't scroll the page */
+  display: none;                   /* unchanged default behaviour */
+}
+.modal-card {
+  max-height: calc(100vh - 120px) !important;
+  max-height: calc(100dvh - 120px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* ensure pinned nav buttons don't increase page height */
+.nav-btn {
+  position: fixed !important;
+  z-index: 999 !important;
+}
+
+/* for the mobile portrait rule: make sure plate-area, controls, right-panel fit inside wrapper */
+@media (max-width: 420px) and (orientation: portrait) {
+  .game-wrapper { height: 100% !important; padding: 6px !important; box-sizing: border-box !important; }
+  .plate-area { min-height: 0 !important; max-height: 48% !important; }
+  .controls-panel { flex: none !important; max-height: 34% !important; overflow: visible !important; }
+  .right-panel { flex: none !important; max-height: 18% !important; overflow: visible !important; }
+  .terminal { max-height: 110px !important; }
+}
+
+/* final safety: if any element still causes overflow, hide it visually instead of letting body scroll */
+body * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== fix: make controls/buttons always visible above safe-area/toolbars ===== */
+@media (max-width: 420px) and (orientation: portrait) {
+
+  /* ensure wrapper reserves space for bottom safe area */
+  #game-wrapper {
+    padding-bottom: calc(env(safe-area-inset-bottom, 14px) + 8px) !important;
+  }
+
+  /* pin controls-panel to the bottom of the viewport but above the safe area */
+  .controls-panel {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(env(safe-area-inset-bottom, 12px) + 8px) !important;
+    z-index: 999 !important;
+    width: calc(100% - 16px) !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    box-shadow: 0 18px 36px rgba(0,0,0,0.28) !important;
+    border-radius: 14px !important;
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    transform: none !important;
+  }
+
+  /* make sure the burger/plate area doesn't get hidden behind pinned controls */
+  .plate-area {
+    margin-bottom: calc( (env(safe-area-inset-bottom, 14px) + 8px) + 120px ) !important;
+    /* extra buffer so the stack never sits under the controls */
+  }
+
+  /* keep nav buttons visible above the controls */
+  .nav-btn {
+    z-index: 1100 !important;
+    position: fixed !important;
+  }
+  .btn-home { left: 12px !important; top: calc(env(safe-area-inset-top, 12px)) !important; }
+  .btn-help { right: 56px !important; top: calc(env(safe-area-inset-top, 12px)) !important; }
+  .btn-mute { right: 12px !important; top: calc(env(safe-area-inset-top, 12px)) !important; }
+
+  /* ensure serve + undo buttons are large, centered and never clipped */
+  .btn-serve, .btn-pop {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 12px 10px !important;
+    font-size: 1.05rem !important;
+    border-radius: 12px !important;
+  }
+
+  /* keep terminal scrollable but compact so it doesn't push layout */
+  .terminal {
+    max-height: 84px !important;
+    height: 84px !important;
+    overflow-y: auto !important;
+  }
+
+  /* safety: reduce any large margins that could create overflow */
+  .game-wrapper { padding-bottom: 0 !important; }
+  .screen { padding-bottom: 0 !important; }
+
+}
+
     </style>
 </head>
 <body>
