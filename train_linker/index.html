@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Train Linker</title>
+    <title>Magnetic Train</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,25 +335,26 @@
 
             /* GAME SCREEN FIX: Use flex to center the shrunken content vertically */
             #game-screen.screen.active {
-                justify-content: center;
+                /* 🚂 CRITICAL CHANGE: Start from top to prevent over-centering */
+                justify-content: flex-start;
                 align-items: center;
                 display: flex;
             }
 
             /* GAME LAYOUT */
             .game-wrapper { 
-                /* 🚂 CRITICAL CHANGE: Scale everything down to 75% */
+                /* Scale remains (0.75) and full viewport sizing remains */
                 transform: scale(0.75);
-                transform-origin: center top; /* Scale from the top center */
+                transform-origin: center top; 
                 
-                /* Reset margins, width, and height so scaling works properly */
-                width: 100vw; /* Take full viewport width before scaling */
+                width: 100vw; 
                 max-width: none;
-                height: 100vh; /* Take full viewport height before scaling */
+                height: 100vh;
                 margin: 0; 
-                padding-top: 50px; /* Add some space above after scaling */
-                padding-bottom: 50px; /* Add some space below after scaling */
-                box-sizing: border-box; /* Include padding in height calculation */
+                /* 🚂 CRITICAL CHANGE: Nudge the wrapper down from the top slightly */
+                padding-top: 100px; /* Reduced space below (from 50px) and pushed content down (was 50px top) */
+                padding-bottom: 50px; 
+                box-sizing: border-box; 
                 gap: 10px; 
             }
 
@@ -361,11 +362,11 @@
             .playground-window {
                 flex-grow: 1;
                 /* Adjust height calculation to fill space between HUD and Controls */
-                height: calc(100% - 130px - 50px - 10px); /* 100% - HUD height - Controls height - Gap */
+                height: calc(100% - 130px - 50px - 10px); 
                 min-height: 300px;
             }
 
-            /* COMPACT HUD (minor adjustment needed due to scaling) */
+            /* COMPACT HUD (No changes needed here) */
             .hud-bar { 
                 padding: 8px 12px; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 50px;
             }
@@ -381,7 +382,7 @@
 
             /* PLAYGROUND: Make it wide */
             .playground {
-                width: calc(180% / 0.75); /* Need to increase width to counteract 0.75 scale */
+                width: calc(180% / 0.75); 
                 height: 100%;
                 border: none;
                 border-radius: 0;
