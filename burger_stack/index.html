@@ -33,11 +33,15 @@
             --text-main: #2D3436;
         }
 
-        * { -webkit-tap-highlight-color: transparent; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
 
         body {
             font-family: 'Nunito', sans-serif;
-            margin: 0;
             overflow-x: hidden;
             overflow-y: auto;
             min-height: 100vh;
@@ -52,6 +56,8 @@
             background-attachment: fixed;
             color: var(--text-main);
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
 
         /* --- SCREENS --- */
@@ -428,253 +434,98 @@
             .btn-help { right: 65px; }
         }
 
-        /* === tiny-portrait, no-scroll safety overrides ===
-   paste at end of your stylesheet (after existing mobile rules) === */
-/* ---------- mobile portrait: no page scroll, fit everything on-screen ---------- */
-@media (max-width: 420px) and (orientation: portrait) {
-  /* make viewport height consistent (safari-friendly) and prevent page scrolling */
-  html, body, #game-wrapper, .screen {
-    height: 100dvh !important;
-  }
-  body {
-    overflow: hidden !important;
-  }
+        /* === tiny-portrait, no-scroll safety overrides === */
+        /* this block targets very narrow portrait iphones and ensures controls stay tappable */
+        @media (max-width: 420px) and (orientation: portrait) {
 
-  /* tighten container spacing */
-  .game-wrapper {
-    padding: 8px 10px 6px !important;
-    gap: 6px !important;
-    min-height: 100dvh !important;
-    box-sizing: border-box;
-  }
+          /* lock viewport height and prevent page scroll */
+          html, body { height: 100dvh; overflow: hidden; -webkit-overflow-scrolling: touch; }
 
-  /* right panel: put ticket + terminal stacked and compact */
-  .right-panel {
-    order: 1;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    height: auto;
-    margin-bottom: 0;
-  }
-  .ticket {
-    flex: none;
-    padding: 8px;
-    transform: none;
-  }
-  .ticket-header { font-size: 0.75rem; padding-bottom: 6px; margin-bottom: 6px; }
-  .target-view { min-height: 48px; gap: 6px; }
-  .mini-food { width: 56px; height: 9px; border-radius: 3px; }
+          /* pin the whole game area to viewport so body chrome doesn't push content */
+          #game-wrapper {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            gap: 6px;
+            overflow: hidden;
+            box-sizing: border-box;
+          }
 
-  /* terminal: fixed small area but still scrollable internally */
-  .terminal {
-    flex: none;
-    height: 110px !important;
-    min-height: 110px !important;
-    max-height: 110px !important;
-    padding: 8px !important;
-    font-size: 0.72rem !important;
-    overflow-y: auto;
-  }
+          /* make the visible screens fill the wrapper */
+          .screen { height: 100%; min-height: 100%; overflow: hidden; }
 
-  /* plate: scale down the burger stack, but keep it tall enough for visuals */
-  .plate-area {
-    order: 2;
-    flex: 1 1 auto;
-    width: 100%;
-    justify-content: flex-end;
-    transform: scale(0.72);
-    transform-origin: center bottom;
-    margin-top: -40px;
-    padding-bottom: 6px;
-    min-height: 120px;
-  }
+          /* compact right panel: ticket then terminal stacked */
+          .right-panel { order: 1; flex-direction: column; gap: 6px; height: auto; max-height: 28%; }
+          .ticket { padding: 8px; height: auto; }
+          .ticket-header { padding-bottom: 6px; margin-bottom: 6px; }
+          .target-view { min-height: 44px; gap: 6px; }
+          .mini-food { width: 56px; height: 9px; }
 
-  /* shrink plate so it doesn't overflow */
-  .plate { width: 260px !important; height: 40px !important; }
+          /* terminal must be internally scrollable and compact */
+          .terminal { flex: none; height: 84px; max-height: 84px; padding: 8px; font-size: 0.72rem; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-  /* ingredient sizes reduced so the stack fits */
-  .f-bun-bot { width: 200px !important; height: 44px !important; border-radius: 12px; }
-  .f-patty { width: 210px !important; height: 44px !important; margin-bottom: -10px; }
-  .f-cheese { width: 220px !important; height: 20px !important; margin-bottom: -6px; }
-  .f-lettuce { width: 230px !important; height: 30px !important; margin-bottom: -8px; }
-  .f-tomato { width: 190px !important; height: 34px !important; margin-bottom: -8px; }
-  .f-bun-top { width: 230px !important; height: 68px !important; margin-bottom: -16px; }
-  .f-cheese::after { right: 36px !important; box-shadow: 50px 0 0 var(--cheese-base) !important; }
+          /* scale down burger so it fits while leaving space for pinned controls */
+          .plate-area { order: 2; flex: 1 1 auto; transform: scale(0.68); transform-origin: center bottom; margin-top: -20px; padding-bottom: 6px; min-height: 80px; }
+          .plate { width: 240px; height: 36px; }
 
-  /* controls panel pinned to bottom-ish, compact & always visible */
-  .controls-panel {
-    order: 3;
-    flex: none;
-    width: 100%;
-    padding: 10px;
-    border-radius: 14px 14px 0 0;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .controls-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px; margin-bottom: 6px; }
-  .ing-btn { padding: 9px 6px !important; font-size: 0.78rem !important; border-radius: 10px; }
-  .btn-pop, .btn-serve { padding: 10px !important; font-size: 1rem !important; border-radius: 10px; }
+          .f-bun-bot { width: 180px; height: 40px; }
+          .f-patty { width: 188px; height: 40px; }
+          .f-cheese { width: 200px; height: 18px; }
+          .f-lettuce { width: 210px; height: 26px; }
+          .f-tomato { width: 170px; height: 30px; }
+          .f-bun-top { width: 200px; height: 60px; }
 
-  /* text / headings smaller to avoid pushing content */
-  h1 { font-size: 1.9rem !important; line-height: 1.05; }
-  .subtitle { font-size: 0.95rem !important; margin-bottom: 10px !important; }
+          .index-marker { left: -52px; font-size: 0.78rem; padding: 3px 8px; }
 
-  /* shrink menu modal and buttons when opened */
-  .menu-card { padding: 16px 12px !important; width: 92% !important; max-width: 360px !important; transform: none !important; }
-  .modal-card { width: 92% !important; max-width: 380px !important; padding: 14px !important; }
+          /* fix: pin controls-panel above the safari bottom bar (safe-area aware) */
+          .controls-panel {
+            position: fixed;
+            left: 8px;
+            right: 8px;
+            bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
+            z-index: 1200;
+            width: calc(100% - 16px);
+            max-width: none;
+            margin: 0 auto;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
 
-  /* nav buttons stay accessible within safe area */
-  .nav-btn { top: calc(env(safe-area-inset-top, 12px)) !important; }
-  .btn-home { left: 12px !important; }
-  .btn-mute { right: 12px !important; }
-  .btn-help { right: 56px !important; }
+          /* ensure serve + undo are full width, big and never clipped */
+          .btn-pop, .btn-serve {
+            width: 100%;
+            padding: 12px !important;
+            font-size: 1rem !important;
+            border-radius: 10px !important;
+          }
 
-  /* tone down index marker and move it a bit closer so it doesn't overflow */
-  .index-marker { left: -60px !important; font-size: 0.78rem !important; padding: 3px 8px !important; }
+          /* make sure plate-area doesn't go under pinned controls */
+          .plate-area { margin-bottom: calc((env(safe-area-inset-bottom, 12px) + 8px) + 120px); }
 
-  /* remove extra margins that could cause the page to overflow */
-  .screen { padding-bottom: 0 !important; }
-  .menu-card, .controls-panel, .modal-card { margin: 0 auto !important; }
+          /* nav buttons pinned and above everything */
+          .nav-btn { position: fixed; z-index: 1300; width: 40px; height: 40px; top: calc(env(safe-area-inset-top, 10px) + 6px); }
+          .btn-home { left: 10px; }
+          .btn-help { right: 56px; }
+          .btn-mute { right: 10px; }
 
-  /* keep animations snappy but not tall */
-  .food { margin-bottom: -6px !important; }
-}
+          /* win/edu/help modal sizing adjustments so they fit without causing page scroll */
+          .modal-card { width: 92%; max-width: 360px; padding: 14px; max-height: calc(100dvh - 120px); overflow-y: auto; }
+          .menu-card { width: 92%; max-width: 360px; padding: 12px; }
 
-/* ===== force no page scroll on tiny phones (safari-friendly) ===== */
-html, body {
-  height: 100vh !important;      /* fallback */
-  height: 100dvh !important;     /* modern safari friendly */
-  overflow: hidden !important;   /* prevent page scroll */
-  -webkit-overflow-scrolling: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
+          /* reduce big headings a bit */
+          h1 { font-size: 1.8rem; }
+          .subtitle { font-size: 0.92rem; }
 
-#game-wrapper {
-  position: fixed !important;    /* pin to viewport so content can't push page */
-  inset: 0 !important;           /* top:0; right:0; bottom:0; left:0 */
-  width: 100% !important;
-  height: 100% !important;
-  overflow: hidden !important;   /* keep any excess inside */
-  box-sizing: border-box !important;
-}
+        } /* end tiny portrait rule */
 
-/* ensure each 'screen' is exactly the wrapper height and doesn't create scroll */
-.screen {
-  height: 100% !important;
-  min-height: 100% !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-}
-
-/* allow internal scrolling only where needed (terminal & modals) */
-.terminal {
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  /* cap to visible area so it doesn't push page */
-  max-height: calc(100% - 220px) !important; /* fallback; will be overridden by smaller mobile rules */
-}
-
-/* modals should scroll internally if content is tall */
-.modal-overlay {
-  overflow: hidden !important;     /* overlay itself won't scroll the page */
-  display: none;                   /* unchanged default behaviour */
-}
-.modal-card {
-  max-height: calc(100vh - 120px) !important;
-  max-height: calc(100dvh - 120px) !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* ensure pinned nav buttons don't increase page height */
-.nav-btn {
-  position: fixed !important;
-  z-index: 999 !important;
-}
-
-/* for the mobile portrait rule: make sure plate-area, controls, right-panel fit inside wrapper */
-@media (max-width: 420px) and (orientation: portrait) {
-  .game-wrapper { height: 100% !important; padding: 6px !important; box-sizing: border-box !important; }
-  .plate-area { min-height: 0 !important; max-height: 48% !important; }
-  .controls-panel { flex: none !important; max-height: 34% !important; overflow: visible !important; }
-  .right-panel { flex: none !important; max-height: 18% !important; overflow: visible !important; }
-  .terminal { max-height: 110px !important; }
-}
-
-/* final safety: if any element still causes overflow, hide it visually instead of letting body scroll */
-body * {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===== fix: make controls/buttons always visible above safe-area/toolbars ===== */
-@media (max-width: 420px) and (orientation: portrait) {
-
-  /* ensure wrapper reserves space for bottom safe area */
-  #game-wrapper {
-    padding-bottom: calc(env(safe-area-inset-bottom, 14px) + 8px) !important;
-  }
-
-  /* pin controls-panel to the bottom of the viewport but above the safe area */
-  .controls-panel {
-    position: fixed !important;
-    left: 8px !important;
-    right: 8px !important;
-    bottom: calc(env(safe-area-inset-bottom, 12px) + 8px) !important;
-    z-index: 999 !important;
-    width: calc(100% - 16px) !important;
-    max-width: none !important;
-    margin: 0 auto !important;
-    box-shadow: 0 18px 36px rgba(0,0,0,0.28) !important;
-    border-radius: 14px !important;
-    padding: 10px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    transform: none !important;
-  }
-
-  /* make sure the burger/plate area doesn't get hidden behind pinned controls */
-  .plate-area {
-    margin-bottom: calc( (env(safe-area-inset-bottom, 14px) + 8px) + 120px ) !important;
-    /* extra buffer so the stack never sits under the controls */
-  }
-
-  /* keep nav buttons visible above the controls */
-  .nav-btn {
-    z-index: 1100 !important;
-    position: fixed !important;
-  }
-  .btn-home { left: 12px !important; top: calc(env(safe-area-inset-top, 12px)) !important; }
-  .btn-help { right: 56px !important; top: calc(env(safe-area-inset-top, 12px)) !important; }
-  .btn-mute { right: 12px !important; top: calc(env(safe-area-inset-top, 12px)) !important; }
-
-  /* ensure serve + undo buttons are large, centered and never clipped */
-  .btn-serve, .btn-pop {
-    width: 100% !important;
-    max-width: none !important;
-    padding: 12px 10px !important;
-    font-size: 1.05rem !important;
-    border-radius: 12px !important;
-  }
-
-  /* keep terminal scrollable but compact so it doesn't push layout */
-  .terminal {
-    max-height: 84px !important;
-    height: 84px !important;
-    overflow-y: auto !important;
-  }
-
-  /* safety: reduce any large margins that could create overflow */
-  .game-wrapper { padding-bottom: 0 !important; }
-  .screen { padding-bottom: 0 !important; }
-
-}
-
+        /* safety: keep terminal scrollbars thumb visible */
+        .terminal::-webkit-scrollbar-thumb { border: 3px solid #1e272e; }
     </style>
 </head>
 <body>
@@ -688,8 +539,8 @@ body * {
         </div>
     </div>
 
-    <div id="edu-modal" class="modal-overlay">
-        <div class="modal-card">
+    <div id="edu-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-card" role="dialog">
             <div class="close-btn" onclick="closeEdu()">&times;</div>
             <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 15px;">
                 <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
@@ -710,8 +561,8 @@ body * {
         </div>
     </div>
 
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-card">
+    <div id="help-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-card" role="dialog">
             <div class="close-btn" onclick="closeHelp()">&times;</div>
             <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem;">HOW TO PLAY</h2>
             <div class="info-block">
@@ -730,13 +581,13 @@ body * {
         </div>
     </div>
 
-    <div id="game-screen" class="screen">
+    <div id="game-screen" class="screen" aria-hidden="true">
         <button class="nav-btn btn-home" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
         <button class="nav-btn btn-help" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
         <button class="nav-btn btn-mute" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
 
-        <div class="game-wrapper">
-            <div class="controls-panel">
+        <div class="game-wrapper" id="game-wrapper">
+            <div class="controls-panel" id="controls-panel">
                 <div class="header-code">stack.push( ... )</div>
                 <div class="controls-grid">
                     <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
@@ -761,15 +612,15 @@ body * {
                     <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
                     <div class="target-view" id="target-view"></div>
                 </div>
-                <div class="terminal" id="terminal-log">
+                <div class="terminal" id="terminal-log" aria-live="polite">
                     <div style="color: #636e72; margin-bottom: 10px; font-style: italic;">// System initialized...<br>// Waiting for chef input...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="win-modal" class="modal-overlay">
-        <div class="modal-card">
+    <div id="win-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-card" role="dialog">
             <h1 id="modal-title" style="color: #00b894; font-family: 'Fredoka One'; font-size: 3rem; margin: 0;">TASTY!</h1>
             <p id="modal-text" style="font-size: 1.3rem; margin: 20px 0; color: #636e72;">The code logic is delicious.</p>
             <button class="btn-start" id="next-btn" onclick="nextLevel()">NEXT LEVEL</button>
@@ -859,26 +710,31 @@ body * {
             initAudio(); 
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-screen').classList.add('active');
+            document.getElementById('game-screen').setAttribute('aria-hidden','false');
             currentLevelNum = 1;
             initLevel();
+            // ensure controls-panel visible on start for pinned mode
+            const cp = document.getElementById('controls-panel');
+            if (cp) cp.style.display = 'flex';
         }
 
         function goHome() {
             userStack = [];
             currentLevelNum = 1; // Reset Level
             document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('game-screen').setAttribute('aria-hidden','true');
             document.getElementById('start-screen').style.display = 'flex';
             document.getElementById('win-modal').style.display = 'none';
             stackEl.innerHTML = '';
         }
 
         // Renamed functions for Educational Modal
-        function openEdu() { initAudio(); playTone('pop'); document.getElementById('edu-modal').style.display = 'flex'; }
-        function closeEdu() { initAudio(); playTone('push'); document.getElementById('edu-modal').style.display = 'none'; }
+        function openEdu() { initAudio(); playTone('pop'); document.getElementById('edu-modal').style.display = 'flex'; document.getElementById('edu-modal').setAttribute('aria-hidden','false'); }
+        function closeEdu() { initAudio(); playTone('push'); document.getElementById('edu-modal').style.display = 'none'; document.getElementById('edu-modal').setAttribute('aria-hidden','true'); }
         
         // New functions for Help Modal
-        function openHelp() { initAudio(); playTone('pop'); document.getElementById('help-modal').style.display = 'flex'; }
-        function closeHelp() { initAudio(); playTone('push'); document.getElementById('help-modal').style.display = 'none'; }
+        function openHelp() { initAudio(); playTone('pop'); document.getElementById('help-modal').style.display = 'flex'; document.getElementById('help-modal').setAttribute('aria-hidden','false'); }
+        function closeHelp() { initAudio(); playTone('push'); document.getElementById('help-modal').style.display = 'none'; document.getElementById('help-modal').setAttribute('aria-hidden','true'); }
 
         // --- GAMEPLAY ---
         function initLevel() {
@@ -968,6 +824,7 @@ body * {
                 }
                 
                 winModal.style.display = 'flex';
+                document.getElementById('win-modal').setAttribute('aria-hidden','false');
                 logToTerminal('success', 'Arrays Matched!');
             } else {
                 playTone('error');
@@ -1013,6 +870,13 @@ body * {
         function formatName(str) {
             return str.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
+
+        // accessibility / double-check: close modals via escape (optional)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeEdu(); closeHelp();
+            }
+        });
     </script>
 </body>
 </html>
