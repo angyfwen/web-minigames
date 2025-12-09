@@ -26,17 +26,23 @@
             --text-light: #A090C0;
         }
 
-        /* --- NUCLEAR SCROLL LOCK --- */
+        /* --- NUCLEAR SCROLL FIX --- */
         html, body {
             font-family: 'Nunito', sans-serif;
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            position: fixed; /* Freezes the page */
-            overflow: hidden; /* Hides scrollbars */
-            overscroll-behavior: none; /* Stops bounce */
-            touch-action: none; /* Stops gestures */
+            margin: 0; 
+            padding: 0;
+            /* Lock the screen completely */
+            width: 100vw; 
+            height: 100vh;
+            position: fixed; 
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; 
+            color: white;
             background-color: var(--bg-space);
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(79, 172, 254, 0.2) 0%, transparent 40%),
@@ -45,7 +51,6 @@
                 radial-gradient(white 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 50px 50px, 100px 100px;
             background-position: 0 0, 0 0, 0 0, 25px 25px;
-            user-select: none; -webkit-user-select: none;
         }
 
         /* --- SCREENS --- */
@@ -56,9 +61,9 @@
             position: absolute; top: 0; left: 0;
         }
         
-        /* Animation removed to prevent glitching on resize */
-        .screen.active { display: flex; animation: simpleFade 0.3s ease; }
-        @keyframes simpleFade { from { opacity: 0; } to { opacity: 1; } }
+        /* Removed scale from animation to prevent glitches with the 80% fix */
+        .screen.active { display: flex; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- MUTE BTN --- */
         #mute-btn { position: fixed; top: 20px; right: 20px; z-index: 200; background: rgba(255,255,255,0.1); color: white; border: 2px solid rgba(255,255,255,0.2); width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; transition: all 0.2s; }
@@ -126,7 +131,7 @@
         .notification-popup { 
             position: fixed; 
             left: 50%; 
-            top: 25px; 
+            top: 25px;
             transform: translateX(-50%); 
             background: linear-gradient(90deg, #FFD700, #FFA500); 
             color: #521536; padding: 15px 40px; border-radius: 999px; 
@@ -172,50 +177,50 @@
         /* --- MOBILE FIT-TO-SCREEN OPTIMIZATION --- */
         @media (max-width: 768px) {
             
-            /* KEY FIX: Scale the whole UI down */
+            /* THIS IS THE 80% SCALING FIX */
             .screen.active {
-                transform: scale(0.85); /* 85% Size */
+                transform: scale(0.80);
                 transform-origin: center center;
                 width: 100%;
                 height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                overflow: hidden;
             }
 
-            /* Prevent scrollbars inside containers */
-            .game-board, .title-box, .btn-group {
+            /* Prevent element scrolling overflowing */
+            .game-board, .modal-box {
                 max-height: 100vh;
-                margin: 0 auto;
+                overflow-y: hidden; 
             }
-            
-            /* --- Title Screen Adjustments --- */
+
             h1 { font-size: 3.2rem; margin-top: 10px; }
             .subtitle { font-size: 1.1rem; margin-top: 5px; }
             .title-rocket-img { width: 90px; margin-bottom: 5px; }
             
             .btn-group { 
                 flex-direction: column; 
-                gap: 20px;
-                margin-top: 25px; 
+                gap: 25px;
+                margin-top: 30px; 
                 width: 100%; 
                 align-items: center; 
             }
             .start-btn { width: 70%; padding: 15px; font-size: 1.4rem; }
 
-            /* --- Game Screen Adjustments --- */
             .game-board { 
-                width: 95%; 
-                margin: 0; 
+                width: 90%; 
+                height: 85vh;
+                margin: 0 auto; 
                 padding: 15px; 
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
+                justify-content: space-between; 
                 margin-top: 50px;
             }
 
             .dashboard { 
-                flex: 0 0 auto; margin-bottom: 5px; gap: 8px; grid-template-columns: 1fr 1fr; 
+                flex: 0 0 auto; 
+                margin-bottom: 5px; 
+                gap: 8px; 
+                grid-template-columns: 1fr 1fr;
             }
             .card { padding: 10px; }
             .card-title { font-size: 0.9rem; margin-bottom: 5px; }
@@ -224,10 +229,20 @@
 
             .arena-wrapper {
                 flex: 1 1 auto;
-                display: flex; align-items: center; justify-content: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 margin-bottom: 10px;
+                overflow: hidden;
             }
-            .arena { width: 100%; height: 100%; min-height: 0; padding: 10px; box-sizing: border-box; align-content: center; }
+            .arena { 
+                width: 100%; 
+                height: 100%; 
+                min-height: 0;
+                padding: 10px; 
+                box-sizing: border-box;
+                align-content: center;
+            }
 
             .orb { width: 50px; height: 50px; font-size: 1.2rem; }
             .orb::after { top: 6px; left: 8px; width: 14px; height: 6px; }
@@ -337,12 +352,9 @@
     </div>
 
     <script>
-        // --- NUCLEAR SCROLL STOPPER ---
-        // Prevents default swipe behavior on the background
+        // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
         document.addEventListener('touchmove', function(e) {
-            if(!e.target.closest('.modal-box')) {
-                e.preventDefault();
-            }
+            e.preventDefault();
         }, { passive: false });
 
         // --- SOUND ENGINE ---
@@ -356,9 +368,6 @@
 
         function playSound(type) {
             if (isMuted) return;
-            // Safari Auto-play fix: resume if suspended
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
@@ -376,6 +385,7 @@
                     osc.start(now); osc.stop(now + 0.2);
                     break;
                 case 'fail':
+                    // Descending "game over" tone
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(300, now);
                     osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
@@ -416,6 +426,7 @@
         }
 
         function goToMenu() {
+            // Ensure notification is cleared when returning to menu
             clearNotification();
             document.getElementById('game-screen').classList.remove('active');
             document.getElementById('start-screen').classList.add('active'); playSound('select');
@@ -462,6 +473,7 @@
             movesUsed = 0; selectedIndices = []; isGameOver = false;
             updateFuelUI();
 
+            // Reset Button Appearance
             btnReset.className = "btn-game btn-orange";
             btnReset.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Reset';
             
@@ -474,6 +486,7 @@
             container.classList.remove('faded');
             gameBoard.classList.remove('shake');
 
+            // Generate unsorted array
             let numberArray = [];
             let isSorted = true;
             do {
@@ -552,6 +565,7 @@
             let pct = (left / maxMoves) * 100;
             bar.style.width = pct + "%";
             
+            // Color logic
             if(pct <= 20) {
                 bar.className = "progress-bar danger";
                 movesLeftDisp.style.color = "var(--btn-red-top)";
@@ -562,6 +576,7 @@
             }
         }
 
+        // --- ACTIONS ---
         btnSwap.onclick = () => {
             if (selectedIndices.length !== 2) return;
             const [i1, i2] = selectedIndices;
@@ -590,11 +605,13 @@
             movesUsed++; 
             updateFuelUI();
             
+            // clear selection UI
             selectedIndices.forEach(i => { if (orbs[i] && orbs[i].el) orbs[i].el.classList.remove('selected'); });
             selectedIndices = [];
             updateUI();
             statusDisplay.innerText = actionText; 
 
+            // Check Win first
             const currentNums = orbs.map(o => o.val);
             const sorted = [...currentNums].sort((a,b) => a-b);
             const isWin = JSON.stringify(currentNums) === JSON.stringify(sorted);
@@ -602,6 +619,7 @@
             if (isWin) {
                 handleWin();
             } else {
+                // If not win, check if out of moves
                 if (movesUsed >= maxMoves) {
                     handleLoss();
                 }
@@ -628,6 +646,7 @@
 
             notifyEl.classList.add('active');
             
+            // Auto hide only if winning mid-game levels
             if (type === 'win' && currentLevelIndex < levels.length - 1) {
                 if (notifyHideTimeout) clearTimeout(notifyHideTimeout);
                 notifyHideTimeout = setTimeout(() => {
@@ -646,6 +665,7 @@
             btnSwap.disabled = true;
             btnInsert.disabled = true;
 
+            // Highlight Reset button
             btnReset.className = "btn-game btn-red";
             btnReset.innerHTML = '<i class="fa-solid fa-repeat"></i> Retry Level';
             
@@ -653,7 +673,7 @@
         }
 
         function handleWin() {
-            isGameOver = true;
+            isGameOver = true; // Stop inputs
             statusDisplay.innerHTML = `<i class="fa-solid fa-star"></i> LEVEL SORTED! <i class="fa-solid fa-star"></i>`;
             statusDisplay.style.color = "#42e695";
             orbs.forEach(o => o.el.classList.add('sorted'));
@@ -679,7 +699,12 @@
             }
         }
 
+        // init
         initLevel();
+        // Re-adjust if user resizes browser window for testing
+        window.addEventListener('resize', () => {
+            // Optional: force redraw logic if needed, but flexbox handles most
+        });
     </script>
 </body>
 </html>
