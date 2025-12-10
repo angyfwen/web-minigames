@@ -49,6 +49,43 @@
         }
         @keyframes gearSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        /* --- RAINBOW MENU BUTTON (TOP LEFT) --- */
+        .menu-btn-rainbow {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 24px;
+            border-radius: 20px;
+            color: white;
+            font-family: 'Courier Prime', monospace; /* Matching theme font */
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: lowercase;
+            cursor: pointer;
+            z-index: 2000; /* Highest priority */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            
+            /* Rainbow Gradient */
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; 
+            animation: gradientMove 4s ease infinite; 
+            
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+        .menu-btn-rainbow:active { transform: scale(0.95); }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .screen { 
             width: 100%; 
             min-height: 100vh; /* Allow it to take full height */
@@ -198,6 +235,12 @@
 
         /* --- MOBILE MEDIA QUERIES --- */
         @media (max-width: 768px) {
+            
+            /* Menu button tweak for small screens */
+            .menu-btn-rainbow {
+                top: 15px; left: 15px; font-size: 0.8rem; padding: 8px 16px;
+            }
+
             h1 { font-size: 2.2rem; }
             .title-container { padding: 20px; }
             .btn-steam { font-size: 1rem; padding: 10px 20px; }
@@ -253,6 +296,10 @@
 </head>
 <body>
 
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+        <i class="fa-solid fa-gamepad"></i> menu
+    </a>
+
     <button id="mute-btn" onclick="toggleMute()">
         <i class="fa-solid fa-volume-high" id="mute-icon"></i>
     </button>
@@ -277,6 +324,12 @@
     <div id="info-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="hideInfo()">X</button>
+            
+
+
+[Image of logic gates diagram]
+
+
             <h2><i class="fa-solid fa-brain"></i> How is this educational?</h2>
             <p>This game is a fun visualization of <strong>Boolean Logic</strong>, the math that runs computers.</p>
             <ul>
