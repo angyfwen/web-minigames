@@ -242,6 +242,11 @@
   .title-row {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   }
+  
+  /* Header Actions (Buttons) */
+  .header-actions {
+    display: flex; gap: 12px; align-items: center;
+  }
 
   header h1 {
     margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 28px; 
@@ -476,6 +481,32 @@
     .card { padding: 12px; }
     .modal iframe { height: 60vh; }
     .mobile-break { display: block; } /* Show break on mobile */
+    
+    /* Mobile Header Layout */
+    header {
+      align-items: flex-start; /* Align to top */
+    }
+    
+    .title-row {
+      flex-direction: column; /* Stack Title and Github Link */
+      align-items: flex-start;
+      gap: 6px;
+    }
+    
+    .header-actions {
+      flex-direction: column; /* Stack Buttons Vertical */
+      gap: 8px;
+      margin-top: 4px;
+    }
+    
+    .status-text {
+      margin-top: 8px; /* Give description some breathing room from the link */
+    }
+    
+    /* Adjust font size slightly for mobile title */
+    header h1 { font-size: 22px; }
+    
+    .pfp { width: 50px; height: 50px; }
   }
 </style>
 </head>
@@ -509,7 +540,7 @@
           <p class="status-text">mostly from internship projects... i guess... ゴゴゴゴ or whatever</p>
         </div>
       </div>
-      <div style="display:flex; gap:12px; align-items:center;">
+      <div class="header-actions">
         <button id="music-toggle" class="preset" title="toggle bg music (ac 3pm)">🎵</button>
         <button id="mode-toggle" class="preset" title="toggle dark / light">✨</button>
       </div>
