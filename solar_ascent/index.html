@@ -26,22 +26,30 @@
         body {
             margin: 0; overflow: hidden;
             font-family: var(--font-body);
-            background: linear-gradient(to bottom, var(--sky-1), var(--sky-2), var(--sky-3));
-            width: 100vw; 
-            height: 100vh;
-            /* CRITICAL: Lock screen for mobile */
+            /* Removed background from body to fix mobile glitches */
+            width: 100vw; height: 100vh; height: 100dvh;
             position: fixed; top: 0; left: 0;
             display: flex; justify-content: center; align-items: center;
-            user-select: none;
-            touch-action: none; 
+            user-select: none; touch-action: none; 
         }
 
-        #game-stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        /* --- NEW: DEDICATED FIXED BACKGROUND LAYER --- */
+        #sky-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            /* Default starting sky */
+            background: linear-gradient(to bottom, var(--sky-1), var(--sky-2), var(--sky-3));
+            z-index: -10; /* Sit behind everything */
+            pointer-events: none;
+            will-change: background; /* Optimize for JS changes */
+        }
 
-        /* --- BACKGROUND --- */
+        #game-stage { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 0;}
+
+        /* --- BACKGROUND OBJECTS --- */
         #stars-container {
             position: absolute; top:0; left:0; width:100%; height:100%;
-            pointer-events: none; opacity: 0; transition: opacity 0.5s ease; z-index: 0;
+            pointer-events: none; opacity: 0; transition: opacity 0.5s ease; 
+            z-index: -5; /* Above sky, below world */
         }
         .star {
             position: absolute; background: white; border-radius: 50%;
@@ -53,7 +61,7 @@
             position: absolute; top: 50px; right: 50px;
             width: 90px; height: 90px;
             background: #fdd835; border-radius: 50%;
-            box-shadow: 0 0 60px #fbc02d; z-index: 1;
+            box-shadow: 0 0 60px #fbc02d; z-index: -4;
         }
 
         #world-layer {
@@ -106,7 +114,6 @@
         .hud-top {
             padding: 20px; display: flex; justify-content: space-between; align-items: flex-start;
             pointer-events: auto;
-            /* Ensure HUD is above the game area */
             position: relative; z-index: 60;
         }
         
@@ -334,6 +341,8 @@
 </head>
 <body>
 
+    <div id="sky-background"></div>
+
     <div id="game-stage">
         
         <div id="stars-container"></div>
@@ -403,12 +412,6 @@
         <div id="edu-modal" class="modal">
             <div class="modal-box" style="border-color: #558b2f;">
                 <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> Educational Value</div>
-                
-
-
-[Image of the photosynthesis process diagram]
-
-
                 <div class="info-list">
                     <div class="info-li"><i class="fa-solid fa-seedling"></i> <div><strong>Growth:</strong> Requires resources.</div></div>
                     <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>Light:</strong> Photosynthesis energy.</div></div>
@@ -605,7 +608,9 @@
             const localPct = (progress - startStop.pct) / range;
             const c1 = interpolateColor(startStop.c1, endStop.c1, localPct);
             const c2 = interpolateColor(startStop.c2, endStop.c2, localPct);
-            document.body.style.background = `linear-gradient(to bottom, rgb(${c1[0]},${c1[1]},${c1[2]}), rgb(${c2[0]},${c2[1]},${c2[2]}))`;
+            
+            // FIX: Target the new dedicated background layer instead of body
+            document.getElementById('sky-background').style.background = `linear-gradient(to bottom, rgb(${c1[0]},${c1[1]},${c1[2]}), rgb(${c2[0]},${c2[1]},${c2[2]}))`;
 
             if(progress > 0.6) {
                 document.getElementById('stars-container').style.opacity = (progress - 0.6) * 2.5;
@@ -713,7 +718,7 @@
             if(rand < 0.2) {
                 currentTargetType = 'pest';
                 
-                // IMPORTANT FIX: Wait 2.0s so user can see it, then switch
+                // Wait 2.0s so user can see it, then switch
                 pestTimeout = setTimeout(() => {
                     if(gameActive) {
                         showFeedback("SAFE!", "#76ff03");
@@ -745,10 +750,6 @@
             // Get safe playable area logic
             const safeW = width - 180; // Button is ~160px
             const safeH = height - 300; // avoid HUD and bottom
-            
-            // RANDOM POSITION (With safe padding)
-            // But if it's the SAME target type (like pest waiting), don't move it.
-            // For now, we move every time pickNewTarget() is called.
             
             const rX = 20 + Math.random() * safeW;
             const rY = 100 + Math.random() * safeH; // 100px from top to avoid HUD
