@@ -176,7 +176,7 @@
                 <div class="label">STABILITY</div>
                 <div class="timer-val" id="orbit-timer">0.0s</div>
                 <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 10.0s</div>
-                <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 35s</div>
+                <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 20s</div>
             </div>
         </div>
 
@@ -257,7 +257,7 @@
             
             
 
-[Image of planetary orbit diagram]
+[Image of orbits]
 
 
             <div class="info-item">
@@ -299,7 +299,7 @@
                 <i class="fa-solid fa-stopwatch info-icon"></i>
                 <div>
                     <div class="info-title">Victory Condition</div>
-                    <div class="info-desc">Maintain a stable orbit for 10.0 seconds. (You have 35s total before timeout).</div>
+                    <div class="info-desc">Maintain a stable orbit for 10.0 seconds. (You have 20s total before timeout).</div>
                 </div>
             </div>
             <button class="btn" style="width: 100%; justify-content: center; border-color: var(--neon-planet); color: var(--neon-planet);" onclick="closeHelp()">RETURN TO SIM</button>
@@ -373,9 +373,9 @@
             requestAnimationFrame(drawStars);
         }
 
-        /* PHYSICS CONFIG */
-        const G = 0.35; 
-        const LAUNCH_POWER = 0.15; 
+        /* PHYSICS CONFIG - INCREASED SPEED */
+        const G = 0.8;  // Increased Gravity (Was 0.35)
+        const LAUNCH_POWER = 0.25; // Increased Launch Power (Was 0.15)
         
         let currentLevel = 0;
         let isDragging = false;
@@ -388,7 +388,7 @@
         
         let stableTime = 0;
         let totalFlightTime = 0;
-        let requiredTime = 10.0; 
+        let requiredTime = 10.0; // Reduced time req
         let gameState = 'AIMING'; 
 
         // UPDATED LEVELS
@@ -496,7 +496,7 @@
                     document.getElementById('sim-status').style.color = "#f43f5e";
                 }
 
-                if (totalFlightTime > 35.0 && stableTime < requiredTime) failLevel("TIMEOUT");
+                if (totalFlightTime > 20.0 && stableTime < requiredTime) failLevel("TIMEOUT");
 
                 updateTimerDisplay(dist >= targetZone.minR && dist <= targetZone.maxR);
             }
