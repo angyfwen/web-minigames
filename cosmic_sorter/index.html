@@ -76,7 +76,7 @@
             text-transform: lowercase;
             cursor: pointer;
             z-index: 2000;
-            display: flex;
+            display: none; /* Hidden by default (Start Screen) */
             align-items: center;
             gap: 8px;
             font-size: 1rem;
@@ -101,7 +101,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            display: flex;
+            display: none; /* Hidden by default (Start Screen) */
             gap: 10px;
             z-index: 2000;
         }
@@ -196,7 +196,7 @@
             color: #521536; padding: 15px 40px; border-radius: 999px; 
             font-family: 'Fredoka One'; font-size: 1.5rem; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
-            z-index: 2000; 
+            z-index: 3000; /* Above nav buttons */
             transition: all 0.3s ease; 
             display: flex; align-items: center; gap: 12px; white-space: nowrap; border: 4px solid #fff; 
             opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-50px);
@@ -319,11 +319,11 @@
 </head>
 <body>
 
-    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow" id="global-menu-btn" style="display:none;">
         <i class="fa-solid fa-gamepad"></i> menu
     </a>
 
-    <div class="nav-group-right">
+    <div class="nav-group-right" id="global-nav-right" style="display:none;">
         <button class="icon-btn nav-btn" onclick="goToMenu()" title="Home"><i class="fa-solid fa-house"></i></button>
         <button class="icon-btn nav-btn" id="mute-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high"></i></button>
         <button class="icon-btn nav-btn" onclick="showHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
@@ -439,8 +439,6 @@
             isMuted = !isMuted;
             document.querySelector('#mute-btn i').classList.toggle('fa-volume-high', !isMuted);
             document.querySelector('#mute-btn i').classList.toggle('fa-volume-xmark', isMuted);
-            // Also toggle class on button itself for visual state
-            document.getElementById('mute-btn').classList.toggle('muted', isMuted);
         }
 
         function playSound(type) {
@@ -462,12 +460,9 @@
                     osc.start(now); osc.stop(now + 0.2);
                     break;
                 case 'fail':
-                    // Descending "game over" tone
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(300, now);
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now);
                     osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.5);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.5);
                     osc.start(now); osc.stop(now + 0.5);
                     break;
                 case 'winLevel':
@@ -502,13 +497,24 @@
         function startGame() {
             document.getElementById('start-screen').classList.remove('active');
             document.getElementById('game-screen').classList.add('active');
+            
+            // SHOW BUTTONS
+            document.getElementById('global-menu-btn').style.display = 'flex';
+            document.getElementById('global-nav-right').style.display = 'flex';
+            
             currentLevelIndex = 0; initLevel(); playSound('select');
         }
 
         function goToMenu() {
             clearNotification();
             document.getElementById('game-screen').classList.remove('active');
-            document.getElementById('start-screen').classList.add('active'); playSound('select');
+            document.getElementById('start-screen').classList.add('active');
+            
+            // HIDE BUTTONS
+            document.getElementById('global-menu-btn').style.display = 'none';
+            document.getElementById('global-nav-right').style.display = 'none';
+
+            playSound('select');
         }
 
         // --- GAME DATA ---
@@ -552,7 +558,6 @@
             movesUsed = 0; selectedIndices = []; isGameOver = false;
             updateFuelUI();
 
-            // Reset Button Appearance
             btnReset.className = "btn-game btn-orange";
             btnReset.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Reset';
             
@@ -565,7 +570,6 @@
             container.classList.remove('faded');
             gameBoard.classList.remove('shake');
 
-            // Generate unsorted array
             let numberArray = [];
             let isSorted = true;
             do {
@@ -640,11 +644,9 @@
             let left = maxMoves - movesUsed;
             if(left < 0) left = 0;
             movesLeftDisp.innerText = left;
-            
             let pct = (left / maxMoves) * 100;
             bar.style.width = pct + "%";
             
-            // Color logic
             if(pct <= 20) {
                 bar.className = "progress-bar danger";
                 movesLeftDisp.style.color = "var(--btn-red-top)";
@@ -684,25 +686,17 @@
             movesUsed++; 
             updateFuelUI();
             
-            // clear selection UI
             selectedIndices.forEach(i => { if (orbs[i] && orbs[i].el) orbs[i].el.classList.remove('selected'); });
             selectedIndices = [];
             updateUI();
             statusDisplay.innerText = actionText; 
 
-            // Check Win first
             const currentNums = orbs.map(o => o.val);
             const sorted = [...currentNums].sort((a,b) => a-b);
             const isWin = JSON.stringify(currentNums) === JSON.stringify(sorted);
 
-            if (isWin) {
-                handleWin();
-            } else {
-                // If not win, check if out of moves
-                if (movesUsed >= maxMoves) {
-                    handleLoss();
-                }
-            }
+            if (isWin) handleWin();
+            else if (movesUsed >= maxMoves) handleLoss();
         }
 
         function clearNotification() {
@@ -725,7 +719,6 @@
 
             notifyEl.classList.add('active');
             
-            // Auto hide only if winning mid-game levels
             if (type === 'win' && currentLevelIndex < levels.length - 1) {
                 if (notifyHideTimeout) clearTimeout(notifyHideTimeout);
                 notifyHideTimeout = setTimeout(() => {
@@ -740,37 +733,24 @@
             gameBoard.classList.add('shake');
             statusDisplay.innerHTML = "OUT OF FUEL!";
             statusDisplay.style.color = "#ff4b1f";
-            
-            btnSwap.disabled = true;
-            btnInsert.disabled = true;
-
-            // Highlight Reset button
+            btnSwap.disabled = true; btnInsert.disabled = true;
             btnReset.className = "btn-game btn-red";
             btnReset.innerHTML = '<i class="fa-solid fa-repeat"></i> Retry Level';
-            
             showNotification("Mission Failed: Out of Fuel!", 'fail');
         }
 
         function handleWin() {
-            isGameOver = true; // Stop inputs
+            isGameOver = true;
             statusDisplay.innerHTML = `<i class="fa-solid fa-star"></i> LEVEL SORTED! <i class="fa-solid fa-star"></i>`;
             statusDisplay.style.color = "#42e695";
             orbs.forEach(o => o.el.classList.add('sorted'));
-            btnSwap.disabled = true; 
-            btnInsert.disabled = true;
+            btnSwap.disabled = true; btnInsert.disabled = true;
 
             if (currentLevelIndex < levels.length - 1) {
                 playSound('winLevel');
                 showNotification(`${levels[currentLevelIndex].name} Complete!`);
-                
-                setTimeout(() => {
-                    container.classList.add('faded');
-                }, 1200);
-
-                setTimeout(() => { 
-                    currentLevelIndex++; 
-                    initLevel(); 
-                }, 2200);
+                setTimeout(() => { container.classList.add('faded'); }, 1200);
+                setTimeout(() => { currentLevelIndex++; initLevel(); }, 2200);
             } else {
                 playSound('winGame');
                 showNotification("All Systems Online! You Win!");
@@ -778,12 +758,7 @@
             }
         }
 
-        // init
         initLevel();
-        // Re-adjust if user resizes browser window for testing
-        window.addEventListener('resize', () => {
-            // Optional: force redraw logic if needed, but flexbox handles most
-        });
     </script>
 </body>
 </html>
