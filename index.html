@@ -38,8 +38,6 @@
             color: #333;
             overflow: hidden;
             user-select: none;
-            /* CRITICAL: Lock body but allow internal elements to scroll */
-            touch-action: none; 
             animation: moveBg 20s linear infinite;
         }
 
@@ -60,7 +58,7 @@
         .screen.active { display: flex; animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* --- RAINBOW MENU BUTTON (TOP LEFT) --- */
+        /* --- MENU BUTTON (FIXED TOP LEFT) --- */
         .menu-btn-rainbow {
             position: absolute;
             top: 20px;
@@ -78,12 +76,9 @@
             align-items: center;
             gap: 8px;
             font-size: 1rem;
-
-            /* THE RAINBOW MAGIC 🌈 */
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
-            
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
         }
@@ -106,13 +101,7 @@
             max-width: 500px;
             width: 90%;
             position: relative;
-            background-image: repeating-linear-gradient(
-                -45deg, 
-                var(--train-red), 
-                var(--train-red) 20px, 
-                var(--train-yellow) 20px, 
-                var(--train-yellow) 40px
-            );
+            background-image: repeating-linear-gradient(-45deg, var(--train-red), var(--train-red) 20px, var(--train-yellow) 20px, var(--train-yellow) 40px);
         }
 
         .title-inner {
@@ -206,6 +195,7 @@
             flex-grow: 1;
             background-color: #8D6E63;
             border-radius: 30px;
+            /* CRITICAL: Allow scrolling */
             overflow-x: auto; 
             overflow-y: hidden;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
@@ -213,10 +203,6 @@
             position: relative;
             scrollbar-width: thin;
             scrollbar-color: var(--train-yellow) #5D4037;
-            
-            /* FIXED SCROLL FOR MOBILE */
-            touch-action: pan-x;
-            -webkit-overflow-scrolling: touch;
         }
 
         .playground-window::-webkit-scrollbar { height: 14px; }
@@ -231,6 +217,8 @@
                 linear-gradient(90deg, transparent 48%, #5a4b45 48%, #5a4b45 52%, transparent 52%),
                 linear-gradient(transparent 48%, #4e342e 48%, #4e342e 52%, transparent 52%);
             background-size: 100px 100px; 
+            /* Ensure large touch area on mobile */
+            min-width: 1000px; 
         }
 
         /* --- TRAIN CAR --- */
@@ -240,8 +228,6 @@
             cursor: grab; z-index: 10; transition: transform 0.1s;
             background: linear-gradient(to bottom, var(--train-blue), #105a8b);
             border-radius: 15px 15px 5px 5px; border: 3px solid white; box-shadow: 5px 10px 10px rgba(0,0,0,0.3);
-            /* Important for drag */
-            touch-action: none;
         }
         .train-car::after { content: ''; position: absolute; right: -15px; top: 50px; width: 25px; height: 12px; background: #333; border-radius: 0 5px 5px 0; border: 2px solid #555; z-index: -1; }
         .train-car::before { content: ''; position: absolute; left: -10px; top: 50px; width: 15px; height: 12px; background: #222; border-radius: 5px 0 0 5px; z-index: -1; }
@@ -261,10 +247,17 @@
         .train-car:active { cursor: grabbing; transform: scale(1.05); z-index: 100; }
 
         /* SMOKE EFFECT */
-        .smoke-particle {
+        .smoke {
             position: absolute; width: 20px; height: 20px;
-            background: rgba(255,255,255,0.7);
-            border-radius: 50%; pointer-events: none; z-index: 20;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: puff 1s ease-out forwards;
+            z-index: 20;
+            pointer-events: none;
+        }
+        @keyframes puff {
+            0% { opacity: 1; transform: scale(0.5) translateY(0); }
+            100% { opacity: 0; transform: scale(2.5) translateY(-60px); }
         }
 
         .controls { display: flex; justify-content: center; gap: 20px; height: 80px; }
@@ -288,12 +281,10 @@
             max-width: 450px; width: 90%; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
         }
-
         .modal-card.win { border-color: var(--train-green); }
         .modal-card.win .modal-title { color: var(--train-green); }
         .modal-card.fail { border-color: var(--train-red); }
         .modal-card.fail .modal-title { color: var(--train-red); }
-        
         .modal-title { font-family: 'Titan One', cursive; font-size: 2.5rem; margin: 0; }
         .modal-text { font-size: 1.2rem; color: #555; margin: 20px 0; font-weight: bold; line-height: 1.5; white-space: pre-wrap; }
         .modal-stars { font-size: 3rem; color: var(--train-yellow); margin-bottom: 20px; text-shadow: 0 3px 0 #d4a000; }
@@ -301,141 +292,80 @@
 
         /* --- INFO POPUP --- */
         .info-card {
-            background: #fff;
-            padding: 10px;
-            border-radius: 30px;
+            background: #fff; padding: 10px; border-radius: 30px;
             width: 90%; max-width: 600px;
             background-image: repeating-linear-gradient(-45deg, var(--train-red), var(--train-red) 15px, var(--train-yellow) 15px, var(--train-yellow) 30px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            text-align: center; position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; position: relative;
         }
-
-        .info-inner {
-            background: #fff; border-radius: 20px; padding: 30px; border: 4px solid #333;
-        }
-
-        .info-header {
-            font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-blue); margin-bottom: 20px;
-            text-shadow: 2px 2px 0 #ddd; text-transform: uppercase;
-        }
-
-        .info-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 25px;
-        }
-
-        .info-item {
-            background: #f9f9f9; padding: 15px; border-radius: 15px; border: 2px solid #eee;
-        }
-
+        .info-inner { background: #fff; border-radius: 20px; padding: 30px; border: 4px solid #333; }
+        .info-header { font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-blue); margin-bottom: 20px; text-shadow: 2px 2px 0 #ddd; text-transform: uppercase; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .info-item { background: #f9f9f9; padding: 15px; border-radius: 15px; border: 2px solid #eee; }
         .info-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
         .info-title { font-weight: 900; color: #333; display: block; margin-bottom: 5px; font-size: 1rem; }
         .info-desc { font-size: 0.8rem; color: #666; line-height: 1.3; }
 
-        .btn-ok {
-            background: var(--train-green); color: white; border: none; padding: 10px 40px;
-            border-radius: 50px; font-family: 'Titan One', cursive; font-size: 1.5rem; cursor: pointer;
-            box-shadow: 0 6px 0 #5f9609; transition: 0.1s;
-        }
+        .btn-ok { background: var(--train-green); color: white; border: none; padding: 10px 40px; border-radius: 50px; font-family: 'Titan One', cursive; font-size: 1.5rem; cursor: pointer; box-shadow: 0 6px 0 #5f9609; transition: 0.1s; }
         .btn-ok:active { transform: translateY(6px); box-shadow: none; }
-
-        .close-x {
-            position: absolute; top: -15px; right: -15px; width: 40px; height: 40px;
-            background: var(--train-red); color: white; border-radius: 50%; border: 3px solid white;
-            font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2);
-        }
+        .close-x { position: absolute; top: -15px; right: -15px; width: 40px; height: 40px; background: var(--train-red); color: white; border-radius: 50%; border: 3px solid white; font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
 
         /* --- MOBILE PATCH (CENTERING & SCROLL) --- */
         @media (max-width: 768px) {
-            
             body { 
-                position: fixed; 
-                width: 100%; 
-                min-height: 100vh;
-                height: auto; 
-                overflow: hidden;
-                background-size: 20px 20px;
-                justify-content: center;
-                align-items: center;
+                position: fixed; width: 100%; min-height: 100vh; height: auto; 
+                overflow: hidden; background-size: 20px 20px;
+                justify-content: center; align-items: center;
             }
-            .screen {
-                height: 100vh;
-            }
-
-            /* START SCREEN FIX */
+            .screen { height: 100vh; }
             .title-card { width: 85%; max-height: 85vh; overflow-y: auto; padding: 10px; }
             .title-inner { padding: 30px 10px; }
             .main-title { font-size: 2.8rem; margin-bottom: 30px; } 
             .main-title span { font-size: 1.5rem; }
             .menu-buttons { gap: 25px; width: 90%; } 
-            .btn-start, .btn-info, .play-btn { font-size: 1.1rem; padding: 12px; }
+            .btn-start, .btn-info { font-size: 1.1rem; padding: 12px; }
 
-            /* GAME SCREEN CENTERING */
+            /* CENTER GAME SCREEN */
             #game-screen.screen.active {
-                justify-content: center;
-                align-items: center;
-                display: flex;
+                justify-content: center; align-items: center; display: flex;
             }
 
             .game-wrapper { 
-                transform: scale(0.85); 
-                transform-origin: center center;
-                width: 100vw; 
-                max-width: none;
-                height: auto; 
-                max-height: 100vh;
-                margin: 0; 
-                padding: 0; 
-                box-sizing: border-box; 
-                gap: 15px; 
+                transform: scale(0.85); transform-origin: center center;
+                width: 100vw; max-width: none; height: auto; max-height: 100vh;
+                margin: 0; padding: 0; box-sizing: border-box; gap: 15px; 
             }
 
+            /* FIXED PLAYGROUND SCROLL */
             .playground-window {
-                flex-grow: 0; 
-                height: 55vh; 
-                min-height: 300px;
+                flex-grow: 0; height: 55vh; min-height: 300px;
+            }
+            /* Force large width so scrolling actually happens */
+            .playground {
+                width: 1600px; /* FIXED WIDTH FOR SCROLL */
+                height: 100%;
+                border: none; border-radius: 0;
             }
 
-            /* COMPACT HUD */
-            .hud-bar { 
-                padding: 8px 12px; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 50px;
-            }
-            .hud-left { 
-                position: absolute; top: 8px; left: 10px; transform: scale(0.85); transform-origin: left top; 
-            }
-            .level-badge { 
-                position: absolute; top: 8px; right: 10px; font-size: 0.9rem; padding: 6px 12px; 
-            }
+            .hud-bar { padding: 8px 12px; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 50px; }
+            .hud-left { position: absolute; top: 8px; left: 10px; transform: scale(0.85); transform-origin: left top; }
+            .level-badge { position: absolute; top: 8px; right: 10px; font-size: 0.9rem; padding: 6px 12px; }
             .target-box { margin-top: 0; width: 100%; order: 3; padding-top: 5px; } 
             .hud-label { display: none; }
             .target-seq { font-size: 1.3rem; margin-top: 25px; }
 
-            .playground {
-                width: calc(180% / 0.80); 
-                height: 100%;
-                border: none;
-                border-radius: 0;
-            }
-
             .train-car { width: 110px; height: 70px; font-size: 1.8rem; } 
             .wheels { bottom: -10px; }
             .wheel { width: 25px; height: 25px; }
-
             .train-car::after { right: -15px; width: 25px; height: 12px; top: 40px; }
             .train-car::before { left: -10px; width: 15px; height: 12px; top: 40px; }
 
             .controls { height: 50px; gap: 8px; margin-bottom: 0; } 
             .ctrl-btn { font-size: 0.8rem; padding: 0 15px; height: 45px; border-radius: 15px; }
             
-            .modal-card { 
-                width: 80%; 
-                padding: 15px; 
-                border-radius: 20px;
-                border: 6px solid #ccc; 
-            }
+            .modal-card { width: 80%; padding: 15px; border-radius: 20px; border: 6px solid #ccc; }
             .modal-title { font-size: 1.8rem; } 
             .modal-stars { font-size: 2.5rem; margin-bottom: 10px; } 
             .modal-text { font-size: 1rem; margin: 10px 0; } 
-            
             .info-card { width: 85%; border-radius: 20px; }
             .info-inner { padding: 20px; }
             .info-header { font-size: 1.5rem; margin-bottom: 15px; }
@@ -521,9 +451,6 @@
             <button class="close-x" onclick="closeInfo()">X</button>
             <div class="info-inner">
                 <div class="info-header"><i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?</div>
-                
-
-
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-icon" style="color: var(--train-yellow);"><i class="fa-solid fa-brain"></i></span>
@@ -602,39 +529,19 @@
             const now = audioCtx.currentTime;
 
             if (type === 'click') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.linearRampToValueAtTime(600, now + 0.1);
-                gainNode.gain.setValueAtTime(0.1, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(600, now + 0.1); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
             }
             else if (type === 'snap') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                gainNode.gain.setValueAtTime(0.1, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
             }
             else if (type === 'win') {
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((f, i) => {
-                    let o = audioCtx.createOscillator();
-                    let g = audioCtx.createGain();
-                    o.type = 'triangle'; o.frequency.value = f;
-                    o.connect(g); g.connect(audioCtx.destination);
-                    g.gain.setValueAtTime(0.1, now + i*0.1);
-                    g.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.3);
-                    o.start(now + i*0.1); o.stop(now + i*0.1 + 0.3);
+                    let o = audioCtx.createOscillator(); let g = audioCtx.createGain(); o.type = 'triangle'; o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.1, now + i*0.1); g.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.3); o.start(now + i*0.1); o.stop(now + i*0.1 + 0.3);
                 });
             }
             else if (type === 'error') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-                gainNode.gain.setValueAtTime(0.1, now);
-                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3); gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3);
             }
         }
 
@@ -643,45 +550,13 @@
             document.getElementById('vol-icon').className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
         }
 
-        // --- SMOKE EFFECT ---
-        function createSmoke(x, y) {
-            for(let i=0; i<6; i++) {
-                const part = document.createElement('div');
-                part.style.position = 'absolute';
-                part.style.width = '20px';
-                part.style.height = '20px';
-                part.style.background = 'rgba(255,255,255,0.7)';
-                part.style.borderRadius = '50%';
-                part.style.zIndex = '50';
-                part.style.pointerEvents = 'none';
-                
-                // Position near connection point
-                part.style.left = (x + Math.random() * 20) + 'px';
-                part.style.top = (y + 30 + Math.random() * 10) + 'px';
-                
-                document.getElementById('playground').appendChild(part);
-
-                const destX = (Math.random() - 0.5) * 60;
-                const destY = -50 - Math.random() * 30;
-
-                part.animate([
-                    { transform: `translate(0, 0) scale(0.5)`, opacity: 0.8 },
-                    { transform: `translate(${destX}px, ${destY}px) scale(1.5)`, opacity: 0 }
-                ], {
-                    duration: 600 + Math.random() * 400,
-                    easing: 'ease-out'
-                }).onfinish = () => part.remove();
-            }
-        }
-
-        // --- WORD BANKS ---
+        // --- LEVELS ---
         const wordPools = {
             3: ['CAT', 'DOG', 'BUS', 'VAN', 'SUN', 'FOX', 'BAT', 'HAT', 'PIG', 'ANT', 'COW'],
             4: ['SHIP', 'BOAT', 'RAIL', 'TRAM', 'TAXI', 'JEEP', 'BIKE', 'CART', 'KITE'],
             5: ['TRAIN', 'PLANE', 'TRACK', 'STEAM', 'METRO', 'SMILE', 'ZEBRA', 'TIGER', 'ROBOT']
         };
 
-        // --- LEVELS ---
         const levels = [
             { id: 1, type: 'word', length: 3, colors: ['t-red', 't-blue', 't-green'] }, 
             { id: 2, type: 'word', length: 3, colors: ['t-orange', 't-blue', 't-purple'] }, 
@@ -690,7 +565,6 @@
             { id: 5, type: 'word', length: 5, colors: ['t-indigo', 't-violet', 't-red', 't-green', 't-blue'] } 
         ];
 
-        // --- GAME STATE ---
         let currentLevelIdx = 0;
         let cars = [];
         let targetSeq = [];
@@ -698,12 +572,10 @@
         let draggedCar = null;
         let offset = { x: 0, y: 0 };
         
-        // --- MOBILE DETECT ---
         const isMobile = window.innerWidth <= 768;
         const CAR_W = isMobile ? 110 : 130; 
         const SNAP_DIST = 60;
 
-        // --- DOM ---
         const playground = document.getElementById('playground');
         const targetDisplay = document.getElementById('target-display');
         const levelDisplay = document.getElementById('level-display');
@@ -716,63 +588,27 @@
         const infoModal = document.getElementById('info-modal');
         const helpModal = document.getElementById('help-modal');
 
-        // --- NAVIGATION ---
-        function startGame() {
-            playSound('click');
-            document.getElementById('start-screen').classList.remove('active');
-            document.getElementById('game-screen').classList.add('active');
-            currentLevelIdx = 0;
-            initLevel();
-        }
+        function startGame() { playSound('click'); document.getElementById('start-screen').classList.remove('active'); document.getElementById('game-screen').classList.add('active'); currentLevelIdx = 0; initLevel(); }
+        function goHome() { playSound('click'); document.getElementById('game-screen').classList.remove('active'); document.getElementById('start-screen').classList.add('active'); winModal.classList.remove('show'); }
+        function showInfo() { playSound('click'); infoModal.classList.add('show'); }
+        function closeInfo() { playSound('click'); infoModal.classList.remove('show'); }
+        function showHelp() { playSound('click'); helpModal.classList.add('show'); }
+        function closeHelp() { playSound('click'); helpModal.classList.remove('show'); }
 
-        function goHome() {
-            playSound('click');
-            document.getElementById('game-screen').classList.remove('active');
-            document.getElementById('start-screen').classList.add('active');
-            winModal.classList.remove('show');
-        }
-
-        function showInfo() {
-            playSound('click');
-            infoModal.classList.add('show');
-        }
-
-        function closeInfo() {
-            playSound('click');
-            infoModal.classList.remove('show');
-        }
-
-        function showHelp() {
-            playSound('click');
-            helpModal.classList.add('show');
-        }
-
-        function closeHelp() {
-            playSound('click');
-            helpModal.classList.remove('show');
-        }
-
-        // --- LOGIC ---
         function initLevel() {
             playground.innerHTML = '';
             cars = [];
             winModal.classList.remove('show');
-            
             const level = levels[currentLevelIdx];
             levelDisplay.innerText = "Level " + level.id;
             
             let displayData = [];
-
             if (level.type === 'numbers') {
                 const startNum = Math.floor(Math.random() * 10) + 1;
-                displayData = [];
-                for(let i=0; i<level.length; i++) {
-                    displayData.push(String(startNum + i));
-                }
+                for(let i=0; i<level.length; i++) displayData.push(String(startNum + i));
                 targetSeq = [...displayData];
                 currentColors = level.colors;
-            } 
-            else if (level.type === 'word') {
+            } else if (level.type === 'word') {
                 const pool = wordPools[level.length];
                 const randWord = pool[Math.floor(Math.random() * pool.length)];
                 targetSeq = randWord.split('');
@@ -781,12 +617,10 @@
             }
 
             targetDisplay.innerText = targetSeq.join(' ➜ ');
-
             displayData.forEach((val, i) => {
                 const c = createCar(val, i, currentColors[i % currentColors.length]);
                 cars.push(c);
             });
-
             scatterCars();
         }
 
@@ -809,13 +643,14 @@
         }
 
         function scatterCars() {
-            const rect = playground.getBoundingClientRect();
+            // FIXED: Use explicit scrollWidth/Height or fixed dims for safer bounds
+            const playW = playground.offsetWidth; 
+            const playH = playground.offsetHeight;
             cars.forEach(c => {
-                c.next = null;
-                c.prev = null;
-                const scatterWidth = isMobile ? rect.width * 2 : rect.width; 
-                c.x = 20 + Math.random() * (scatterWidth - (CAR_W + 50));
-                c.y = 20 + Math.random() * (rect.height - 100);
+                c.next = null; c.prev = null;
+                // Keep them somewhat centered but scattered
+                c.x = 20 + Math.random() * (playW - 200);
+                c.y = 50 + Math.random() * (playH - 150);
                 updatePos(c);
             });
         }
@@ -830,19 +665,8 @@
             }
         }
 
-        // --- INTERACTION ---
         function onMouseDown(e) { startDrag(e.target, e.clientX, e.clientY); document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp); }
-        function onTouchStart(e) { 
-            // e.preventDefault(); // REMOVED: Allow default unless grabbing a car
-            const touch = e.touches[0]; 
-            // Only prevent default if we actually hit a car
-            if (e.target.closest('.train-car')) {
-                e.preventDefault();
-                startDrag(e.target, touch.clientX, touch.clientY); 
-            }
-            document.addEventListener('touchmove', onTouchMove, {passive: false}); 
-            document.addEventListener('touchend', onTouchEnd); 
-        }
+        function onTouchStart(e) { e.preventDefault(); const touch = e.touches[0]; startDrag(e.target, touch.clientX, touch.clientY); document.addEventListener('touchmove', onTouchMove, {passive: false}); document.addEventListener('touchend', onTouchEnd); }
 
         function startDrag(target, clientX, clientY) {
             const carEl = target.closest('.train-car');
@@ -859,21 +683,14 @@
         }
 
         function onMouseMove(e) { moveDrag(e.clientX, e.clientY); }
-        function onTouchMove(e) { 
-            if (draggedCar) {
-                e.preventDefault(); 
-                moveDrag(e.touches[0].clientX, e.touches[0].clientY); 
-            }
-        }
+        function onTouchMove(e) { e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
 
         function moveDrag(clientX, clientY) {
             if (!draggedCar) return;
             const scale = isMobile ? 0.85 : 1; 
             const rect = playground.getBoundingClientRect();
-            
             draggedCar.x = (clientX - rect.left - offset.x) / scale;
             draggedCar.y = (clientY - rect.top - offset.y) / scale;
-            
             updatePos(draggedCar);
         }
 
@@ -902,11 +719,42 @@
                     current.prev = other;
                     updatePos(other);
                     playSound('snap');
-                    createSmoke(current.x, current.y); // PUFF!
+                    spawnSmoke(current.x - 20, current.y + 40); // SPAWN SMOKE AT CONNECTION
                     break;
                 }
             }
         }
+
+        // --- SMOKE EFFECT ---
+        function spawnSmoke(x, y) {
+            for(let i=0; i<6; i++) {
+                let s = document.createElement('div');
+                s.className = 'smoke';
+                // Random offset for natural puff
+                s.style.left = (x + Math.random() * 30) + 'px';
+                s.style.top = (y + Math.random() * 20) + 'px';
+                s.style.animationDelay = (i * 0.1) + 's';
+                playground.appendChild(s);
+                setTimeout(() => s.remove(), 1000);
+            }
+        }
+        
+        // CSS FOR SMOKE (Added dynamically to keep main block clean, or use <style>)
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .smoke {
+                position: absolute; width: 25px; height: 25px;
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 50%;
+                animation: puff 0.8s ease-out forwards;
+                z-index: 50; pointer-events: none;
+            }
+            @keyframes puff {
+                0% { opacity: 0.8; transform: scale(0.5) translateY(0); }
+                100% { opacity: 0; transform: scale(2) translateY(-60px); }
+            }
+        `;
+        document.head.appendChild(style);
 
         function findHead(c) {
             let curr = c;
