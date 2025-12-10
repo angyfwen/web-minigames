@@ -40,7 +40,6 @@
             font-family: 'Nunito', sans-serif;
             margin: 0;
             padding: 0;
-            /* Lock the screen completely */
             width: 100vw; 
             height: 100vh;
             position: fixed; 
@@ -69,7 +68,7 @@
             display: none;
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; /* Default for Desktop */
+            justify-content: center;
             position: absolute; top: 0; left: 0;
         }
         
@@ -129,41 +128,26 @@
             margin: auto; 
         }
 
-        /* --- CONTROLS --- */
+        /* --- CONTROLS PANEL (UPDATED) --- */
         .controls-panel {
             background: #fff;
-            padding: 25px; border-radius: 25px;
+            border-radius: 25px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             border-bottom: 8px solid rgba(0,0,0,0.05);
-            display: flex; flex-direction: column;
-            position: relative; /* For the handle */
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden; /* This keeps the corners round! */
         }
         
-        /* The "Handle" Pill for Mobile */
-        .panel-handle {
-            display: none; /* Hidden on desktop */
-            width: 50px;
-            height: 6px;
-            background: #dfe6e9;
-            border-radius: 10px;
-            margin: 0 auto 15px auto;
+        /* Inner container for scrolling */
+        .controls-inner {
+            padding: 25px;
+            width: 100%;
+            box-sizing: border-box;
         }
-        
-        /* The Scroll Hint Arrow */
-        .scroll-hint {
-            display: none;
-            text-align: center;
-            color: #b2bec3;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            animation: bounce 1.5s infinite;
-            font-family: 'Fredoka One';
-        }
-        @keyframes bounce { 
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 
-            40% {transform: translateY(-5px);} 
-            60% {transform: translateY(-3px);} 
-        }
+
+        /* Mobile specific elements (hidden on desktop) */
+        .mobile-drawer-header { display: none; }
 
         .header-code {
             text-align: center; font-weight: bold; margin-bottom: 10px; 
@@ -354,7 +338,6 @@
             /* GLOBAL MOBILE SCREEN SETTINGS */
             .screen.active {
                 transform: scale(0.80);
-                /* Default to top center for the game screen */
                 transform-origin: top center;
                 display: flex;
                 height: 100%;
@@ -364,16 +347,16 @@
 
             /* SPECIFIC START SCREEN FIX: CENTER IT! */
             #start-screen.active {
-                justify-content: center; /* Center Vertically */
+                justify-content: center;
                 align-items: center;
                 padding-top: 0;
-                transform-origin: center center; /* Scale from middle */
+                transform-origin: center center;
             }
 
             /* SPECIFIC GAME SCREEN FIX: ALIGN TOP */
             #game-screen.active {
                 justify-content: flex-start;
-                padding-top: 60px; /* Buffer for notch/top */
+                padding-top: 60px;
             }
 
             .game-wrapper, .modal-card, .menu-card {
@@ -381,7 +364,6 @@
                 overflow-y: hidden; 
             }
 
-            /* --- MENU SCREEN SQUISH --- */
             .menu-card {
                 padding: 30px 20px; 
                 width: 85%; 
@@ -394,7 +376,6 @@
             .btn-start { font-size: 1.5rem; padding: 15px; }
             .btn-info-main { font-size: 1rem; padding: 12px; }
 
-            /* --- MODAL SQUISH --- */
             .modal-card {
                 width: 85%; 
                 max-width: 380px; 
@@ -413,7 +394,7 @@
             .game-wrapper {
                 display: flex;
                 flex-direction: column;
-                height: 100dvh; /* Force exact screen height */
+                height: 100dvh;
                 max-height: 100dvh;
                 padding: 10px;
                 padding-top: 10px; 
@@ -422,7 +403,6 @@
                 box-sizing: border-box;
             }
 
-            /* --- ORDER/TERMINAL (TOP SECTION) --- */
             .right-panel {
                 order: 1; 
                 flex-direction: row; 
@@ -449,7 +429,6 @@
                 font-size: 0.7rem;
             }
 
-            /* --- BURGER STACK (MIDDLE SECTION) --- */
             .plate-area {
                 order: 2;
                 flex: 1;
@@ -461,27 +440,54 @@
                 margin-top: -80px; 
             }
 
-            /* --- CONTROLS (BOTTOM SECTION) --- */
+            /* --- CONTROLS PANEL (MOBILE SPECIFIC STYLE) --- */
             .controls-panel {
                 order: 3;
                 width: 100%;
-                
-                /* SCROLLING LOGIC */
                 flex: 1; 
-                min-height: 0; 
-                overflow-y: auto; 
+                min-height: 0;
+                padding: 0; /* Clear padding so drawer works */
                 
-                padding: 15px;
-                padding-bottom: 80px; 
-                
-                /* ROUNDED CORNERS - Make them really round on mobile */
-                border-radius: 30px 30px 0 0;
+                /* IMPORTANT: THIS IS THE ROUND CORNER FIX */
+                border-radius: 40px 40px 0 0 !important; 
                 background: #fff;
             }
+
+            /* Header for the drawer (Fixed at top of panel) */
+            .mobile-drawer-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 15px 0 5px 0;
+                background: #fff; /* Opaque bg to cover scroll */
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+            }
+
+            /* The "Handle" Pill */
+            .panel-handle {
+                width: 50px;
+                height: 6px;
+                background: #b2bec3;
+                border-radius: 10px;
+                margin-bottom: 5px;
+            }
             
-            /* SHOW THE VISUAL HINTS ON MOBILE */
-            .panel-handle { display: block; }
-            .scroll-hint { display: block; }
+            /* Text to tell user to scroll */
+            .scroll-hint-text {
+                font-size: 0.75rem;
+                color: #b2bec3;
+                font-weight: bold;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            /* Inner scrolling area */
+            .controls-inner {
+                flex: 1;
+                overflow-y: auto; /* Buttons scroll INSIDE the rounded box */
+                padding: 15px;
+                padding-bottom: 80px; 
+            }
 
             .controls-grid {
                 grid-template-columns: repeat(3, 1fr); 
@@ -497,7 +503,6 @@
             .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
             .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; }
 
-            /* --- NAV BUTTONS --- */
             .nav-btn { top: 15px; width: 40px; height: 40px; font-size: 1rem; }
             .btn-home { left: 15px; }
             .btn-mute { right: 15px; }
@@ -565,22 +570,25 @@
 
         <div class="game-wrapper">
             <div class="controls-panel">
-                <div class="panel-handle"></div>
-                
-                <div class="header-code">stack.push( ... )</div>
-                <div class="controls-grid">
-                    <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
-                    <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
-                    <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
-                    <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
-                    <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
-                    <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
+                <div class="mobile-drawer-header">
+                    <div class="panel-handle"></div>
+                    <div class="scroll-hint-text">Scroll for more <i class="fa-solid fa-arrow-down"></i></div>
                 </div>
-                <div class="header-code" style="margin-top:10px;">stack.pop()</div>
-                <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
-                <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
-                
-                <div class="scroll-hint">More <i class="fa-solid fa-chevron-down"></i></div>
+
+                <div class="controls-inner">
+                    <div class="header-code">stack.push( ... )</div>
+                    <div class="controls-grid">
+                        <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
+                        <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
+                        <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
+                        <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
+                        <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
+                        <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
+                    </div>
+                    <div class="header-code" style="margin-top:10px;">stack.pop()</div>
+                    <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
+                    <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
+                </div>
             </div>
 
             <div class="plate-area">
@@ -611,10 +619,10 @@
     <script>
         // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
         document.addEventListener('touchmove', function(e) {
-            // Allow scroll only inside terminal, modals, and the new CONTROLS PANEL
+            // Allow scroll only inside terminal, modals, and the new CONTROLS INNER
             if (!e.target.closest('.terminal') && 
                 !e.target.closest('.modal-card') && 
-                !e.target.closest('.controls-panel')) {
+                !e.target.closest('.controls-inner')) {
                 e.preventDefault();
             }
         }, { passive: false });
