@@ -72,8 +72,19 @@
         .timer-val { font-family: var(--font-head); font-size: 1.8rem; color: white; line-height: 1; }
         .timer-val.active { color: var(--neon-zone); text-shadow: 0 0 20px rgba(52, 211, 153, 0.6); }
 
-        .hud-bottom { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; padding-bottom: 10px; }
-        .btn-group { display: flex; gap: 10px; }
+        /* HUD BOTTOM - DESKTOP LAYOUT FIX */
+        .hud-bottom { 
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr; /* Left, Center, Right */
+            align-items: end; 
+            pointer-events: auto; 
+            padding-bottom: 10px; 
+            width: 100%;
+        }
+        
+        .btn-group-left { display: flex; gap: 10px; justify-self: start; }
+        .btn-center { justify-self: center; } /* Centers the Reset Button */
+        .btn-group-right { justify-self: end; visibility: hidden; } /* Placeholder to balance grid */
 
         .btn {
             border: 1px solid rgba(255,255,255,0.2); background: rgba(10, 15, 30, 0.8);
@@ -86,6 +97,32 @@
         .btn-reset { border-color: var(--neon-danger); color: var(--neon-danger); padding: 10px 20px; }
         .btn-reset:hover { background: var(--neon-danger); color: white; box-shadow: 0 0 20px var(--neon-danger); }
         
+        /* RAINBOW BUTTON (BOTTOM RIGHT FIXED) */
+        .menu-btn-rainbow {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 24px;
+            border-radius: 12px;
+            color: #000;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 999;
+            display: flex; align-items: center; gap: 8px; font-size: 1rem;
+
+            /* RAINBOW MAGIC */
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; 
+            animation: gradientMove 4s ease infinite; 
+            
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            transition: transform 0.2s;
+        }
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -146,8 +183,28 @@
             .panel { min-width: auto; padding: 8px 12px; }
             .value-display { font-size: 0.9rem; }
             .timer-val { font-size: 1.4rem; }
+            
+            /* Mobile Layout for Bottom HUD */
+            .hud-bottom { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: flex-end; 
+                padding: 10px;
+            }
+            .btn-center { 
+                /* On mobile, reset button can float center-ish or stay flex */
+                position: absolute; left: 50%; transform: translateX(-50%); bottom: 10px;
+            }
+            .btn-group-left { gap: 8px; }
+
             .title-main { font-size: 2.2rem; }
             .holo-container { padding: 30px 20px; width: 90%; }
+            
+            /* Adjust Menu Button on Mobile */
+            .menu-btn-rainbow {
+                bottom: 10px; right: 10px;
+                padding: 8px 16px; font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -175,27 +232,33 @@
             <div class="panel" style="text-align: right;">
                 <div class="label">STABILITY</div>
                 <div class="timer-val" id="orbit-timer">0.0s</div>
-                <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 10.0s</div>
-                <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 20s</div>
+                <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 15.0s</div>
+                <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 35s</div>
             </div>
         </div>
 
         <div class="hud-bottom">
-            <div class="btn-group">
+            <div class="btn-group-left">
                 <button class="btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
                 <button class="btn" onclick="toggleMute()" title="Mute/Unmute"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
                 <button class="btn" onclick="showHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
             </div>
 
-            <button class="btn btn-reset" style="border-radius: 50px;" onclick="resetLevel()">
-                <i class="fa-solid fa-rotate-right mr-2"></i> RETRY
-            </button>
+            <div class="btn-center">
+                <button class="btn btn-reset" style="border-radius: 50px;" onclick="resetLevel()">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> RETRY
+                </button>
+            </div>
 
-            <div class="btn-group" style="visibility: hidden;">
-                <button class="btn">X</button>
+            <div class="btn-group-right">
+                <button class="btn" style="visibility: hidden;">X</button>
             </div>
         </div>
     </div>
+
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+        <i class="fa-solid fa-gamepad"></i> GO WEBGAMES MENU
+    </a>
 
     <div id="start-screen">
         <div class="holo-container">
@@ -219,7 +282,7 @@
         <div class="modal-box" style="border-color: var(--neon-zone);">
             <div class="text-6xl text-emerald-400 mb-4"><i class="fa-regular fa-circle-check"></i></div>
             <div class="modal-h">STABLE ORBIT</div>
-            <p class="modal-p">Trajectory confirmed for 10 seconds.</p>
+            <p class="modal-p">Trajectory confirmed for 15 seconds.</p>
             <button class="btn" style="width: 100%; justify-content: center; background: rgba(74, 222, 128, 0.1); border-color: var(--neon-zone); color: var(--neon-zone);" onclick="nextLevel()">NEXT SECTOR</button>
         </div>
     </div>
@@ -257,14 +320,14 @@
             
             
 
-[Image of orbits]
+[Image of the Sun]
 
 
             <div class="info-item">
-                <i class="fa-solid fa-globe info-icon"></i>
+                <i class="fa-solid fa-sun info-icon"></i>
                 <div>
-                    <div class="info-title">Orbital Mechanics</div>
-                    <div class="info-desc">Experience Kepler's Laws intuitively. Planets move faster when closer to the star.</div>
+                    <div class="info-title">The Sun</div>
+                    <div class="info-desc">The star at the center provides the gravitational pull that keeps planets in orbit.</div>
                 </div>
             </div>
             <div class="info-item">
@@ -299,7 +362,7 @@
                 <i class="fa-solid fa-stopwatch info-icon"></i>
                 <div>
                     <div class="info-title">Victory Condition</div>
-                    <div class="info-desc">Maintain a stable orbit for 10.0 seconds. (You have 20s total before timeout).</div>
+                    <div class="info-desc">Maintain a stable orbit for 15.0 seconds. (You have 35s total before timeout).</div>
                 </div>
             </div>
             <button class="btn" style="width: 100%; justify-content: center; border-color: var(--neon-planet); color: var(--neon-planet);" onclick="closeHelp()">RETURN TO SIM</button>
@@ -373,9 +436,9 @@
             requestAnimationFrame(drawStars);
         }
 
-        /* PHYSICS CONFIG - INCREASED SPEED */
-        const G = 0.8;  // Increased Gravity (Was 0.35)
-        const LAUNCH_POWER = 0.25; // Increased Launch Power (Was 0.15)
+        /* PHYSICS CONFIG */
+        const G = 0.8; 
+        const LAUNCH_POWER = 0.25; 
         
         let currentLevel = 0;
         let isDragging = false;
@@ -388,7 +451,7 @@
         
         let stableTime = 0;
         let totalFlightTime = 0;
-        let requiredTime = 10.0; // Reduced time req
+        let requiredTime = 10.0; 
         let gameState = 'AIMING'; 
 
         // UPDATED LEVELS
