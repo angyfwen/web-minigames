@@ -324,25 +324,29 @@
            ========================================= */
         @media (max-width: 900px) {
             
-            /* KEY FIX: Scale down AND PUSH UP */
+            /* GLOBAL MOBILE SCREEN SETTINGS */
             .screen.active {
-                /* Scale to 80% */
                 transform: scale(0.80);
-                /* Anchor to TOP CENTER to force it upwards */
+                /* Default to top center for the game screen */
                 transform-origin: top center;
-                
-                /* Layout */
                 display: flex;
-                justify-content: flex-start; /* Align contents to top */
-                align-items: center;
-                
-                /* Dimensions & Overflow */
                 height: 100%;
                 width: 100%;
                 overflow: hidden; 
-                
-                /* Add a safety buffer for the notch */
-                padding-top: 60px;
+            }
+
+            /* SPECIFIC START SCREEN FIX: CENTER IT! */
+            #start-screen.active {
+                justify-content: center; /* Center Vertically */
+                align-items: center;
+                padding-top: 0;
+                transform-origin: center center; /* Scale from middle */
+            }
+
+            /* SPECIFIC GAME SCREEN FIX: ALIGN TOP */
+            #game-screen.active {
+                justify-content: flex-start;
+                padding-top: 60px; /* Buffer for notch/top */
             }
 
             .game-wrapper, .modal-card, .menu-card {
@@ -355,7 +359,6 @@
                 padding: 30px 20px; 
                 width: 85%; 
                 max-width: 350px;
-                /* Remove margins that push it down */
                 margin: 0;
                 transform: rotate(0deg); 
             }
@@ -383,13 +386,12 @@
             .game-wrapper {
                 display: flex;
                 flex-direction: column;
-                min-height: 100dvh;
-                height: auto;
+                height: 100dvh; /* Force exact screen height */
+                max-height: 100dvh;
                 padding: 10px;
-                /* Remove extra top padding since we align to top now */
                 padding-top: 10px; 
                 gap: 10px;
-                overflow-y: visible;
+                overflow: hidden; 
                 box-sizing: border-box;
             }
 
@@ -436,9 +438,16 @@
             .controls-panel {
                 order: 3;
                 width: 100%;
-                height: auto;
+                
+                /* NEW SCROLLING LOGIC */
+                flex: 1; /* Take remaining space */
+                min-height: 0; 
+                overflow-y: auto; /* Internal scroll */
+                
                 padding: 15px;
+                padding-bottom: 80px; /* Space for scrolling past button */
                 border-radius: 20px 20px 0 0;
+                background: #fff;
             }
 
             .controls-grid {
@@ -565,8 +574,10 @@
     <script>
         // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
         document.addEventListener('touchmove', function(e) {
-            // Allow scroll only inside terminal and modals
-            if (!e.target.closest('.terminal') && !e.target.closest('.modal-card')) {
+            // Allow scroll only inside terminal, modals, and the new CONTROLS PANEL
+            if (!e.target.closest('.terminal') && 
+                !e.target.closest('.modal-card') && 
+                !e.target.closest('.controls-panel')) {
                 e.preventDefault();
             }
         }, { passive: false });
