@@ -103,8 +103,6 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 50; pointer-events: none;
             display: none; 
-            /* Changed to allow absolute positioning of children */
-            
         }
 
         .hud-top {
@@ -114,11 +112,11 @@
             pointer-events: auto; z-index: 60;
         }
         
-        /* Adjusted container to sit to the right of the menu button */
         .badge-container { 
             display: flex; gap: 10px; 
-            /* Pushes the stats away from the left edge */
-            margin-left: 110px; 
+            /* Pushes badges to the right of the menu button */
+            margin-left: 120px; 
+            align-items: center;
         }
 
         .badge {
@@ -126,6 +124,7 @@
             font-family: var(--font-title); font-size: 1.3rem; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px;
             color: #558b2f; border: 3px solid #33691e; transition: all 0.2s;
+            white-space: nowrap;
         }
         .timer-badge { color: #d32f2f; border-color: #c62828; }
 
@@ -172,7 +171,7 @@
             animation: gradientMove 4s ease infinite; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
-            pointer-events: auto; /* Ensure clickable */
+            pointer-events: auto;
         }
         .menu-btn-rainbow:hover { transform: scale(1.05); }
         .menu-btn-rainbow:active { transform: scale(0.95); }
@@ -247,6 +246,7 @@
             position: absolute; font-family: var(--font-title); font-size: 3rem;
             color: white; text-shadow: 2px 2px 0 black; text-align: center; width: 200px;
             pointer-events: none; animation: floatUp 0.8s forwards; z-index: 100;
+            /* Centered in the popup */
             left: 50%; top: 50%; margin-left: -100px; margin-top: -50px;
         }
         @keyframes floatUp { 0% {transform: translateY(0) scale(0.5); opacity:0;} 100% {transform: translateY(-80px) scale(1.2); opacity:0;} }
@@ -355,12 +355,34 @@
             .btn-play { font-size: 2rem; padding: 12px 50px; }
             .btn-info { font-size: 0.9rem; padding: 10px 20px; }
 
-            .hud-top { padding: 10px; }
+            .hud-top { 
+                padding: 15px; 
+                align-items: center;
+            }
+
+            /* --- ALIGNMENT FIX FOR MOBILE --- */
+            .menu-btn-rainbow {
+                top: 15px;
+                left: 15px;
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+
+            .badge-container { 
+                margin-left: 110px; /* Space for the button */
+                margin-top: 0;
+                flex-direction: row; 
+                gap: 5px; 
+                align-items: center;
+            }
+
+            .badge { 
+                font-size: 0.85rem; 
+                padding: 6px 12px; 
+                border-width: 2px;
+                white-space: nowrap;
+            }
             
-            /* Responsive Badge Adjustment */
-            .badge-container { margin-left: 0; margin-top: 50px; flex-direction: column; gap: 8px; align-items: flex-start; }
-            
-            .badge { font-size: 0.9rem; padding: 5px 12px; border-width: 2px; }
             .btn-round { width: 40px; height: 40px; font-size: 1rem; }
 
             /* Mobile QTE Ring scaling */
