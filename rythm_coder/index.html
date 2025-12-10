@@ -19,6 +19,8 @@
             --neon-green: #00ff00;
             --neon-yellow: #ffff00;
             --neon-orange: #ff9900;
+            --neon-purple: #9d46ff; /* New Purple */
+            --neon-red: #ff3333;    /* New Red for Error */
             --grid-off: #151515;
         }
 
@@ -110,11 +112,21 @@
             max-height: 98vh; 
         }
 
+        /* TERMINAL WITH RED SHAKE STATE */
         .terminal {
             background: #020202; border-radius: 8px; padding: 12px;
-            border: 1px solid var(--neon-blue); display: flex; flex-direction: column;
+            border: 2px solid var(--neon-blue); display: flex; flex-direction: column;
             flex-shrink: 0;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .terminal.error {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 20px var(--neon-red), inset 0 0 20px rgba(255, 51, 51, 0.2);
+        }
+
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
         .term-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 6px; }
         .term-title { color: var(--neon-blue); font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
         .term-content { color: #eee; font-size: 0.95rem; line-height: 1.4; white-space: nowrap; overflow-x: auto; }
@@ -169,13 +181,22 @@
             font-family: 'Fira Code', monospace; font-weight: bold; font-size: 0.9rem; 
             cursor: pointer; text-transform: uppercase; 
             display: flex; align-items: center; justify-content: center; gap: 6px; 
-            transition: 0.1s; flex: 1; touch-action: manipulation;
+            transition: 0.2s; flex: 1; touch-action: manipulation;
         }
         .btn:active { transform: scale(0.96); }
+        
+        /* Disable State */
+        .btn:disabled {
+            opacity: 0.4;
+            filter: grayscale(1);
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
 
-        .btn-play { background: var(--neon-green); color: black; }
+        .btn-play { background: var(--neon-purple); color: white; box-shadow: 0 0 10px var(--neon-purple); }
         .btn-stop { background: var(--neon-pink); color: white; display: none; }
-        .btn-submit { background: var(--neon-yellow); color: black; flex: 2; }
+        .btn-submit { background: var(--neon-green); color: black; flex: 2; box-shadow: 0 0 10px var(--neon-green); }
         .btn-icon { background: #222; color: #fff; border: 1px solid #444; flex: 0 0 45px; }
 
         /* --- START SCREEN STYLES --- */
@@ -273,7 +294,7 @@
     <div id="game-screen" class="screen">
         <div class="game-panel">
             
-            <div class="terminal">
+            <div class="terminal" id="code-terminal">
                 <div class="term-header">
                     <span class="term-title">/// MISSION CODE</span>
                     <span class="term-title text-white" id="level-num">LVL 1</span>
@@ -309,8 +330,8 @@
                     <button id="btn-stop" class="btn btn-stop" onclick="togglePlay()">
                         <i class="fa-solid fa-stop"></i> STOP LOOP
                     </button>
-                    <button class="btn btn-submit" onclick="submitSolution()">
-                        <i class="fa-solid fa-check"></i> CHECK CODE
+                    <button id="btn-submit" class="btn btn-submit" disabled onclick="submitSolution()">
+                        <i class="fa-solid fa-check"></i> submit code
                     </button>
                 </div>
             </div>
@@ -339,7 +360,7 @@
     <div id="info-modal" class="modal">
         <div class="modal-box info-box">
             <h2 class="text-xl font-bold text-yellow-400 mb-4" style="font-family: 'Titan One'">
-                <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
+                EDUCATIONAL VALUE
             </h2>
             
             
@@ -377,8 +398,8 @@
                     <span class="info-desc">Tap the grid squares to match the code instructions. (e.g., `kick.play(1)` means tap column 1 on the kick row).</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-title">3. Check & Play</span>
-                    <span class="info-desc">Hit <strong>CHECK CODE</strong> to see if you got it right!</span>
+                    <span class="info-title">3. Play & Submit</span>
+                    <span class="info-desc">Hit <strong>PLAY LOOP</strong> to hear it. This unlocks the <strong>submit code</strong> button!</span>
                 </div>
             </div>
             <button class="btn btn-submit w-full" style="background: var(--neon-blue);" onclick="closeHelp()">LET'S CODE</button>
@@ -386,7 +407,7 @@
     </div>
 
     <script>
-        // --- AUDIO ENGINE (FIXED FOR IOS) ---
+        // --- AUDIO ENGINE ---
         const AudioSys = {
             ctx: null, muted: false,
             unlock() {
@@ -443,13 +464,8 @@
         };
 
         // GLOBAL UNLOCK LISTENER (Catches first tap anywhere)
-        document.addEventListener('touchstart', function() {
-            AudioSys.unlock();
-        }, { once: true });
-        
-        document.addEventListener('click', function() {
-            AudioSys.unlock();
-        }, { once: true });
+        document.addEventListener('touchstart', function() { AudioSys.unlock(); }, { once: true });
+        document.addEventListener('click', function() { AudioSys.unlock(); }, { once: true });
 
         function toggleMute() {
             AudioSys.muted = !AudioSys.muted;
@@ -459,6 +475,7 @@
 
         /* --- GAME LOGIC --- */
         const INSTRUMENTS = ["kick", "snare", "hihat", "synth"];
+        let hasPlayedLoop = false; // Dependency Flag
         
         function getRandomInts(count, min, max) {
             let nums = new Set();
@@ -503,7 +520,7 @@
         const mainGridEl = document.getElementById('main-grid'); const sweepBar = document.getElementById('sweep-bar');
 
         function startGame() { 
-            AudioSys.unlock(); // FORCE UNLOCK HERE
+            AudioSys.unlock(); 
             document.getElementById('start-screen').classList.remove('active'); 
             document.getElementById('game-screen').classList.add('active'); 
             currentLevelIdx = 1; 
@@ -529,6 +546,10 @@
             const badge = document.getElementById('difficulty-badge');
             badge.innerText = data.badge; badge.style.color = data.color;
             document.getElementById('instructions').innerHTML = data.html;
+            
+            // RESET STATE
+            hasPlayedLoop = false;
+            document.getElementById('btn-submit').disabled = true;
             
             stopSequence(); resetGrid();
         }
@@ -572,6 +593,10 @@
         function togglePlay() { isPlaying ? stopSequence() : startSequence(); }
 
         function startSequence() {
+            // UNLOCK SUBMIT BUTTON
+            hasPlayedLoop = true;
+            document.getElementById('btn-submit').disabled = false;
+
             isPlaying = true; currentStep = 0; 
             document.getElementById('btn-play').style.display = 'none'; 
             document.getElementById('btn-stop').style.display = 'flex'; 
@@ -616,10 +641,17 @@
                 else document.getElementById('modal').style.display = 'flex';
             } else {
                 AudioSys.trigger(1);
-                const panel = document.querySelector('.game-panel');
-                panel.classList.remove('shake');
-                void panel.offsetWidth;
-                panel.classList.add('shake');
+                
+                // RED SHAKE ERROR EFFECT
+                const term = document.getElementById('code-terminal');
+                term.classList.remove('error', 'shake'); // Reset
+                void term.offsetWidth; // Trigger reflow
+                term.classList.add('error', 'shake');
+                
+                // Remove error style after animation
+                setTimeout(() => {
+                    term.classList.remove('error', 'shake');
+                }, 500);
             }
         }
 
