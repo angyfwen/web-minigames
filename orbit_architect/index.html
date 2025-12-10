@@ -17,116 +17,138 @@
             --neon-planet: #22d3ee;
             --neon-zone: #34d399;
             --neon-danger: #f43f5e;
+            --glass-panel: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(34, 211, 238, 0.3);
             --font-head: 'Orbitron', sans-serif;
             --font-body: 'Share Tech Mono', monospace;
         }
 
-        /* NUCLEAR MOBILE FIXES */
-        * { -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; -webkit-user-select: none; }
+        /* MOBILE FIX: Stop highlighting on tap */
+        * { -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: var(--font-body);
             background-color: var(--space-bg);
             color: #fff;
-            width: 100vw; height: 100vh; height: 100dvh;
-            margin: 0; padding: 0;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0;
             overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-            position: fixed; top:0; left:0; /* Lock screen */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: none; 
             background: 
                 radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 50% 50%, #11111f 0%, #000000 100%);
         }
 
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        #starfield { z-index: 0; opacity: 0.8; }
-        #game-canvas { z-index: 1; }
+        #starfield, #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #starfield { z-index: 0; pointer-events: none; opacity: 0.9; }
+        #game-canvas { z-index: 1; cursor: crosshair; }
 
-        /* --- UI LAYER --- */
+        /* UI */
         .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10; pointer-events: none;
             display: flex; flex-direction: column; justify-content: space-between; 
-            padding: 15px; box-sizing: border-box;
+            padding: 20px;
         }
 
-        .hud-top { display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto; width: 100%; }
+        .hud-top { display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto; }
 
         .panel {
             background: rgba(10, 15, 30, 0.85); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 10px 15px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5); min-width: 140px;
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px 20px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5); min-width: 160px;
         }
 
-        .label { font-size: 0.6rem; color: #94a3b8; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 4px; display: block; }
-        .value-display { font-size: 1rem; font-weight: 700; color: var(--neon-planet); font-family: var(--font-head); }
-        .data-row { font-size: 0.75rem; color: #cbd5e1; margin-top: 2px; display: flex; justify-content: space-between; gap: 10px; }
-        .timer-val { font-family: var(--font-head); font-size: 1.5rem; color: white; line-height: 1; }
-        .timer-val.active { color: var(--neon-zone); text-shadow: 0 0 15px rgba(52, 211, 153, 0.6); }
+        .label { font-size: 0.7rem; color: #94a3b8; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px; padding-bottom: 2px; display: block; }
+        .value-display { font-size: 1.1rem; font-weight: 700; color: var(--neon-planet); font-family: var(--font-head); }
+        .data-row { font-size: 0.85rem; color: #cbd5e1; margin-top: 3px; display: flex; justify-content: space-between; }
+        .data-num { color: white; font-weight: bold; font-family: var(--font-body); }
+        .timer-val { font-family: var(--font-head); font-size: 1.8rem; color: white; line-height: 1; }
+        .timer-val.active { color: var(--neon-zone); text-shadow: 0 0 20px rgba(52, 211, 153, 0.6); }
 
-        .hud-bottom { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; padding-bottom: 5px; width: 100%; }
-        
+        .hud-bottom { display: flex; justify-content: space-between; align-items: flex-end; pointer-events: auto; padding-bottom: 10px; }
+        .btn-group { display: flex; gap: 10px; }
+
         .btn {
             border: 1px solid rgba(255,255,255,0.2); background: rgba(10, 15, 30, 0.8);
-            width: 45px; height: 45px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 1.1rem; backdrop-filter: blur(4px);
-            transition: 0.2s; cursor: pointer;
+            padding: 10px; font-family: var(--font-head); font-size: 0.9rem;
+            cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s; color: white; border-radius: 8px; backdrop-filter: blur(4px); min-width: 45px;
         }
-        .btn:active { transform: scale(0.9); background: white; color: black; }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 20px white; border-color: white; }
+        .btn:active { transform: scale(0.95); }
+        .btn-reset { border-color: var(--neon-danger); color: var(--neon-danger); padding: 10px 20px; }
+        .btn-reset:hover { background: var(--neon-danger); color: white; box-shadow: 0 0 20px var(--neon-danger); }
         
-        .btn-reset { 
-            width: auto; padding: 0 20px; height: 45px; 
-            border-color: var(--neon-danger); color: var(--neon-danger); 
-            font-family: var(--font-head); font-size: 0.9rem;
-        }
-        .btn-reset:active { background: var(--neon-danger); color: white; }
-
-        /* --- START SCREEN --- */
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.3);
         }
 
         .holo-container {
-            background: rgba(8, 12, 25, 0.85); border: 1px solid var(--neon-planet);
-            box-shadow: 0 0 50px rgba(34, 211, 238, 0.2);
-            padding: 30px; border-radius: 20px; text-align: center;
-            position: relative; animation: floatUI 6s ease-in-out infinite; width: 90%; max-width: 350px;
+            background: rgba(8, 12, 25, 0.7); border: 1px solid var(--neon-planet);
+            box-shadow: 0 0 60px rgba(34, 211, 238, 0.15), inset 0 0 40px rgba(34, 211, 238, 0.05);
+            backdrop-filter: blur(12px); padding: 40px 50px; border-radius: 16px; text-align: center;
+            position: relative; animation: floatUI 6s ease-in-out infinite; max-width: 600px; width: 85%;
         }
-        @keyframes floatUI { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-8px);} }
+        .corner { position: absolute; width: 15px; height: 15px; border: 2px solid white; }
+        .tl { top: -1px; left: -1px; border-right: none; border-bottom: none; border-color: var(--neon-planet); }
+        .tr { top: -1px; right: -1px; border-left: none; border-bottom: none; border-color: var(--neon-planet); }
+        .bl { bottom: -1px; left: -1px; border-right: none; border-top: none; border-color: var(--neon-planet); }
+        .br { bottom: -1px; right: -1px; border-left: none; border-top: none; border-color: var(--neon-planet); }
+        @keyframes floatUI { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
 
         .title-main {
-            font-family: var(--font-head); font-size: 2.5rem; line-height: 1; margin-bottom: 8px;
+            font-family: var(--font-head); font-size: 3.5rem; line-height: 1; margin-bottom: 10px;
             background: linear-gradient(to bottom, #fff, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+            text-shadow: 0 0 30px rgba(34, 211, 238, 0.4); letter-spacing: 2px;
         }
-        .btn-start {
-            background: rgba(34, 211, 238, 0.15); color: var(--neon-planet); font-size: 1.2rem; padding: 15px 0; width: 100%;
-            border: 1px solid var(--neon-planet); border-radius: 8px; font-family: var(--font-head); margin-top: 20px;
-        }
-        .btn-start:active { background: var(--neon-planet); color: #000; }
+        .title-sub { font-size: 0.9rem; color: #94a3b8; margin-bottom: 30px; letter-spacing: 6px; text-transform: uppercase; font-weight: 700; }
 
-        /* --- MODALS --- */
+        .btn-start {
+            background: rgba(34, 211, 238, 0.1); color: var(--neon-planet); font-size: 1.2rem; padding: 14px 40px;
+            border: 1px solid var(--neon-planet); border-radius: 4px; transition: all 0.3s; font-family: var(--font-head);
+        }
+        .btn-start:hover { background: var(--neon-planet); color: #000; box-shadow: 0 0 40px rgba(34, 211, 238, 0.5); }
+        .btn-start-info { margin-top: 20px; color: #94a3b8; background: transparent; border: none; font-size: 0.9rem; cursor: pointer; letter-spacing: 2px; font-family: var(--font-head); }
+        .btn-start-info:hover { color: white; text-shadow: 0 0 10px white; }
+
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
             display: none; justify-content: center; align-items: center; z-index: 100;
         }
         .modal-box {
-            background: #0b0b15; border: 1px solid var(--neon-zone); padding: 30px 20px; width: 85%; max-width: 360px; text-align: center;
-            box-shadow: 0 0 60px rgba(52, 211, 153, 0.2); border-radius: 16px;
+            background: #0b0b15; border: 1px solid var(--neon-zone); padding: 30px; width: 85%; max-width: 500px; text-align: center;
+            box-shadow: 0 0 80px rgba(52, 211, 153, 0.2); animation: zoomIn 0.3s ease-out; border-radius: 12px;
+            max-height: 90vh; overflow-y: auto;
         }
-        .modal-h { font-family: var(--font-head); font-size: 1.8rem; margin-bottom: 10px; color: white; }
-        .modal-p { font-size: 0.95rem; color: #94a3b8; margin-bottom: 20px; line-height: 1.4; }
-        
-        .info-item { margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start; text-align: left; }
-        .info-icon { font-size: 1.4rem; color: var(--neon-planet); min-width: 25px; margin-top: 2px; }
-        .info-title { color: var(--neon-sun); font-family: var(--font-head); font-weight: 700; font-size: 1rem; }
-        .info-desc { color: #cbd5e1; font-size: 0.85rem; }
+        @keyframes zoomIn { from{transform: scale(0.9); opacity:0;} to{transform: scale(1); opacity:1;} }
+        .modal-h { font-family: var(--font-head); font-size: 2rem; margin-bottom: 10px; color: white; display: flex; align-items: center; justify-content: center; gap: 15px;}
+        .modal-p { font-size: 1rem; color: #94a3b8; margin-bottom: 25px; }
 
+        .info-box { border-color: var(--neon-sun); box-shadow: 0 0 60px rgba(251, 191, 36, 0.15); text-align: left; }
+        .info-item { margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-start; }
+        .info-icon { font-size: 1.5rem; color: var(--neon-planet); min-width: 30px; margin-top: 2px; }
+        .info-title { color: var(--neon-sun); font-family: var(--font-head); font-weight: 700; font-size: 1.1rem; margin-bottom: 3px; }
+        .info-desc { color: #cbd5e1; font-size: 0.9rem; line-height: 1.4; }
+
+        /* --- MOBILE TWEAKS --- */
+        @media (max-width: 768px) {
+            .hud-top { padding: 10px; }
+            .panel { min-width: auto; padding: 8px 12px; }
+            .value-display { font-size: 0.9rem; }
+            .timer-val { font-size: 1.4rem; }
+            .title-main { font-size: 2.2rem; }
+            .holo-container { padding: 30px 20px; width: 90%; }
+        }
     </style>
 </head>
 <body>
@@ -140,125 +162,147 @@
                 <div class="label">TELEMETRY</div>
                 <div class="value-display" id="level-display">SECTOR 01</div>
                 <div class="data-row">
-                    <span>SPD</span> <span><span class="data-num" id="val-speed">0</span> km/s</span>
+                    <span>VEL</span> <span><span class="data-num" id="val-speed">0000</span> km/s</span>
+                </div>
+                <div class="data-row">
+                    <span>DIST</span> <span><span class="data-num" id="val-dist">0.00</span> AU</span>
+                </div>
+                <div style="font-size: 0.7rem; color: #64748b; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
+                    STATUS: <span id="sim-status" style="color:white;">READY</span>
                 </div>
             </div>
             
             <div class="panel" style="text-align: right;">
-                <div class="label">ORBIT TIME</div>
+                <div class="label">STABILITY</div>
                 <div class="timer-val" id="orbit-timer">0.0s</div>
-                <div class="text-xs text-gray-400 font-bold" id="target-time">GOAL: 15s</div>
+                <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 15.0s</div>
+                <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 35s</div>
             </div>
         </div>
 
         <div class="hud-bottom">
-            <div style="display:flex; gap:10px;">
-                <button class="btn" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
-                <button class="btn" onclick="showHelp()"><i class="fa-solid fa-question"></i></button>
+            <div class="btn-group">
+                <button class="btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+                <button class="btn" onclick="toggleMute()" title="Mute/Unmute"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
+                <button class="btn" onclick="showHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
             </div>
-            <button class="btn btn-reset" onclick="resetLevel()">
+
+            <button class="btn btn-reset" style="border-radius: 50px;" onclick="resetLevel()">
                 <i class="fa-solid fa-rotate-right mr-2"></i> RETRY
             </button>
+
+            <div class="btn-group" style="visibility: hidden;">
+                <button class="btn">X</button>
+            </div>
         </div>
     </div>
 
     <div id="start-screen">
         <div class="holo-container">
-            <div style="font-size: 3rem; color: var(--neon-sun); margin-bottom: 10px; filter: drop-shadow(0 0 20px var(--neon-sun));">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <div style="font-size: 3rem; color: var(--neon-sun); margin-bottom: 10px; filter: drop-shadow(0 0 30px var(--neon-sun));">
                 <i class="fa-solid fa-atom fa-spin" style="--fa-animation-duration: 20s;"></i>
             </div>
             <div class="title-main">ORBIT<br>ARCHITECT</div>
-            <div style="color: #94a3b8; font-size: 0.8rem; letter-spacing: 4px; margin-bottom: 20px;">MOBILE EDITION</div>
-            
-            <button class="btn-start" onclick="startGame()">INITIALIZE</button>
-            
-            <button style="margin-top:15px; background:none; border:none; color:#64748b; font-family:var(--font-head); font-size:0.8rem; letter-spacing:1px;" onclick="showEducationalInfo()">
-                EDUCATIONAL VALUE
-            </button>
+            <div class="title-sub">DEEP GALAXY EDITION</div>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <button class="btn btn-start" onclick="startGame()">INITIALIZE</button>
+                <button class="btn-start-info" onclick="showEducationalInfo()">
+                    <i class="fa-solid fa-graduation-cap mr-2"></i> EDUCATIONAL VALUE
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-box" style="border-color: var(--neon-zone);">
-            <div class="text-5xl text-emerald-400 mb-4"><i class="fa-regular fa-circle-check"></i></div>
+            <div class="text-6xl text-emerald-400 mb-4"><i class="fa-regular fa-circle-check"></i></div>
             <div class="modal-h">STABLE ORBIT</div>
-            <p class="modal-p">Trajectory maintained for 15 seconds. Excellent work, Architect.</p>
-            <button class="btn-start" style="margin-top:0; border-color:var(--neon-zone); background:rgba(52, 211, 153, 0.1); color:var(--neon-zone);" onclick="nextLevel()">NEXT SECTOR</button>
+            <p class="modal-p">Trajectory confirmed for 15 seconds.</p>
+            <button class="btn" style="width: 100%; justify-content: center; background: rgba(74, 222, 128, 0.1); border-color: var(--neon-zone); color: var(--neon-zone);" onclick="nextLevel()">NEXT SECTOR</button>
         </div>
     </div>
 
     <div id="finish-modal" class="modal">
-        <div class="modal-box" style="border-color: var(--neon-sun);">
-            <div class="text-5xl text-yellow-400 mb-4"><i class="fa-solid fa-trophy"></i></div>
-            <div class="modal-h" style="color: var(--neon-sun);">COMPLETE</div>
-            <p class="modal-p">All sectors mapped successfully.</p>
-            <button class="btn-start" style="margin-top:0; border-color:white; color:white;" onclick="goHome()">HOME</button>
+        <div class="modal-box" style="border-color: var(--neon-sun); box-shadow: 0 0 80px rgba(251, 191, 36, 0.3);">
+            <div class="text-6xl text-yellow-400 mb-4"><i class="fa-solid fa-trophy"></i></div>
+            <div class="modal-h" style="color: var(--neon-sun);">MISSION COMPLETE</div>
+            <p class="modal-p">All sectors mapped. Data uplink complete.</p>
+            <button class="btn" style="width: 100%; justify-content: center; border-color: white;" onclick="goHome()">RETURN TO MENU</button>
         </div>
     </div>
 
     <div id="crash-modal" class="modal">
-        <div class="modal-box" style="border-color: var(--neon-danger);">
-            <div class="text-5xl text-red-500 mb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="modal-box" style="border-color: var(--neon-danger); box-shadow: 0 0 60px rgba(244, 63, 94, 0.3);">
+            <div class="text-6xl text-red-500 mb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <div class="modal-h" style="color: var(--neon-danger);">FAILURE</div>
             <p class="modal-p" id="crash-msg">Object collision detected.</p>
-            <button class="btn-start" style="margin-top:0; border-color:var(--neon-danger); background:rgba(244, 63, 94, 0.1); color:var(--neon-danger);" onclick="resetLevel()">RETRY LAUNCH</button>
+            <button class="btn btn-reset" style="width: 100%; justify-content: center; background: var(--neon-danger); color: black;" onclick="resetLevel()">RETRY LAUNCH</button>
+        </div>
+    </div>
+
+    <div id="edu-modal" class="modal">
+        <div class="modal-box info-box">
+            <h2 class="modal-h" style="text-align: left; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px;">
+                <i class="fa-solid fa-brain" style="color: var(--neon-planet);"></i> HOW IS THIS EDUCATIONAL?
+            </h2>
+            <div class="info-item">
+                <i class="fa-solid fa-atom info-icon"></i>
+                <div>
+                    <div class="info-title">Newtonian Physics</div>
+                    <div class="info-desc">Learn how Gravity (Mass) interacts with Velocity (Momentum) to create orbits.</div>
+                </div>
+            </div>
+            
+            
+
+[Image of orbits]
+
+
+            <div class="info-item">
+                <i class="fa-solid fa-globe info-icon"></i>
+                <div>
+                    <div class="info-title">Orbital Mechanics</div>
+                    <div class="info-desc">Experience Kepler's Laws intuitively. Planets move faster when closer to the star.</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-calculator info-icon"></i>
+                <div>
+                    <div class="info-title">Vector Math</div>
+                    <div class="info-desc">Aiming the launch visualizes vector magnitude and direction.</div>
+                </div>
+            </div>
+            <button class="btn" style="width: 100%; justify-content: center; border-color: white;" onclick="closeEduInfo()">ACKNOWLEDGE</button>
         </div>
     </div>
 
     <div id="help-modal" class="modal">
-        <div class="modal-box" style="text-align: left; border-color: var(--neon-planet);">
-            <div class="modal-h" style="text-align: center; color: var(--neon-planet);">FLIGHT MANUAL</div>
-            
+        <div class="modal-box info-box" style="border-color: var(--neon-planet);">
+            <h2 class="modal-h" style="text-align: left; font-size: 1.8rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; color: var(--neon-planet);">FLIGHT MANUAL</h2>
             <div class="info-item">
                 <i class="fa-solid fa-hand-pointer info-icon"></i>
                 <div>
-                    <div class="info-title">Drag & Aim</div>
-                    <div class="info-desc">Touch the blue planet and pull back like a slingshot to launch.</div>
+                    <div class="info-title">Launch Controls</div>
+                    <div class="info-desc">Click & Drag on the planet. Pull back like a slingshot to aim and set power.</div>
                 </div>
             </div>
             <div class="info-item">
                 <i class="fa-solid fa-circle-notch info-icon"></i>
                 <div>
-                    <div class="info-title">Green Zone</div>
-                    <div class="info-desc">Launch the planet into the glowing green ring.</div>
+                    <div class="info-title">Target Zone</div>
+                    <div class="info-desc">Keep the planet inside the <span style="color:var(--neon-zone)">Green Glowing Ring</span>.</div>
                 </div>
             </div>
             <div class="info-item">
                 <i class="fa-solid fa-stopwatch info-icon"></i>
                 <div>
-                    <div class="info-title">Stay Stable</div>
-                    <div class="info-desc">Keep it inside the ring for 15 seconds to win.</div>
+                    <div class="info-title">Victory Condition</div>
+                    <div class="info-desc">Maintain a stable orbit for 15.0 seconds. (You have 35s total before timeout).</div>
                 </div>
             </div>
-            <button class="btn-start" style="margin-top:10px; border-color:white; color:white;" onclick="closeHelp()">ACKNOWLEDGE</button>
-        </div>
-    </div>
-
-    <div id="edu-modal" class="modal">
-        <div class="modal-box" style="text-align: left;">
-            <div class="modal-h" style="text-align:center; font-size:1.5rem;"><i class="fa-solid fa-brain"></i> PHYSICS ENGINE</div>
-            <div class="info-item">
-                <i class="fa-solid fa-atom info-icon"></i>
-                <div>
-                    <div class="info-title">Gravity</div>
-                    <div class="info-desc">Objects with mass attract each other. The Sun pulls the planet inward.</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <i class="fa-solid fa-rocket info-icon"></i>
-                <div>
-                    <div class="info-title">Velocity</div>
-                    <div class="info-desc">Speed fights gravity. If you go too fast, you fly away. Too slow, you crash.</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <i class="fa-solid fa-circle-nodes info-icon"></i>
-                <div>
-                    <div class="info-title">Orbit</div>
-                    <div class="info-desc">An orbit is a perfect balance where you are falling towards the sun but missing it constantly!</div>
-                </div>
-            </div>
-            <button class="btn-start" style="margin-top:10px;" onclick="closeEduInfo()">CLOSE</button>
+            <button class="btn" style="width: 100%; justify-content: center; border-color: var(--neon-planet); color: var(--neon-planet);" onclick="closeHelp()">RETURN TO SIM</button>
         </div>
     </div>
 
@@ -277,37 +321,41 @@
             crash() { this.init(); this.playTone('sawtooth', 80, 0.5, 0.1); }
         };
 
-        function toggleMute() { AudioSys.muted = !AudioSys.muted; }
+        function toggleMute() {
+            AudioSys.muted = !AudioSys.muted;
+            document.getElementById('snd-icon').className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        }
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         const starCanvas = document.getElementById('starfield');
         const starCtx = starCanvas.getContext('2d');
         
-        let width, height, minDim; // minDim helps scaling
+        let width, height;
         let stars = [];
+        let mScale = 1; // Mobile Scaling Factor
 
         function resize() { 
             width = canvas.width = starCanvas.width = window.innerWidth; 
             height = canvas.height = starCanvas.height = window.innerHeight;
-            minDim = Math.min(width, height);
             
-            // CENTER EVERYTHING
-            sun.x = width / 2;
-            sun.y = height / 2;
-            
+            // Calculate Mobile Scale (Smaller screen = Smaller planets)
+            mScale = Math.min(width, height) / 800; // Base reference is 800px
+            if(mScale > 1) mScale = 1;
+            if(mScale < 0.5) mScale = 0.5;
+
             initStars();
-            // If dragging, reset drag to avoid glitches
-            if(isDragging) isDragging = false; 
         }
         window.addEventListener('resize', resize); 
 
         function initStars() {
             stars = [];
-            for(let i=0; i<150; i++) {
+            for(let i=0; i<200; i++) {
                 stars.push({
-                    x: Math.random() * width, y: Math.random() * height,
-                    size: Math.random() * 1.5, opacity: Math.random(),
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5,
+                    opacity: Math.random(),
                     speed: Math.random() * 0.05 + 0.01
                 });
             }
@@ -325,74 +373,82 @@
             requestAnimationFrame(drawStars);
         }
 
-        /* --- PHYSICS & GAME STATE --- */
-        // Adjusted G for mobile viewports
-        const G = 0.5; 
-        const LAUNCH_POWER = 0.08; 
+        /* PHYSICS CONFIG */
+        const G = 0.35; 
+        const LAUNCH_POWER = 0.15; 
         
         let currentLevel = 0;
         let isDragging = false;
+        let dragStart = {x:0, y:0};
         let dragCurrent = {x:0, y:0};
         
-        // Dynamic Objects (Radii are relative to minDim)
-        let sun = { x: 0, y: 0, mass: 2000, radius: 25 };
-        let planet = { x: 0, y: 0, vx: 0, vy: 0, radius: 12, active: false, trail: [] };
-        
-        // Zone is now a ratio (0.0 - 1.0) of minDim
-        let targetZone = { minR: 0.3, maxR: 0.45 }; 
+        let sun = { x: 0, y: 0, mass: 2000, radius: 35 };
+        let planet = { x: 0, y: 0, vx: 0, vy: 0, radius: 8, active: false, trail: [] };
+        let targetZone = { minR: 150, maxR: 350 };
         
         let stableTime = 0;
         let totalFlightTime = 0;
         let requiredTime = 15.0; 
         let gameState = 'AIMING'; 
 
-        // Ratios relative to screen width/height (minDim)
+        // UPDATED LEVELS
         const LEVELS = [
-            { id: 1, massMulti: 1.0, zone: [0.25, 0.40] }, 
-            { id: 2, massMulti: 1.3, zone: [0.30, 0.45] }, 
-            { id: 3, massMulti: 1.5, zone: [0.20, 0.30] }, 
-            { id: 4, massMulti: 1.8, zone: [0.35, 0.45] }, 
-            { id: 5, massMulti: 2.0, zone: [0.22, 0.32] } 
+            { id: 1, sunMass: 1800, zone: [150, 350] }, 
+            { id: 2, sunMass: 2500, zone: [180, 320] }, 
+            { id: 3, sunMass: 3200, zone: [200, 300] }, 
+            { id: 4, sunMass: 3200, zone: [150, 250] }, 
+            { id: 5, sunMass: 3800, zone: [220, 320] } 
         ];
 
         function initLevel() {
             const lvl = LEVELS[currentLevel];
+            sun.x = width / 2; sun.y = height / 2;
             
-            // Adjust physics based on screen size
-            sun.radius = minDim * 0.08; // Sun is 8% of screen
-            planet.radius = minDim * 0.03; // Planet is 3%
+            // Apply Mobile Scaling to Physics Objects
+            sun.mass = lvl.sunMass * mScale;
+            sun.radius = 35 * mScale;
+            planet.radius = 8 * mScale;
             
-            // Adjust mass so gravity feels consistent on small vs big screens
-            // F ~ M/r^2. If r scales by S, F scales by 1/S^2. To keep F ~ 1/S (relative), M must scale by S.
-            sun.mass = 2500 * lvl.massMulti * (minDim / 400); 
-
             planet.active = false;
-            
-            // Safe spawn distance (scale based)
             const angle = Math.random() * Math.PI * 2;
-            const spawnDist = minDim * 0.18; // Close enough to drag, far enough from sun
+            const minSpawn = 200 * mScale; 
+            const maxSpawn = 300 * mScale; 
+            const dist = minSpawn + Math.random() * (maxSpawn - minSpawn);
+
+            planet.x = sun.x + Math.cos(angle) * dist;
+            planet.y = sun.y + Math.sin(angle) * dist;
             
-            planet.x = sun.x + Math.cos(angle) * spawnDist;
-            planet.y = sun.y + Math.sin(angle) * spawnDist;
-            
+            // Boundary checks
+            planet.x = Math.max(50, Math.min(width-50, planet.x));
+            planet.y = Math.max(50, Math.min(height-50, planet.y));
+
             planet.vx = 0; planet.vy = 0;
             planet.trail = [];
 
-            targetZone.minR = lvl.zone[0] * minDim;
-            targetZone.maxR = lvl.zone[1] * minDim;
+            // Scale target zones
+            targetZone.minR = lvl.zone[0] * mScale;
+            targetZone.maxR = lvl.zone[1] * mScale;
             
             stableTime = 0;
             totalFlightTime = 0;
             gameState = 'AIMING';
 
             document.getElementById('level-display').innerText = `SECTOR ${lvl.id}`;
-            document.getElementById('val-speed').innerText = "0";
+            document.getElementById('sim-status').innerText = "AWAITING VECTOR";
+            document.getElementById('sim-status').style.color = "#aaa";
+            document.getElementById('val-speed').innerText = "0000";
+            document.getElementById('val-dist').innerText = "0.00";
             updateTimerDisplay();
+            
             hideModals();
         }
 
         function hideModals() {
-            document.querySelectorAll('.modal').forEach(el => el.style.display = 'none');
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('crash-modal').style.display = 'none';
+            document.getElementById('finish-modal').style.display = 'none';
+            document.getElementById('edu-modal').style.display = 'none';
+            document.getElementById('help-modal').style.display = 'none';
         }
 
         function update() {
@@ -410,32 +466,37 @@
                 planet.x += planet.vx;
                 planet.y += planet.vy;
 
-                if (planet.trail.length > 100) planet.trail.shift();
+                if (planet.trail.length > 150) planet.trail.shift();
                 planet.trail.push({x: planet.x, y: planet.y});
 
-                const speed = Math.sqrt(planet.vx*planet.vx + planet.vy*planet.vy) * 10;
-                document.getElementById('val-speed').innerText = Math.round(speed);
+                const speed = Math.sqrt(planet.vx*planet.vx + planet.vy*planet.vy) * 100;
+                document.getElementById('val-speed').innerText = Math.round(speed).toString().padStart(4, '0');
+                document.getElementById('val-dist').innerText = (dist/100).toFixed(2);
 
-                // Collision Logic
                 if (dist < sun.radius + planet.radius) failLevel("IMPACT WITH STAR");
-                if (dist > minDim * 1.5) failLevel("SIGNAL LOST"); // Flew off screen
+                if (dist > Math.max(width, height)) failLevel("SIGNAL LOST");
 
-                // Zone Logic
+                totalFlightTime += 1/60;
+
                 if (dist >= targetZone.minR && dist <= targetZone.maxR) {
                     stableTime += 1/60;
+                    document.getElementById('sim-status').innerText = "TRAJECTORY STABLE";
+                    document.getElementById('sim-status').style.color = "#4ade80";
+                    
                     if(stableTime >= requiredTime) {
                         gameState = 'WIN'; AudioSys.win();
-                        if(currentLevel === LEVELS.length - 1) document.getElementById('finish-modal').style.display = 'flex';
-                        else document.getElementById('modal').style.display = 'flex';
+                        if(currentLevel === LEVELS.length - 1) {
+                            document.getElementById('finish-modal').style.display = 'flex';
+                        } else {
+                            document.getElementById('modal').style.display = 'flex';
+                        }
                     }
                 } else {
-                    // Reset stable time if you leave zone? (Optional difficulty tweak: currently doesn't reset, just pauses)
-                    // Uncomment to make harder: stableTime = 0; 
+                    document.getElementById('sim-status').innerText = "TRAJECTORY UNSTABLE";
+                    document.getElementById('sim-status').style.color = "#f43f5e";
                 }
-                
-                // Max flight time to prevent infinite loops
-                totalFlightTime += 1/60;
-                if(totalFlightTime > 45) failLevel("FUEL DEPLETED");
+
+                if (totalFlightTime > 35.0 && stableTime < requiredTime) failLevel("TIMEOUT");
 
                 updateTimerDisplay(dist >= targetZone.minR && dist <= targetZone.maxR);
             }
@@ -454,64 +515,61 @@
             ctx.beginPath();
             ctx.arc(sun.x, sun.y, targetZone.maxR, 0, Math.PI * 2);
             ctx.arc(sun.x, sun.y, targetZone.minR, 0, Math.PI * 2, true);
-            ctx.fillStyle = 'rgba(52, 211, 153, 0.1)'; 
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.15)'; 
             ctx.fill();
-            ctx.strokeStyle = 'rgba(52, 211, 153, 0.3)'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
 
             // Sun
-            let sunGrad = ctx.createRadialGradient(sun.x, sun.y, sun.radius*0.2, sun.x, sun.y, sun.radius);
-            sunGrad.addColorStop(0, '#fff'); sunGrad.addColorStop(0.3, '#fbbf24'); sunGrad.addColorStop(1, '#b45309'); 
+            let sunGrad = ctx.createRadialGradient(sun.x, sun.y, 5, sun.x, sun.y, sun.radius);
+            sunGrad.addColorStop(0, '#fef3c7'); sunGrad.addColorStop(0.4, '#f59e0b'); sunGrad.addColorStop(1, '#b45309'); 
             ctx.beginPath(); ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
-            ctx.fillStyle = sunGrad; ctx.shadowBlur = 30; ctx.shadowColor = '#fbbf24'; ctx.fill(); ctx.shadowBlur = 0;
+            ctx.fillStyle = sunGrad; ctx.shadowBlur = 60; ctx.shadowColor = '#fbbf24'; ctx.fill(); ctx.shadowBlur = 0;
 
             // Planet
-            let pGrad = ctx.createRadialGradient(planet.x - planet.radius*0.3, planet.y - planet.radius*0.3, planet.radius*0.2, planet.x, planet.y, planet.radius);
-            pGrad.addColorStop(0, '#a5f3fc'); pGrad.addColorStop(1, '#0891b2'); 
+            let pGrad = ctx.createRadialGradient(planet.x - 3, planet.y - 3, 2, planet.x, planet.y, planet.radius);
+            pGrad.addColorStop(0, '#bae6fd'); pGrad.addColorStop(1, '#0284c7'); 
             ctx.beginPath(); ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
-            ctx.fillStyle = pGrad; ctx.fill();
-
-            // Visual "Drag Ring" around planet when aiming (Mobile UX)
-            if(gameState === 'AIMING') {
-                ctx.beginPath();
-                ctx.arc(planet.x, planet.y, planet.radius + 15, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
+            ctx.fillStyle = pGrad; ctx.shadowBlur = 15; ctx.shadowColor = '#0ea5e9'; ctx.fill(); ctx.shadowBlur = 0;
 
             // Trail
             if (planet.trail.length > 1) {
                 ctx.beginPath(); ctx.moveTo(planet.trail[0].x, planet.trail[0].y);
                 for (let p of planet.trail) ctx.lineTo(p.x, p.y);
-                ctx.strokeStyle = 'rgba(34, 211, 238, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.strokeStyle = 'rgba(14, 165, 233, 0.5)'; ctx.lineWidth = 2; ctx.stroke();
             }
 
-            // Aiming Vector
+            // Aiming
             if (gameState === 'AIMING' && isDragging) {
                 ctx.beginPath(); ctx.moveTo(planet.x, planet.y); ctx.lineTo(dragCurrent.x, dragCurrent.y);
-                ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 3; ctx.stroke();
-                
-                // Trajectory Prediction (Small dot)
-                let simX = planet.x; let simY = planet.y;
-                let simVx = (planet.x - dragCurrent.x) * LAUNCH_POWER;
-                let simVy = (planet.y - dragCurrent.y) * LAUNCH_POWER;
-                
-                ctx.beginPath();
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                for(let i=0; i<10; i++) {
-                    simX += simVx * 5; simY += simVy * 5; // Rough prediction
-                    ctx.fillRect(simX, simY, 2, 2);
-                }
+                ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2; ctx.stroke();
+                drawPrediction();
             }
 
             requestAnimationFrame(() => { update(); draw(); });
         }
 
-        // TOUCH HANDLING
+        function drawPrediction() {
+            let simX = planet.x; let simY = planet.y;
+            let simVx = (planet.x - dragCurrent.x) * LAUNCH_POWER;
+            let simVy = (planet.y - dragCurrent.y) * LAUNCH_POWER;
+            
+            ctx.beginPath(); ctx.moveTo(simX, simY);
+            for(let i=0; i<150; i++) {
+                const dx = sun.x - simX; const dy = sun.y - simY; const dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist < sun.radius) break; 
+                const force = G * sun.mass / (dist*dist);
+                const simAx = force * (dx / dist);
+                const simAy = force * (dy / dist);
+                simVx += simAx; simVy += simAy;
+                simX += simVx; simY += simVy;
+                ctx.lineTo(simX, simY);
+            }
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; ctx.setLineDash([5, 5]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+        }
+
         function getPos(e) {
             const r = canvas.getBoundingClientRect();
+            // Handle both touch and mouse events
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return { x: clientX - r.left, y: clientY - r.top };
@@ -523,10 +581,12 @@
         function startDrag(e) {
             if (gameState !== 'AIMING') return;
             const pos = getPos(e);
-            // Generous hit detection for mobile (radius + 40px padding)
-            if (Math.hypot(pos.x - planet.x, pos.y - planet.y) < planet.radius + 40) { 
+            
+            // HITBOX FIX: Larger grab radius (50px) for mobile taps
+            if (Math.hypot(pos.x - planet.x, pos.y - planet.y) < 50) { 
                 isDragging = true; dragCurrent = pos;
-                if(e.type === 'touchstart') e.preventDefault(); // Stop scroll
+                // Important: Prevent scrolling while dragging
+                if(e.type === 'touchstart') e.preventDefault();
             }
         }
 
@@ -541,16 +601,12 @@
             isDragging = false;
             const vx = (planet.x - dragCurrent.x) * LAUNCH_POWER;
             const vy = (planet.y - dragCurrent.y) * LAUNCH_POWER;
-            
-            // Prevent accidental tiny taps
-            if (Math.hypot(vx, vy) > 0.5) { 
-                planet.vx = vx; planet.vy = vy; gameState = 'FLYING'; AudioSys.launch(); 
-            }
+            if (Math.hypot(vx, vy) > 0.5) { planet.vx = vx; planet.vy = vy; gameState = 'FLYING'; AudioSys.launch(); }
         }
 
         function updateTimerDisplay(isActive) {
             const el = document.getElementById('orbit-timer');
-            el.innerText = stableTime.toFixed(1) + 's';
+            el.innerText = stableTime.toFixed(2) + 's';
             if (isActive) el.classList.add('active'); else el.classList.remove('active');
         }
 
@@ -561,10 +617,11 @@
         
         function showEducationalInfo() { document.getElementById('edu-modal').style.display = 'flex'; }
         function closeEduInfo() { document.getElementById('edu-modal').style.display = 'none'; }
+        
         function showHelp() { document.getElementById('help-modal').style.display = 'flex'; }
         function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
 
-        // Boot
+        // Initial setup
         resize();
         initStars();
         drawStars();
