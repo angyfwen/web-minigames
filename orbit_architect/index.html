@@ -175,7 +175,7 @@
             <div class="panel" style="text-align: right;">
                 <div class="label">STABILITY</div>
                 <div class="timer-val" id="orbit-timer">0.0s</div>
-                <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 15.0s</div>
+                <div class="text-xs text-gray-400 font-bold" id="target-time">REQ: 10.0s</div>
                 <div class="text-xs text-red-900 mt-1" style="font-size: 0.6rem;">TIMEOUT: 35s</div>
             </div>
         </div>
@@ -219,7 +219,7 @@
         <div class="modal-box" style="border-color: var(--neon-zone);">
             <div class="text-6xl text-emerald-400 mb-4"><i class="fa-regular fa-circle-check"></i></div>
             <div class="modal-h">STABLE ORBIT</div>
-            <p class="modal-p">Trajectory confirmed for 15 seconds.</p>
+            <p class="modal-p">Trajectory confirmed for 10 seconds.</p>
             <button class="btn" style="width: 100%; justify-content: center; background: rgba(74, 222, 128, 0.1); border-color: var(--neon-zone); color: var(--neon-zone);" onclick="nextLevel()">NEXT SECTOR</button>
         </div>
     </div>
@@ -257,7 +257,7 @@
             
             
 
-[Image of orbits]
+[Image of planetary orbit diagram]
 
 
             <div class="info-item">
@@ -299,7 +299,7 @@
                 <i class="fa-solid fa-stopwatch info-icon"></i>
                 <div>
                     <div class="info-title">Victory Condition</div>
-                    <div class="info-desc">Maintain a stable orbit for 15.0 seconds. (You have 35s total before timeout).</div>
+                    <div class="info-desc">Maintain a stable orbit for 10.0 seconds. (You have 35s total before timeout).</div>
                 </div>
             </div>
             <button class="btn" style="width: 100%; justify-content: center; border-color: var(--neon-planet); color: var(--neon-planet);" onclick="closeHelp()">RETURN TO SIM</button>
@@ -388,7 +388,7 @@
         
         let stableTime = 0;
         let totalFlightTime = 0;
-        let requiredTime = 15.0; 
+        let requiredTime = 10.0; 
         let gameState = 'AIMING'; 
 
         // UPDATED LEVELS
