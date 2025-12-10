@@ -35,10 +35,14 @@
 
         * { -webkit-tap-highlight-color: transparent; }
 
-        /* --- BACKGROUND ANIMATION --- */
+        /* --- BACKGROUND ANIMATION FIX --- */
         @keyframes bgScroll {
-            0% { background-position: center 0, 0 0; }
-            100% { background-position: center 100%, 40px 40px; } /* Move pattern diagonally */
+            /* Layer 1 (Radial): Stays at "center center"
+               Layer 2 (Stripes): Moves from "0 0" to "56.6px 0"
+               (56.6px is the horizontal repeat distance for a 40px diagonal stripe at 45deg)
+            */
+            0% { background-position: center center, 0 0; }
+            100% { background-position: center center, 56.6px 0; }
         }
 
         /* --- NUCLEAR SCROLL FIX & BODY SETUP --- */
@@ -59,13 +63,22 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            
             background-color: var(--bg-color);
+            /* Layer 1: Vignette (Static shadow)
+               Layer 2: Stripes (Moving pattern)
+            */
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            background-attachment: fixed;
-            /* Activate background animation */
-            animation: bgScroll 20s linear infinite;
+            
+            /* Removed 'fixed' attachment to fix animation jitter */
+            background-attachment: scroll; 
+            background-size: auto, auto;
+            
+            /* Speed: 3s linear loop */
+            animation: bgScroll 3s linear infinite;
+            
             color: var(--text-main);
         }
 
@@ -272,9 +285,11 @@
             background-image: linear-gradient(135deg, transparent 5px, #fffdf5 5px), linear-gradient(225deg, transparent 5px, #fffdf5 5px);
             background-size: 20px 20px; background-repeat: repeat-x; background-position: bottom;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: rotate(2deg);
+            /* Center Content */
+            display: flex; flex-direction: column;
         }
-        .ticket-header { border-bottom: 2px dashed #b2bec3; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; color: #636e72; }
-        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; min-height: 100px; justify-content: center; }
+        .ticket-header { margin-bottom: 15px; font-weight: bold; color: #636e72; border-bottom: 2px dashed #b2bec3; padding-bottom: 10px; }
+        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; justify-content: center; flex-grow: 1; padding-bottom: 15px;}
         .mini-food { width: 100px; height: 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
 
         /* --- SCROLLABLE TERMINAL --- */
@@ -430,7 +445,7 @@
             }
             .ticket-header { 
                 flex: 0 0 auto; /* Header doesn't grow */
-                margin-bottom: 5px; font-size: 0.8rem; 
+                margin-bottom: 5px; font-size: 0.8rem; border-bottom: 2px dashed #b2bec3; padding-bottom: 5px;
             }
             /* FIXED: Target view centers vertically */
             .target-view { 
