@@ -364,17 +364,9 @@
             .btn-play { font-size: 2rem; padding: 12px 50px; }
             .btn-info { font-size: 0.9rem; padding: 10px 20px; }
 
-            .hud-top { 
-                padding: 10px; 
-                flex-direction: row;
-                align-items: center;
-                justify-content: flex-end;
-            }
+            .hud-top { padding: 10px; gap: 10px; }
             .badge { font-size: 1rem; padding: 5px 15px; border-width: 2px; }
-
-            /* Bottom buttons */
-            .hud-bottom { bottom: 20px; gap: 15px; }
-            .btn-round { width: 55px; height: 55px; font-size: 1.2rem; }
+            .btn-round { width: 40px; height: 40px; font-size: 1rem; }
 
             /* Mobile QTE Ring scaling */
             #qte-wrapper { width: 140px; height: 140px; }
@@ -438,7 +430,7 @@
                         <i class="fa-solid fa-ruler-vertical"></i> <span id="height-val">0</span> cm
                     </div>
                     <div id="timer-badge-el" class="badge timer-badge">
-                        <i class="fa-solid fa-stopwatch"></i> <span id="timer-val">90</span>s
+                        <i class="fa-solid fa-stopwatch"></i> <span id="timer-val">60</span>s
                     </div>
                 </div>
             </div>
@@ -554,7 +546,7 @@
         let logicHeightCm = 0;
         let visualHeightCm = 0;
         
-        let timeLeft = 90; // Increased timer to 90s
+        let timeLeft = 60;
         let globalTimerInt;
         
         let currentTargetType = null;
@@ -565,7 +557,7 @@
         // PEST LOGIC
         let pestTimeout = null;
 
-        const NEEDLE_SPEED_CONST = 5.0; // Faster needle
+        const NEEDLE_SPEED_CONST = 5.0; 
 
         const SKY_STOPS = [
             { pct: 0,  c1: [66, 165, 245], c2: [144, 202, 249] }, 
@@ -714,7 +706,7 @@
 
             logicHeightCm = 0;
             visualHeightCm = 0;
-            timeLeft = 90;
+            timeLeft = 60;
             needleAngle = 0; 
             
             mainLoopId = requestAnimationFrame(gameLoop);
@@ -804,7 +796,6 @@
             wrap.style.display = 'flex';
 
             // Get safe playable area logic (Smart Bounding)
-            // With buttons at bottom, reduce Safe Height more
             const safeW = width - 180; // Button is ~160px
             const safeH = height - 350; // Extra padding for bottom buttons
             
