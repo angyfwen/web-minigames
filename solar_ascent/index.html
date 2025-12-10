@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@900&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -30,6 +31,39 @@
             position: fixed; top: 0; left: 0;
             display: flex; justify-content: center; align-items: center;
             user-select: none; touch-action: none; 
+        }
+
+        /* --- RAINBOW MENU BUTTON (TOP LEFT) --- */
+        .menu-btn-rainbow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 24px;
+            border-radius: 20px;
+            color: white; 
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            text-decoration: none;
+            text-transform: lowercase; 
+            cursor: pointer;
+            z-index: 200; /* Ensure it's above everything */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; 
+            animation: gradientMove 4s ease infinite; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+        .menu-btn-rainbow:active { transform: scale(0.95); }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* --- FIXED BACKGROUND --- */
@@ -109,6 +143,8 @@
         .hud-top {
             padding: 20px; display: flex; justify-content: space-between; align-items: flex-start;
             pointer-events: auto; position: relative; z-index: 60;
+            /* PUSH DOWN slightly so it doesn't overlap with the menu button on mobile */
+            margin-top: 50px; 
         }
         
         .badge-container { display: flex; gap: 15px; }
@@ -316,7 +352,7 @@
             .btn-play { font-size: 2rem; padding: 12px 50px; }
             .btn-info { font-size: 0.9rem; padding: 10px 20px; }
 
-            .hud-top { padding: 10px; gap: 10px; }
+            .hud-top { padding: 10px; gap: 10px; margin-top: 60px; /* Space for Menu Btn */ }
             .badge { font-size: 1rem; padding: 5px 15px; border-width: 2px; }
             .btn-round { width: 40px; height: 40px; font-size: 1rem; }
 
@@ -333,6 +369,10 @@
 <body>
 
     <div id="sky-background"></div>
+
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+        <i class="fa-solid fa-gamepad"></i> menu
+    </a>
 
     <div id="game-stage">
         
@@ -402,7 +442,7 @@
 
         <div id="edu-modal" class="modal">
             <div class="modal-box" style="border-color: #558b2f;">
-                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> How is this ecudational?</div>
+                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> Educational Value</div>
                 <div class="info-list">
                     <div class="info-li"><i class="fa-solid fa-seedling"></i> <div><strong>Growth:</strong> Requires resources.</div></div>
                     <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>Light:</strong> Photosynthesis energy.</div></div>
@@ -1045,4 +1085,3 @@
     </script>
 </body>
 </html>
-
