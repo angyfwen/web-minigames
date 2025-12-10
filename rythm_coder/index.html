@@ -77,17 +77,14 @@
             font-weight: 700;
             text-decoration: none;
             cursor: pointer;
-            z-index: 999; /* Top level */
+            z-index: 999;
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 1rem;
-            
-            /* Rainbow Gradient */
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
-            
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: transform 0.2s;
         }
@@ -265,7 +262,7 @@
                     <i class="fa-solid fa-play"></i> START SYSTEM
                 </button>
                 <button class="btn" style="background:transparent; border:2px solid var(--neon-blue); color:var(--neon-blue);" onclick="showInfo()">
-                    <i class="fa-solid fa-graduation-cap"></i> LEARN MORE
+                    <i class="fa-solid fa-brain"></i> LEARN MORE
                 </button>
             </div>
         </div>
@@ -290,8 +287,8 @@
 
             <div class="controls">
                 <div class="control-row">
-                    <button class="btn btn-icon" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
-                    <button class="btn btn-icon" onclick="toggleMute()" title="Mute/Unmute"><i class="fa-solid fa-volume-high" id="sound-icon"></i></button>
+                    <button class="btn btn-icon" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
+                    <button class="btn btn-icon" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="sound-icon"></i></button>
                     <button class="btn btn-icon" onclick="showHelp()" title="How to Play" style="background: var(--neon-blue); border-color: var(--neon-blue); color: black;"><i class="fa-solid fa-question"></i></button>
                     
                     <div style="flex-grow:1"></div>
@@ -343,6 +340,8 @@
                 EDUCATIONAL VALUE
             </h2>
             
+            
+
             <div class="info-list">
                 <div class="info-item">
                     <span class="info-title">1. Syntax Mapping</span>
@@ -385,26 +384,54 @@
     </div>
 
     <script>
-        // --- AUDIO ENGINE ---
+        // --- AUDIO ENGINE (FIXED FOR IOS) ---
         const AudioSys = {
             ctx: null, muted: false,
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
+            // Function to wake up audio context on user interaction
+            unlock() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume().then(() => {
+                        console.log("Audio Context Resumed");
+                    });
+                }
+            },
+            init() { 
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+            },
             playTone(type, freq, decay, vol) {
-                if (this.muted || !this.ctx) return; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                if (this.muted || !this.ctx) return; 
+                const osc = this.ctx.createOscillator(); 
+                const gain = this.ctx.createGain();
+                osc.type = type; 
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
                 if(type === 'triangle') osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + decay);
-                gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + decay);
-                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + decay);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + decay);
+                osc.connect(gain); 
+                gain.connect(this.ctx.destination); 
+                osc.start(); 
+                osc.stop(this.ctx.currentTime + decay);
             },
             playNoise(decay) {
-                if (this.muted || !this.ctx) return; const bufferSize = this.ctx.sampleRate * decay; const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-                const noise = this.ctx.createBufferSource(); noise.buffer = buffer; const gain = this.ctx.createGain();
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + decay);
-                noise.connect(gain); gain.connect(this.ctx.destination); noise.start();
+                if (this.muted || !this.ctx) return; 
+                const bufferSize = this.ctx.sampleRate * decay; 
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0); 
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = this.ctx.createBufferSource(); 
+                noise.buffer = buffer; 
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + decay);
+                noise.connect(gain); 
+                gain.connect(this.ctx.destination); 
+                noise.start();
             },
             trigger(row) {
-                this.init();
+                this.init(); // Ensure init
                 switch(row) {
                     case 0: this.playTone('triangle', 150, 0.2, 0.8); break; // Kick
                     case 1: this.playTone('square', 200, 0.1, 0.1); this.playNoise(0.1); break; // Snare
@@ -413,6 +440,15 @@
                 }
             }
         };
+
+        // GLOBAL UNLOCK LISTENER (Catches first tap anywhere)
+        document.addEventListener('touchstart', function() {
+            AudioSys.unlock();
+        }, { once: true });
+        
+        document.addEventListener('click', function() {
+            AudioSys.unlock();
+        }, { once: true });
 
         function toggleMute() {
             AudioSys.muted = !AudioSys.muted;
@@ -465,14 +501,21 @@
         let currentLevelIdx = 0; let userGrid = []; let targetGrid = []; let isPlaying = false; let currentStep = 0; let intervalId = null;
         const mainGridEl = document.getElementById('main-grid'); const sweepBar = document.getElementById('sweep-bar');
 
-        function startGame() { AudioSys.init(); document.getElementById('start-screen').classList.remove('active'); document.getElementById('game-screen').classList.add('active'); currentLevelIdx = 1; loadLevel(); }
+        function startGame() { 
+            AudioSys.unlock(); // FORCE UNLOCK HERE
+            document.getElementById('start-screen').classList.remove('active'); 
+            document.getElementById('game-screen').classList.add('active'); 
+            currentLevelIdx = 1; 
+            loadLevel(); 
+        }
+        
         function goHome() { stopSequence(); document.getElementById('game-screen').classList.remove('active'); document.getElementById('start-screen').classList.add('active'); document.getElementById('modal').style.display = 'none'; document.getElementById('finish-modal').style.display = 'none'; }
         function finishGame() { document.getElementById('finish-modal').style.display = 'none'; goHome(); }
         
-        function showInfo() { document.getElementById('info-modal').style.display = 'flex'; }
+        function showInfo() { AudioSys.unlock(); document.getElementById('info-modal').style.display = 'flex'; }
         function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
         
-        function showHelp() { document.getElementById('help-modal').style.display = 'flex'; }
+        function showHelp() { AudioSys.unlock(); document.getElementById('help-modal').style.display = 'flex'; }
         function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
 
         function loadLevel() {
