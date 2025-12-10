@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Rhythm Coder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,178 +22,172 @@
             --grid-off: #151515;
         }
 
-        /* MOBILE FIX: No tap highlights */
-        * { -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: 'Fira Code', monospace;
+        /* NUCLEAR SCROLL FIX FOR MOBILE */
+        html, body {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh; 
+            /* Fix height for Safari address bar */
+            height: 100dvh; 
+            position: fixed; top: 0; left: 0;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none;
             background-color: var(--bg-black);
             color: #fff;
-            height: 100vh;
-            /* MOBILE FIX: Use dvh */
-            height: 100dvh;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
+            font-family: 'Fira Code', monospace;
+            display: flex; align-items: center; justify-content: center;
+            user-select: none; -webkit-user-select: none;
         }
 
         /* --- BACKGROUND --- */
         .disco-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; z-index: 0;
-            background: #000;
+            overflow: hidden; z-index: 0; pointer-events: none;
         }
-
         .beam {
             position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
-            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 255, 0.2) 20deg, transparent 40deg, rgba(255, 0, 255, 0.2) 140deg, transparent 160deg, rgba(255, 255, 0, 0.2) 260deg, transparent 280deg);
-            animation: spin 12s linear infinite; opacity: 0.8; mix-blend-mode: screen;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 255, 0.1) 20deg, transparent 40deg, rgba(255, 0, 255, 0.1) 140deg, transparent 160deg, rgba(255, 255, 0, 0.1) 260deg, transparent 280deg);
+            animation: spin 15s linear infinite; opacity: 0.6; mix-blend-mode: screen;
         }
         .beam.two {
-            animation-direction: reverse; animation-duration: 18s; opacity: 0.5;
-            background: conic-gradient(from 180deg, transparent 0deg, rgba(0, 255, 0, 0.2) 20deg, transparent 40deg);
+            animation-direction: reverse; animation-duration: 20s; opacity: 0.4;
+            background: conic-gradient(from 180deg, transparent 0deg, rgba(0, 255, 0, 0.1) 20deg, transparent 40deg);
         }
         @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
 
         /* --- SCREENS --- */
         .screen {
-            display: none; width: 100%; height: 100%;
+            width: 100%; height: 100%;
+            display: none;
             flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10; position: relative;
+            z-index: 10; position: absolute; top: 0; left: 0;
         }
         .screen.active { display: flex; animation: fadeUp 0.3s ease; }
         @keyframes fadeUp { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
 
-        /* --- START SCREEN --- */
-        .start-container {
-            text-align: center; display: flex; flex-direction: column; align-items: center;
-        }
-
-        .logo-line {
-            font-family: 'Titan One', cursive; font-size: 6.5rem; line-height: 0.8;
-            color: transparent; -webkit-text-stroke: 3px var(--neon-blue);
-            text-shadow: 0 0 30px var(--neon-blue); position: relative; z-index: 2;
-        }
-        .logo-line.pink { -webkit-text-stroke: 3px var(--neon-pink); text-shadow: 0 0 30px var(--neon-pink); }
-
-        /* Mobile Font Sizing for Start Screen */
-        @media (max-width: 900px) {
-            .logo-line { font-size: 4rem; -webkit-text-stroke: 2px var(--neon-blue); }
-            .logo-line.pink { -webkit-text-stroke: 2px var(--neon-pink); }
-        }
-
-        .equalizer { display: flex; gap: 8px; justify-content: center; height: 40px; margin: 15px 0; align-items: flex-end; }
-        .bar { width: 12px; background: #fff; animation: bounce 0.5s infinite ease-in-out alternate; border-radius: 4px; box-shadow: 0 0 10px currentColor;}
-        .bar:nth-child(1) { height: 30%; animation-delay: 0.1s; background: var(--neon-blue); }
-        .bar:nth-child(2) { height: 60%; animation-delay: 0.3s; background: var(--neon-green); }
-        .bar:nth-child(3) { height: 80%; animation-delay: 0.0s; background: var(--neon-yellow); }
-        .bar:nth-child(4) { height: 50%; animation-delay: 0.4s; background: var(--neon-pink); }
-        .bar:nth-child(5) { height: 70%; animation-delay: 0.2s; background: var(--neon-blue); }
-        @keyframes bounce { 0% {height: 20%;} 100% {height: 100%;} }
-
-        /* --- GAME UI --- */
+        /* --- GAME PANEL (Responsive Box) --- */
         .game-panel {
             background: rgba(10, 10, 10, 0.95); border: 1px solid #333;
-            border-radius: 20px; padding: 20px; width: 95%; max-width: 950px;
-            display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 0 100px rgba(0,0,0,0.9); position: relative; z-index: 20;
+            border-radius: 16px; padding: 16px; 
+            width: 95%; max-width: 900px;
+            /* Flex layout to fit vertical screens */
+            display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
+            position: relative; z-index: 20;
+            max-height: 98vh; /* Ensure it fits */
         }
-        
-        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
+        /* --- TERMINAL (Instructions) --- */
         .terminal {
-            background: #020202; border-radius: 10px; padding: 15px 20px;
+            background: #020202; border-radius: 8px; padding: 12px;
             border: 1px solid var(--neon-blue); display: flex; flex-direction: column;
+            flex-shrink: 0; /* Don't shrink this too much */
         }
-        .term-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; }
-        .term-title { color: var(--neon-blue); font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
-        .term-content { color: #eee; font-size: 1.1rem; line-height: 1.6; }
+        .term-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 6px; }
+        .term-title { color: var(--neon-blue); font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
+        .term-content { color: #eee; font-size: 0.95rem; line-height: 1.4; white-space: nowrap; overflow-x: auto; }
         .keyword { color: var(--neon-pink); font-weight: bold; }
         .number { color: var(--neon-yellow); font-weight: bold; }
-        .comment { color: #666; font-style: italic; }
+        .comment { color: #666; font-style: italic; font-size: 0.8rem; }
 
-        .sequencer-container { position: relative; background: #050505; padding: 15px; border-radius: 12px; border: 1px solid #333; z-index: 30; }
-        .grid-header { display: grid; grid-template-columns: 80px repeat(8, 1fr); margin-bottom: 8px; }
-        .col-num { text-align: center; color: #555; font-size: 0.9rem; font-weight: bold; }
-        .main-grid { display: grid; grid-template-columns: 80px repeat(8, 1fr); gap: 6px; }
-        .track-label { display: flex; align-items: center; font-weight: bold; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        /* --- SEQUENCER GRID (The Main Issue) --- */
+        .sequencer-container { 
+            position: relative; background: #050505; 
+            padding: 8px; border-radius: 10px; border: 1px solid #333; 
+            z-index: 30; 
+            flex-grow: 1; /* Take up remaining space */
+            display: flex; flex-direction: column; justify-content: center;
+        }
 
-        .beat-btn { width: 100%; aspect-ratio: 1; background-color: var(--grid-off); border: 1px solid #333; border-radius: 6px; cursor: pointer; position: relative; z-index: 40; transition: all 0.1s; }
-        .beat-btn:hover { background-color: #2a2a2a; border-color: #666; transform: scale(1.05); }
-        .beat-btn:active { transform: scale(0.9); }
-        .beat-btn.row-0.active { background-color: var(--neon-pink) !important; box-shadow: 0 0 15px var(--neon-pink); border-color: white; }
-        .beat-btn.row-1.active { background-color: var(--neon-blue) !important; box-shadow: 0 0 15px var(--neon-blue); border-color: white; }
-        .beat-btn.row-2.active { background-color: var(--neon-yellow) !important; box-shadow: 0 0 15px var(--neon-yellow); border-color: white; }
-        .beat-btn.row-3.active { background-color: var(--neon-green) !important; box-shadow: 0 0 15px var(--neon-green); border-color: white; }
+        /* Responsive Grid Logic */
+        .grid-layout {
+            display: grid; 
+            /* 1st col is label (auto width), rest are beats (1fr each) */
+            grid-template-columns: 50px repeat(8, 1fr); 
+            gap: 4px;
+            width: 100%;
+        }
 
-        .sweep-bar { position: absolute; top: 35px; left: 95px; width: 4px; height: calc(100% - 50px); background: white; box-shadow: 0 0 15px white; pointer-events: none; display: none; z-index: 100; border-radius: 2px; }
+        .col-header { text-align: center; color: #555; font-size: 0.7rem; font-weight: bold; padding-bottom: 4px;}
+        .track-label { 
+            display: flex; align-items: center; justify-content: flex-start;
+            font-weight: bold; font-size: 0.7rem; color: #888; 
+            text-transform: uppercase; letter-spacing: 0px;
+        }
 
-        .controls { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .btn { border: none; padding: 12px 24px; border-radius: 50px; font-family: 'Fira Code', monospace; font-weight: bold; font-size: 1rem; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; gap: 8px; transition: 0.2s; position: relative; z-index: 50; border: 2px solid transparent; }
-        .btn:hover { transform: translateY(-3px); filter: brightness(1.2); }
-        .btn:active { transform: translateY(0); }
+        .beat-btn { 
+            width: 100%; aspect-ratio: 1; /* Perfect squares */
+            background-color: var(--grid-off); border: 1px solid #333; 
+            border-radius: 4px; cursor: pointer; position: relative; z-index: 40; 
+            touch-action: manipulation;
+        }
+        .beat-btn.active { border-color: white; box-shadow: 0 0 10px currentColor; }
+        .row-0.active { background-color: var(--neon-pink) !important; color: var(--neon-pink); }
+        .row-1.active { background-color: var(--neon-blue) !important; color: var(--neon-blue); }
+        .row-2.active { background-color: var(--neon-yellow) !important; color: var(--neon-yellow); }
+        .row-3.active { background-color: var(--neon-green) !important; color: var(--neon-green); }
 
-        .btn-play { background: var(--neon-green); color: black; box-shadow: 0 0 15px var(--neon-green); }
-        .btn-stop { background: var(--neon-pink); color: white; display: none; box-shadow: 0 0 15px var(--neon-pink); }
-        .btn-submit { background: var(--neon-yellow); color: black; box-shadow: 0 0 15px var(--neon-yellow); }
+        /* Sweep Bar needs to match grid */
+        .sweep-bar { 
+            position: absolute; top: 25px; 
+            /* Calculated dynamically in JS or approximate left position */
+            left: 58px; 
+            width: 2px; height: calc(100% - 35px); 
+            background: white; box-shadow: 0 0 10px white; 
+            pointer-events: none; display: none; z-index: 100; 
+        }
+
+        /* --- CONTROLS --- */
+        .controls { 
+            display: flex; flex-direction: column; gap: 8px; margin-top: 5px; flex-shrink: 0;
+        }
+        .control-row { display: flex; gap: 8px; width: 100%; }
         
-        .btn-hint { background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-        .btn-hint:hover { background: var(--neon-blue); color: black; }
+        .btn { 
+            border: none; padding: 12px; border-radius: 8px; 
+            font-family: 'Fira Code', monospace; font-weight: bold; font-size: 0.9rem; 
+            cursor: pointer; text-transform: uppercase; 
+            display: flex; align-items: center; justify-content: center; gap: 6px; 
+            transition: 0.1s; flex: 1; /* Stretch to fill */
+            touch-action: manipulation;
+        }
+        .btn:active { transform: scale(0.96); }
 
-        .btn-retry { background: transparent; color: var(--neon-orange); border: 2px solid var(--neon-orange); box-shadow: 0 0 10px var(--neon-orange); }
-        .btn-retry:hover { background: var(--neon-orange); color: black; }
-
-        .btn-home { background: #222; color: white; border: 1px solid #444; padding: 12px; }
-        .btn-info { background: transparent; color: var(--neon-yellow); border: 2px solid var(--neon-yellow); box-shadow: 0 0 15px var(--neon-yellow); }
-        .btn-info:hover { background: var(--neon-yellow); color: black; }
+        .btn-play { background: var(--neon-green); color: black; }
+        .btn-stop { background: var(--neon-pink); color: white; display: none; }
+        .btn-submit { background: var(--neon-yellow); color: black; flex: 2; /* Bigger */ }
+        .btn-icon { background: #222; color: #fff; border: 1px solid #444; flex: 0 0 45px; } /* Square buttons */
+        
+        /* --- START SCREEN STYLES --- */
+        .start-container { text-align: center; }
+        .logo-line {
+            font-family: 'Titan One', cursive; font-size: 4rem; line-height: 0.9;
+            color: transparent; -webkit-text-stroke: 2px var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+        .logo-line.pink { -webkit-text-stroke: 2px var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); }
+        .equalizer { display: flex; gap: 6px; justify-content: center; height: 30px; margin: 20px 0; align-items: flex-end; }
+        .bar { width: 8px; background: #fff; animation: bounce 0.5s infinite alternate; border-radius: 4px; }
+        @keyframes bounce { 0% {height: 30%;} 100% {height: 100%;} }
 
         /* --- MODALS --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 200; }
-        .modal-box { background: #0a0a0a; border: 2px solid var(--neon-green); padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 0 50px rgba(34, 197, 94, 0.3); max-width: 450px; width: 90%; animation: popIn 0.3s ease; }
-        .finish-box { border-color: var(--neon-pink); box-shadow: 0 0 50px rgba(255, 0, 255, 0.3); }
-        .info-box { border-color: var(--neon-yellow); box-shadow: 0 0 50px rgba(255, 255, 0, 0.3); text-align: left; }
-        @keyframes popIn { from{transform:scale(0.8); opacity:0;} to{transform:scale(1); opacity:1;} }
-
-        .info-list { text-align: left; margin: 20px 0; }
-        .info-item { margin-bottom: 20px; }
-        .info-title { color: var(--neon-blue); font-weight: bold; font-size: 1.1rem; }
-        .info-desc { color: #aaa; font-size: 0.9rem; }
-
-        /* Error Status */
-        .status-error { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); animation: blink 0.5s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-
-        /* --- ROTATION MESSAGE STYLE --- */
-        #rotate-message {
-            display: none;
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; color: var(--neon-blue);
-            padding: 40px;
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(5px); }
+        .modal-box { 
+            background: #0a0a0a; border: 2px solid var(--neon-green); 
+            padding: 30px; border-radius: 16px; text-align: center; 
+            width: 85%; max-width: 400px;
         }
+        .finish-box { border-color: var(--neon-pink); }
+        .info-box { border-color: var(--neon-yellow); text-align: left; }
         
-        /* Show rotate message ONLY on portrait mobile devices */
-        @media only screen and (orientation: portrait) and (max-width: 900px) {
-            #rotate-message { display: flex; }
-            #start-screen, #game-screen, .disco-bg { display: none !important; }
-        }
+        /* Info List */
+        .info-item { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .info-title { color: var(--neon-blue); font-weight: bold; display: block; margin-bottom: 4px; }
+        .info-desc { color: #999; font-size: 0.85rem; }
 
     </style>
 </head>
 <body>
-
-    <div id="rotate-message">
-        <i class="fa-solid fa-rotate-right fa-spin" style="font-size: 4rem; margin-bottom: 30px; --fa-animation-duration: 3s; color: var(--neon-pink);"></i>
-        <h2 style="font-family: 'Titan One'; font-size: 2rem; margin-bottom: 10px; color: var(--neon-blue);">ROTATE DEVICE</h2>
-        <p style="font-family: 'Fira Code'; font-size: 1rem; color: #fff;">
-            Sequence grid requires landscape mode for proper compilation.
-        </p>
-    </div>
 
     <div class="disco-bg">
         <div class="beam"></div>
@@ -202,118 +196,118 @@
 
     <div id="start-screen" class="screen active">
         <div class="start-container">
-            <div class="logo-line" data-text="RHYTHM">RHYTHM</div>
+            <div class="logo-line">RHYTHM</div>
             <div class="equalizer">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar" style="background:var(--neon-blue)"></div>
+                <div class="bar" style="background:var(--neon-green); animation-delay:0.1s"></div>
+                <div class="bar" style="background:var(--neon-yellow); animation-delay:0.2s"></div>
+                <div class="bar" style="background:var(--neon-pink); animation-delay:0.3s"></div>
             </div>
-            <div class="logo-line pink" data-text="CODER">CODER</div>
-            <p class="text-white my-8 text-xl tracking-[0.3em] font-bold" style="text-shadow: 0 0 10px white;">LOGIC • PATTERNS • MUSIC</p>
-            <div class="flex flex-col gap-6 items-center w-full">
-                <button class="btn btn-play w-full max-w-xs justify-center" onclick="startGame()">
+            <div class="logo-line pink">CODER</div>
+            
+            <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 15px; width: 240px;">
+                <button class="btn btn-play" style="width:100%" onclick="startGame()">
                     <i class="fa-solid fa-play"></i> START SYSTEM
                 </button>
-                
-                <button class="btn btn-info w-full max-w-xs justify-center" onclick="showInfo()">
-                    <i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE
+                <button class="btn" style="background:transparent; border:2px solid var(--neon-blue); color:var(--neon-blue);" onclick="showInfo()">
+                    <i class="fa-solid fa-brain"></i> LEARN MORE
                 </button>
             </div>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
-        <div class="game-panel" id="game-panel">
+        <div class="game-panel">
+            
             <div class="terminal">
                 <div class="term-header">
-                    <span class="term-title">/// MISSION CODE ///</span>
-                    <span class="term-title text-white" id="level-num">LEVEL 1</span>
-                    <span class="term-title" id="difficulty-badge" style="color: #00ff00;">[EASY]</span>
+                    <span class="term-title">/// MISSION CODE</span>
+                    <span class="term-title text-white" id="level-num">LVL 1</span>
+                    <span class="term-title" id="difficulty-badge" style="color: #00ff00;">EASY</span>
                 </div>
                 <div class="term-content" id="instructions"></div>
-                <div class="text-right mt-2 text-xs text-gray-500" id="status-line">STATUS: WAITING...</div>
             </div>
 
             <div class="sequencer-container">
-                <div class="grid-header">
-                    <div></div> 
-                    <div class="col-num">1</div><div class="col-num">2</div><div class="col-num">3</div><div class="col-num">4</div>
-                    <div class="col-num">5</div><div class="col-num">6</div><div class="col-num">7</div><div class="col-num">8</div>
-                </div>
                 <div class="sweep-bar" id="sweep-bar"></div>
-                <div class="main-grid" id="main-grid"></div>
+                <div class="grid-layout" id="main-grid">
+                    </div>
             </div>
 
             <div class="controls">
-                <div class="flex gap-2">
-                    <button class="btn btn-home" style="padding: 12px 15px;" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
-                    <button class="btn btn-home" style="padding: 12px 15px;" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="sound-icon"></i></button>
-                </div>
-                
-                <div class="flex gap-2">
-                     <button class="btn btn-retry" onclick="resetGrid()">
-                        <i class="fa-solid fa-rotate-left"></i> RESET
+                <div class="control-row">
+                    <button class="btn btn-icon" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
+                    <button class="btn btn-icon" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="sound-icon"></i></button>
+                    <div style="flex-grow:1"></div>
+                    <button class="btn" style="background:#222; color:#aaa; border:1px solid #444;" onclick="resetGrid()">
+                        <i class="fa-solid fa-trash"></i> CLEAR
                     </button>
-                    <button class="btn btn-hint" onclick="fillAnswer()">
-                        <i class="fa-solid fa-lightbulb"></i> ANSWER
+                    <button class="btn" style="background:transparent; border:1px solid var(--neon-blue); color:var(--neon-blue);" onclick="fillAnswer()">
+                        <i class="fa-solid fa-lightbulb"></i> HINT
                     </button>
                 </div>
-
-                <div class="flex gap-2">
+                <div class="control-row">
                     <button id="btn-play" class="btn btn-play" onclick="togglePlay()">
-                        <i class="fa-solid fa-play"></i> PLAY
+                        <i class="fa-solid fa-play"></i> PLAY LOOP
                     </button>
                     <button id="btn-stop" class="btn btn-stop" onclick="togglePlay()">
-                        <i class="fa-solid fa-stop"></i> STOP
+                        <i class="fa-solid fa-stop"></i> STOP LOOP
                     </button>
-                    <button id="btn-submit" class="btn btn-submit" onclick="submitSolution()">
-                        <i class="fa-solid fa-check"></i>
+                    <button class="btn btn-submit" onclick="submitSolution()">
+                        <i class="fa-solid fa-check"></i> CHECK CODE
                     </button>
                 </div>
             </div>
+
         </div>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-box">
             <div class="text-6xl text-green-400 mb-4 animate-bounce"><i class="fa-solid fa-check-circle"></i></div>
-            <h2 class="text-3xl font-bold text-white mb-2" style="font-family: 'Titan One'">COMPILED!</h2>
+            <h2 class="text-2xl font-bold text-white mb-2" style="font-family: 'Titan One'">COMPILED!</h2>
             <p class="text-gray-400 mb-6">Sequence logic matches target.</p>
-            <button class="btn btn-play w-full justify-center" onclick="nextLevel()">NEXT LEVEL</button>
+            <button class="btn btn-play w-full" onclick="nextLevel()">NEXT LEVEL</button>
         </div>
     </div>
 
     <div id="finish-modal" class="modal">
         <div class="modal-box finish-box">
             <div class="text-6xl text-pink-400 mb-4 animate-pulse"><i class="fa-solid fa-trophy"></i></div>
-            <h2 class="text-3xl font-bold text-white mb-2" style="font-family: 'Titan One'">SYSTEM OVERRIDE</h2>
-            <p class="text-gray-400 mb-6">All patterns decoded successfully.</p>
-            <button class="btn btn-play w-full justify-center" style="background: var(--neon-pink); box-shadow: 0 0 20px var(--neon-pink); color: white;" onclick="finishGame()">BACK TO START</button>
+            <h2 class="text-2xl font-bold text-white mb-2" style="font-family: 'Titan One'">ALL SYSTEMS GO</h2>
+            <p class="text-gray-400 mb-6">You have mastered the rhythm.</p>
+            <button class="btn btn-play w-full" style="background:var(--neon-pink); color:white;" onclick="finishGame()">HOME</button>
         </div>
     </div>
 
     <div id="info-modal" class="modal">
         <div class="modal-box info-box">
-            <h2 class="text-2xl font-bold text-yellow-400 mb-4" style="font-family: 'Titan One'">
-                <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
+            <h2 class="text-xl font-bold text-yellow-400 mb-4" style="font-family: 'Titan One'">
+                EDUCATIONAL VALUE
             </h2>
+            
+            
+
             <div class="info-list">
                 <div class="info-item">
-                    <span class="info-title">1. Syntax & Logic</span>
-                    <span class="info-desc">Translating written commands (Code) into a physical grid (Binary).</span>
+                    <span class="info-title">1. Syntax Mapping</span>
+                    <span class="info-desc">Translating code commands into physical grid positions.</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-title">2. Coordinates</span>
-                    <span class="info-desc">Computers count in steps. Mapping "Step 5" to column 5 teaches Array Indexing.</span>
+                    <span class="info-title">2. Arrays & Indexes</span>
+                    <span class="info-desc">Understanding that `play(1)` means the first slot in the sequence array.</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-title">3. Algorithms</span>
-                    <span class="info-desc">Levels require understanding Loops ("Every Beat") and Conditionals ("If Odd").</span>
+                    <span class="info-title">3. Loops</span>
+                    <span class="info-desc">Visualizing `for` loops as filling a range of beats.</span>
                 </div>
             </div>
-            <button class="btn btn-home w-full justify-center" onclick="closeInfo()">UNDERSTOOD</button>
+            <button class="btn btn-submit w-full" onclick="closeInfo()">UNDERSTOOD</button>
         </div>
     </div>
 
     <script>
+        // --- AUDIO ENGINE ---
         const AudioSys = {
             ctx: null, muted: false,
             init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
@@ -334,10 +328,10 @@
             trigger(row) {
                 this.init();
                 switch(row) {
-                    case 0: this.playTone('triangle', 150, 0.2, 0.8); break; 
-                    case 1: this.playTone('square', 200, 0.1, 0.1); this.playNoise(0.1); break;
-                    case 2: this.playNoise(0.05); break;
-                    case 3: this.playTone('sine', 440, 0.4, 0.1); break;
+                    case 0: this.playTone('triangle', 150, 0.2, 0.8); break; // Kick
+                    case 1: this.playTone('square', 200, 0.1, 0.1); this.playNoise(0.1); break; // Snare
+                    case 2: this.playNoise(0.05); break; // Hat
+                    case 3: this.playTone('sine', 440, 0.4, 0.1); break; // Synth
                 }
             }
         };
@@ -348,133 +342,50 @@
             icon.className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
         }
 
-        /* --- RANDOMIZATION LOGIC --- */
-
+        /* --- GAME LOGIC --- */
+        const INSTRUMENTS = ["kick", "snare", "hihat", "synth"];
+        
         function getRandomInts(count, min, max) {
             let nums = new Set();
-            while(nums.size < count) {
-                nums.add(Math.floor(Math.random() * (max - min + 1)) + min);
-            }
+            while(nums.size < count) nums.add(Math.floor(Math.random() * (max - min + 1)) + min);
             return Array.from(nums).sort((a,b) => a-b);
         }
 
-        const INSTRUMENTS = ["kick", "snare", "hihat", "synth"];
-        const INSTR_MAP = { "kick":0, "snare":1, "hihat":2, "synth":3 };
-
         const LevelGenerator = {
-            createGrid() {
-                return Array(4).fill().map(() => Array(8).fill(0));
-            },
-            
-            // Level 1: EASY - Variable Assignment
-            level1() {
-                const kSteps = getRandomInts(2, 1, 8);
-                const sSteps = getRandomInts(2, 1, 8);
+            createGrid() { return Array(4).fill().map(() => Array(8).fill(0)); },
+            level1() { // Vars
+                const k = getRandomInts(2, 1, 8); const s = getRandomInts(2, 1, 8);
                 const grid = this.createGrid();
-                
-                kSteps.forEach(s => grid[0][s-1] = 1);
-                sSteps.forEach(s => grid[1][s-1] = 1);
-
-                return {
-                    id: 1,
-                    badge: "[EASY]",
-                    color: "#00ff00",
-                    html: `<span class="keyword">let</span> kick = [<span class="number">${kSteps.join(', ')}</span>];<br><span class="keyword">let</span> snare = [<span class="number">${sSteps.join(', ')}</span>];<br><span class="comment">// Input coordinates exactly.</span>`,
-                    grid: grid
-                };
+                k.forEach(x => grid[0][x-1] = 1); s.forEach(x => grid[1][x-1] = 1);
+                return { id: 1, badge: "EASY", color: "#00ff00", grid: grid, html: `<span class="keyword">let</span> kick = [<span class="number">${k.join(',')}</span>];<br><span class="keyword">let</span> snare = [<span class="number">${s.join(',')}</span>];` };
             },
-
-            // Level 2: EASY - Method Calls
-            level2() {
-                const instIndices = getRandomInts(3, 0, 3);
-                const i1 = INSTRUMENTS[instIndices[0]];
-                const i2 = INSTRUMENTS[instIndices[1]];
-                const i3 = INSTRUMENTS[instIndices[2]];
-
-                const s1 = getRandomInts(1, 1, 8)[0]; 
-                const s2 = getRandomInts(3, 1, 8);    
-                const s3 = getRandomInts(1, 1, 8)[0]; 
-
+            level2() { // Methods
+                const i = getRandomInts(3, 0, 3); const s1 = getRandomInts(1,1,8)[0]; const s2 = getRandomInts(3,1,8);
                 const grid = this.createGrid();
-                grid[instIndices[0]][s1-1] = 1;
-                s2.forEach(s => grid[instIndices[1]][s-1] = 1);
-                grid[instIndices[2]][s3-1] = 1;
-
-                return {
-                    id: 2,
-                    badge: "[EASY]",
-                    color: "#00ff00",
-                    html: `${i1}.<span class="keyword">play</span>(<span class="number">${s1}</span>);<br>${i2}.<span class="keyword">play</span>([<span class="number">${s2.join(', ')}</span>]);<br>${i3}.<span class="keyword">play</span>(<span class="number">${s3}</span>);`,
-                    grid: grid
-                };
+                grid[i[0]][s1-1] = 1; s2.forEach(x => grid[i[1]][x-1] = 1);
+                return { id: 2, badge: "EASY", color: "#00ff00", grid: grid, html: `${INSTRUMENTS[i[0]]}.<span class="keyword">play</span>(<span class="number">${s1}</span>);<br>${INSTRUMENTS[i[1]]}.<span class="keyword">play</span>([<span class="number">${s2.join(',')}</span>]);` };
             },
-
-            // Level 3: MEDIUM - Loops (Range)
-            level3() {
-                const instIdx = Math.floor(Math.random() * 4);
-                const name = INSTRUMENTS[instIdx];
-                const start = Math.floor(Math.random() * 4) + 1; 
-                const end = Math.floor(Math.random() * (8 - start)) + start + 1; 
-
+            level3() { // Loop
+                const idx = Math.floor(Math.random()*4); const start = Math.floor(Math.random()*4)+1; const end = Math.floor(Math.random()*(8-start))+start+1;
                 const grid = this.createGrid();
-                for(let i=start; i<=end; i++) {
-                    grid[instIdx][i-1] = 1;
-                }
-
-                return {
-                    id: 3,
-                    badge: "[MEDIUM]",
-                    color: "#ffff00",
-                    html: `<span class="keyword">for</span>(i = <span class="number">${start}</span> to <span class="number">${end}</span>) {<br>&nbsp;&nbsp;${name}.<span class="keyword">play</span>(i);<br>}<br><span class="comment">// Loop runs in range.</span>`,
-                    grid: grid
-                };
+                for(let x=start; x<=end; x++) grid[idx][x-1] = 1;
+                return { id: 3, badge: "MED", color: "#ffff00", grid: grid, html: `<span class="keyword">for</span>(i=<span class="number">${start}</span> to <span class="number">${end}</span>) {<br>&nbsp;${INSTRUMENTS[idx]}.<span class="keyword">play</span>(i);<br>}` };
             },
-
-            // Level 4: HARD - Conditionals (Modulo Math)
-            level4() {
-                const instIndices = getRandomInts(2, 0, 3);
-                const oddInst = INSTRUMENTS[instIndices[0]]; 
-                const evenInst = INSTRUMENTS[instIndices[1]]; 
-
-                const grid = this.createGrid();
-                [0, 2, 4, 6].forEach(i => grid[instIndices[0]][i] = 1);
-                [1, 3, 5, 7].forEach(i => grid[instIndices[1]][i] = 1);
-
-                return {
-                    id: 4,
-                    badge: "[HARD]",
-                    color: "#ff00ff",
-                    html: `<span class="keyword">if</span> (step % <span class="number">2</span> != <span class="number">0</span>) {<br>&nbsp;&nbsp;${oddInst}.<span class="keyword">play</span>(); <span class="comment">// Odd</span><br>} <span class="keyword">else</span> {<br>&nbsp;&nbsp;${evenInst}.<span class="keyword">play</span>(); <span class="comment">// Even</span><br>}`,
-                    grid: grid
-                };
+            level4() { // If/Else
+                const i = getRandomInts(2, 0, 3); const grid = this.createGrid();
+                [0,2,4,6].forEach(x => grid[i[0]][x] = 1); [1,3,5,7].forEach(x => grid[i[1]][x] = 1);
+                return { id: 4, badge: "HARD", color: "#ff00ff", grid: grid, html: `<span class="keyword">if</span>(odd) ${INSTRUMENTS[i[0]]}.<span class="keyword">play</span>();<br><span class="keyword">else</span> ${INSTRUMENTS[i[1]]}.<span class="keyword">play</span>();` };
             },
-
-            // Level 5: EXPERT - Functions
-            level5() {
-                const instIndices = getRandomInts(2, 0, 3);
-                const i1 = INSTRUMENTS[instIndices[0]];
-                const i2 = INSTRUMENTS[instIndices[1]];
-                
-                const s1 = getRandomInts(3, 1, 8);
-                const s2 = getRandomInts(3, 1, 8);
-
+            level5() { // Function
+                const i = getRandomInts(2, 0, 3); const s1 = getRandomInts(3,1,8); const s2 = getRandomInts(3,1,8);
                 const grid = this.createGrid();
-                s1.forEach(s => grid[instIndices[0]][s-1] = 1);
-                s2.forEach(s => grid[instIndices[1]][s-1] = 1);
-
-                return {
-                    id: 5,
-                    badge: "[EXPERT]",
-                    color: "#ff0000",
-                    html: `<span class="keyword">function</span> build() {<br>&nbsp;&nbsp;${i1}(<span class="number">${s1.join(', ')}</span>);<br>&nbsp;&nbsp;${i2}(<span class="number">${s2.join(', ')}</span>);<br>}<br><span class="keyword">build</span>();`,
-                    grid: grid
-                };
+                s1.forEach(x => grid[i[0]][x-1] = 1); s2.forEach(x => grid[i[1]][x-1] = 1);
+                return { id: 5, badge: "PRO", color: "#ff0000", grid: grid, html: `<span class="keyword">func</span> beat() {<br>&nbsp;${INSTRUMENTS[i[0]]}(<span class="number">${s1.join(',')}</span>);<br>&nbsp;${INSTRUMENTS[i[1]]}(<span class="number">${s2.join(',')}</span>);<br>}` };
             }
         };
 
-
-        let currentLevelIdx = 0; let userGrid = []; let targetGrid = []; let isPlaying = false; let currentStep = 0; let intervalId = null; let tempo = 250;
-        const mainGridEl = document.getElementById('main-grid'); const sweepBar = document.getElementById('sweep-bar'); const btnPlay = document.getElementById('btn-play'); const btnStop = document.getElementById('btn-stop');
+        let currentLevelIdx = 0; let userGrid = []; let targetGrid = []; let isPlaying = false; let currentStep = 0; let intervalId = null;
+        const mainGridEl = document.getElementById('main-grid'); const sweepBar = document.getElementById('sweep-bar');
 
         function startGame() { AudioSys.init(); document.getElementById('start-screen').classList.remove('active'); document.getElementById('game-screen').classList.add('active'); currentLevelIdx = 1; loadLevel(); }
         function goHome() { stopSequence(); document.getElementById('game-screen').classList.remove('active'); document.getElementById('start-screen').classList.add('active'); document.getElementById('modal').style.display = 'none'; document.getElementById('finish-modal').style.display = 'none'; }
@@ -483,121 +394,113 @@
         function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
 
         function loadLevel() {
-            let levelData;
-            if (currentLevelIdx === 1) levelData = LevelGenerator.level1();
-            else if (currentLevelIdx === 2) levelData = LevelGenerator.level2();
-            else if (currentLevelIdx === 3) levelData = LevelGenerator.level3();
-            else if (currentLevelIdx === 4) levelData = LevelGenerator.level4();
-            else if (currentLevelIdx === 5) levelData = LevelGenerator.level5();
-            else { document.getElementById('finish-modal').style.display = 'flex'; return; }
-
-            // Apply Level Data
-            targetGrid = levelData.grid;
-            document.getElementById('level-num').innerText = `LEVEL ${levelData.id}`; 
-            const badge = document.getElementById('difficulty-badge');
-            badge.innerText = levelData.badge;
-            badge.style.color = levelData.color;
-
-            document.getElementById('instructions').innerHTML = levelData.html;
-            document.getElementById('status-line').innerText = "STATUS: WAITING INPUT"; 
-            document.getElementById('status-line').className = "text-right mt-2 text-xs text-gray-500";
+            const levels = [null, LevelGenerator.level1, LevelGenerator.level2, LevelGenerator.level3, LevelGenerator.level4, LevelGenerator.level5];
+            if(currentLevelIdx >= levels.length) { document.getElementById('finish-modal').style.display = 'flex'; return; }
             
-            stopSequence(); 
-            resetGrid();
+            const data = levels[currentLevelIdx].call(LevelGenerator);
+            targetGrid = data.grid;
+            document.getElementById('level-num').innerText = `LVL ${data.id}`;
+            const badge = document.getElementById('difficulty-badge');
+            badge.innerText = data.badge; badge.style.color = data.color;
+            document.getElementById('instructions').innerHTML = data.html;
+            
+            stopSequence(); resetGrid();
         }
 
-        // --- NEW FEATURES ---
-
-        function fillAnswer() {
-            // Copy target logic to user logic
-            for(let r=0; r<4; r++) {
-                for(let c=0; c<8; c++) {
-                    userGrid[r][c] = targetGrid[r][c];
-                }
-            }
-            renderMainGrid(); // Re-render to show active classes
-            AudioSys.playTone('sine', 600, 0.2, 0.2); // Sound cue
-            document.getElementById('status-line').innerText = "STATUS: ANSWER REVEALED"; 
-            document.getElementById('status-line').className = "text-right mt-2 text-xs text-blue-400";
+        function resetGrid() { userGrid = Array(4).fill().map(() => Array(8).fill(0)); renderMainGrid(); }
+        
+        function fillAnswer() { 
+            for(let r=0; r<4; r++) for(let c=0; c<8; c++) userGrid[r][c] = targetGrid[r][c]; 
+            renderMainGrid(); 
         }
-
-        function resetGrid() {
-            userGrid = Array(4).fill().map(() => Array(8).fill(0)); 
-            renderMainGrid();
-            document.getElementById('status-line').innerText = "STATUS: GRID RESET"; 
-            document.getElementById('status-line').className = "text-right mt-2 text-xs text-gray-500";
-        }
-
-        // --------------------
 
         function renderMainGrid() {
-            mainGridEl.innerHTML = ''; const labels = ["KICK", "SNARE", "HAT", "SYNTH"];
+            mainGridEl.innerHTML = `
+                <div></div><div class="col-header">1</div><div class="col-header">2</div><div class="col-header">3</div><div class="col-header">4</div>
+                <div class="col-header">5</div><div class="col-header">6</div><div class="col-header">7</div><div class="col-header">8</div>
+            `;
+            const labels = ["KICK", "SNR", "HAT", "SYN"];
+            
             for(let r=0; r<4; r++) {
                 const label = document.createElement('div'); label.className = 'track-label'; label.innerText = labels[r]; mainGridEl.appendChild(label);
                 for(let c=0; c<8; c++) {
-                    const btn = document.createElement('button'); 
+                    const btn = document.createElement('div'); 
                     let classes = `beat-btn row-${r} col-${c}`;
-                    if(userGrid[r][c] === 1) classes += " active"; // Check userGrid state
+                    if(userGrid[r][c]) classes += " active";
                     btn.className = classes;
-                    btn.onclick = () => toggleNote(r, c); 
+                    // Instant touch logic
+                    btn.addEventListener('touchstart', (e) => { e.preventDefault(); toggleNote(r,c); }, {passive: false});
+                    btn.addEventListener('mousedown', () => toggleNote(r,c));
                     mainGridEl.appendChild(btn);
                 }
             }
         }
 
         function toggleNote(r, c) {
-            AudioSys.init(); userGrid[r][c] = userGrid[r][c] ? 0 : 1; const btn = document.querySelector(`.row-${r}.col-${c}`);
-            if(userGrid[r][c]) { btn.classList.add('active'); AudioSys.trigger(r); } else { btn.classList.remove('active'); }
+            AudioSys.init(); 
+            userGrid[r][c] = userGrid[r][c] ? 0 : 1; 
+            renderMainGrid(); // simpler to just re-render to ensure classes stick
+            if(userGrid[r][c]) AudioSys.trigger(r);
         }
 
-        function togglePlay() { if(isPlaying) stopSequence(); else startSequence(); }
+        function togglePlay() { isPlaying ? stopSequence() : startSequence(); }
 
         function startSequence() {
-            isPlaying = true; currentStep = 0; btnPlay.style.display = 'none'; btnStop.style.display = 'flex'; sweepBar.style.display = 'block';
-            intervalId = setInterval(() => { playStep(); }, tempo);
+            isPlaying = true; currentStep = 0; 
+            document.getElementById('btn-play').style.display = 'none'; 
+            document.getElementById('btn-stop').style.display = 'flex'; 
+            sweepBar.style.display = 'block';
+            intervalId = setInterval(playStep, 250);
         }
 
         function stopSequence() {
-            isPlaying = false; clearInterval(intervalId); btnPlay.style.display = 'flex'; btnStop.style.display = 'none'; sweepBar.style.display = 'none'; currentStep = 0;
+            isPlaying = false; clearInterval(intervalId); 
+            document.getElementById('btn-play').style.display = 'flex'; 
+            document.getElementById('btn-stop').style.display = 'none'; 
+            sweepBar.style.display = 'none'; 
+            // clear highlights
+            document.querySelectorAll('.beat-btn').forEach(b => b.style.filter = 'none');
         }
 
         function playStep() {
+            // Highlight current column
+            document.querySelectorAll('.beat-btn').forEach(b => b.style.filter = 'none');
             for(let r=0; r<4; r++) {
-                if(userGrid[r][currentStep]) { AudioSys.trigger(r); const btn = document.querySelector(`.row-${r}.col-${currentStep}`); btn.style.filter = "brightness(2)"; setTimeout(() => btn.style.filter = "none", 100); }
+                if(userGrid[r][currentStep]) {
+                    AudioSys.trigger(r);
+                    const btn = document.querySelector(`.row-${r}.col-${currentStep}`);
+                    if(btn) btn.style.filter = "brightness(2)";
+                }
             }
-            const stepPercent = 100 / 8; sweepBar.style.left = `calc(95px + ${currentStep * stepPercent}% + ${stepPercent/2}%)`;
+            
+            // Move sweep bar (calculated based on layout)
+            // 50px offset + (currentStep * 1fr width)
+            // A rough % approximation works for responsive
+            const leftPercent = 14 + (currentStep * 10.7); // Approximate alignment
+            sweepBar.style.left = `${leftPercent}%`;
+
             currentStep++; if(currentStep >= 8) currentStep = 0;
         }
 
         function submitSolution() {
             let match = true;
-            for(let r=0; r<4; r++) { for(let c=0; c<8; c++) { if(userGrid[r][c] !== targetGrid[r][c]) { match = false; break; } } }
+            for(let r=0; r<4; r++) for(let c=0; c<8; c++) if(userGrid[r][c] !== targetGrid[r][c]) match = false;
             
             if(match) {
-                stopSequence(); 
-                AudioSys.playTone('sine', 880, 0.1, 0.3); // Win beep
-                
-                // --- MODIFIED LOGIC: CHECK IF LEVEL 5 ---
-                if (currentLevelIdx === 5) {
-                    document.getElementById('finish-modal').style.display = 'flex';
-                } else {
-                    document.getElementById('modal').style.display = 'flex';
-                }
+                stopSequence(); AudioSys.playTone('sine', 880, 0.3, 0.2);
+                if(currentLevelIdx === 5) document.getElementById('finish-modal').style.display = 'flex';
+                else document.getElementById('modal').style.display = 'flex';
             } else {
-                AudioSys.trigger(1); // Error noise
-                const panel = document.getElementById('game-panel');
+                AudioSys.trigger(1);
+                const panel = document.querySelector('.game-panel');
                 panel.classList.remove('shake');
-                void panel.offsetWidth; // trigger reflow
+                void panel.offsetWidth;
                 panel.classList.add('shake');
-                
-                const status = document.getElementById('status-line');
-                status.innerText = "STATUS: SYNTAX ERROR";
-                status.className = "text-right mt-2 text-xs status-error";
             }
         }
 
         function nextLevel() {
-            document.getElementById('modal').style.display = 'none'; 
+            document.getElementById('modal').style.display = 'none';
             currentLevelIdx++;
             loadLevel();
         }
