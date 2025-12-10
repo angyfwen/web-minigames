@@ -17,30 +17,28 @@
             --font-title: 'Chewy', cursive;
             --font-body: 'Fredoka', sans-serif;
             --hit-zone: #76ff03; 
-            --hit-pest: #ff1744; /* Danger Red */
+            --hit-pest: #ff1744;
             --gray-track: rgba(0,0,0,0.2);
         }
 
-        /* MOBILE FIX: Remove tap highlight color */
         * { -webkit-tap-highlight-color: transparent; }
 
         body {
             margin: 0; overflow: hidden;
             font-family: var(--font-body);
             background: linear-gradient(to bottom, var(--sky-1), var(--sky-2), var(--sky-3));
-            height: 100vh; 
-            /* MOBILE FIX: Use dvh for mobile browsers */
-            height: 100dvh;
-            width: 100vw;
+            width: 100vw; 
+            height: 100vh;
+            /* CRITICAL: Lock screen for mobile */
+            position: fixed; top: 0; left: 0;
             display: flex; justify-content: center; align-items: center;
             user-select: none;
-            /* MOBILE FIX: Prevent gestures/scrolling globally */
             touch-action: none; 
         }
 
         #game-stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
 
-        /* --- BACKGROUND LAYERS --- */
+        /* --- BACKGROUND --- */
         #stars-container {
             position: absolute; top:0; left:0; width:100%; height:100%;
             pointer-events: none; opacity: 0; transition: opacity 0.5s ease; z-index: 0;
@@ -51,23 +49,19 @@
         }
         @keyframes twinkle { from {opacity:0.3;} to {opacity:1;} }
 
-        /* The Sun */
         .actual-sun {
             position: absolute; top: 50px; right: 50px;
             width: 90px; height: 90px;
             background: #fdd835; border-radius: 50%;
             box-shadow: 0 0 60px #fbc02d; z-index: 1;
-            will-change: transform; 
         }
 
-        /* Moving World */
         #world-layer {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 2;
             will-change: transform; 
         }
 
-        /* HILL SHAPES */
         .hill-layer {
             position: absolute; bottom: -50px; left: -20%; width: 140%; 
             border-radius: 50% 50% 0 0;
@@ -78,7 +72,6 @@
         .h3 { height: 400px; background: #7cb342; bottom: -120px; left: -30%; z-index: 3; }
         .h4 { height: 500px; background: #9ccc65; bottom: -150px; left: 0%; z-index: 2; }
 
-        /* STATIC TREES */
         .tree {
             position: absolute; bottom: 150px; 
             font-size: 3rem; z-index: 6;
@@ -113,6 +106,8 @@
         .hud-top {
             padding: 20px; display: flex; justify-content: space-between; align-items: flex-start;
             pointer-events: auto;
+            /* Ensure HUD is above the game area */
+            position: relative; z-index: 60;
         }
         
         .badge-container { display: flex; gap: 15px; }
@@ -125,24 +120,15 @@
         }
         .timer-badge { color: #d32f2f; border-color: #c62828; }
 
-        /* URGENT SHAKE ANIMATION */
         .shake-urgent {
             animation: shakeUrgent 0.2s infinite;
-            background: #ffcdd2; /* Reddish tint */
+            background: #ffcdd2;
             transform-origin: center;
         }
         @keyframes shakeUrgent {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-2px, 1px) rotate(-1deg); }
+            75% { transform: translate(2px, -1px) rotate(1deg); }
         }
 
         .btn-round {
@@ -156,9 +142,12 @@
         /* --- QTE RING --- */
         #qte-wrapper {
             position: absolute; width: 160px; height: 160px;
-            top: 50%; left: 50%; z-index: 40; pointer-events: auto;
+            /* No fixed position here - moved by JS */
+            z-index: 40; pointer-events: auto;
             display: none; justify-content: center; align-items: center;
+            /* Smooth movement if we wanted, but popping is better for whack-a-mole */
         }
+        
         #qte-wrapper.active { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from {transform: scale(0);} to {transform: scale(1);} }
 
@@ -194,7 +183,6 @@
             z-index: 4; position: relative; color: white;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3); border: 5px solid white;
             cursor: pointer; transition: transform 0.1s;
-            /* CRITICAL MOBILE FIX: Allow rapid tapping without scrolling */
             touch-action: manipulation;
             -webkit-user-select: none;
             user-select: none;
@@ -205,26 +193,26 @@
         .icon-water { background: #039be5; text-shadow: 2px 2px 0 #01579b; }
         .icon-air { background: #78909c; text-shadow: 2px 2px 0 #37474f; }
         
-        /* PEST IS RED AND SCARY */
         .icon-pest { 
             background: #d32f2f; 
             text-shadow: 2px 2px 0 #b71c1c; 
             border-color: #ff8a80;
             animation: shake 0.5s infinite;
         } 
-        @keyframes shake { 0% {transform: translate(1px, 1px) rotate(0deg);} 10% {transform: translate(-1px, -2px) rotate(-1deg);} 20% {transform: translate(-3px, 0px) rotate(1deg);} 30% {transform: translate(3px, 2px) rotate(0deg);} 40% {transform: translate(1px, -1px) rotate(1deg);} 50% {transform: translate(-1px, 2px) rotate(-1deg);} 60% {transform: translate(-3px, 1px) rotate(0deg);} 70% {transform: translate(3px, 1px) rotate(-1deg);} 80% {transform: translate(-1px, -1px) rotate(1deg);} 90% {transform: translate(1px, 2px) rotate(0deg);} 100% {transform: translate(1px, -2px) rotate(-1deg);} }
+        @keyframes shake { 0%, 100% {transform: rotate(0deg);} 25% {transform: rotate(-5deg);} 75% {transform: rotate(5deg);} }
 
         .feedback-text {
             position: absolute; font-family: var(--font-title); font-size: 3rem;
             color: white; text-shadow: 2px 2px 0 black; text-align: center; width: 200px;
             pointer-events: none; animation: floatUp 0.8s forwards; z-index: 100;
-            left: 50%; margin-left: -100px; top: 60%;
+            /* Centered in the popup */
+            left: 50%; top: 50%; margin-left: -100px; margin-top: -50px;
         }
         @keyframes floatUp { 0% {transform: translateY(0) scale(0.5); opacity:0;} 100% {transform: translateY(-80px) scale(1.2); opacity:0;} }
 
         /* --- BIG CENTER MESSAGE --- */
         #big-msg {
-            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
             font-family: var(--font-title); font-size: 4rem;
             background: white; padding: 15px 50px; border-radius: 50px;
             border: 6px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -234,7 +222,7 @@
         }
         @keyframes dropIn { from {transform: translate(-50%, -100%); opacity:0;} to {transform: translate(-50%, 0); opacity:1;} }
 
-        /* --- EPIC START SCREEN --- */
+        /* --- OVERLAYS --- */
         #start-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%; z-index:60;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -245,14 +233,9 @@
         .start-card {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(15px);
-            padding: 50px 70px;
-            border-radius: 50px;
-            border: 5px solid white;
-            box-shadow: 
-                0 20px 50px rgba(0,0,0,0.2),
-                0 0 0 10px rgba(255,255,255,0.3); 
-            text-align: center;
-            display: flex; flex-direction: column; align-items: center;
+            padding: 50px 70px; border-radius: 50px; border: 5px solid white;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center; display: flex; flex-direction: column; align-items: center;
             animation: floatCard 4s ease-in-out infinite;
         }
         @keyframes floatCard { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
@@ -264,14 +247,12 @@
         @keyframes bounceLogo { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.1);} }
 
         .logo-sun {
-            font-size: 8rem; color: #fbc02d; 
-            position: absolute; top: 0; left: 0; width: 100%; text-align: center;
+            font-size: 8rem; color: #fbc02d; position: absolute; top: 0; left: 0; width: 100%; text-align: center;
             filter: drop-shadow(0 0 20px rgba(253, 216, 53, 0.6));
             animation: spinSlow 12s linear infinite;
         }
         .logo-plant {
-            font-size: 5.5rem; color: #558b2f;
-            position: absolute; bottom: 5px; left: 0; width: 100%; text-align: center;
+            font-size: 5.5rem; color: #558b2f; position: absolute; bottom: 5px; left: 0; width: 100%; text-align: center;
             filter: drop-shadow(0 4px 0 white);
         }
         @keyframes spinSlow { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
@@ -286,10 +267,8 @@
             background: linear-gradient(to bottom, #76ff03, #64dd17); 
             color: #1b5e20; padding: 20px 90px; font-size: 3rem;
             border: 5px solid white; border-radius: 70px; font-family: var(--font-title); cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25); 
-            margin-bottom: 25px;
-            animation: pulseBtn 1.5s infinite;
-            transition: transform 0.2s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25); margin-bottom: 25px;
+            animation: pulseBtn 1.5s infinite; transition: transform 0.2s;
             text-shadow: 0 2px 0 rgba(255,255,255,0.4);
         }
         .btn-play:hover { transform: scale(1.1); animation: none; filter: brightness(1.1); }
@@ -317,65 +296,35 @@
         .modal-box {
             background: white; padding: 40px; border-radius: 20px; text-align: center;
             border: 5px solid #7cb342; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            width: 90%; max-width: 450px;
-            /* MOBILE FIX: Scrollable modal if content is long */
-            max-height: 90vh; overflow-y: auto;
+            width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;
         }
         .modal-h { font-family: var(--font-title); font-size: 2.2rem; color: #33691e; line-height: 1; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 15px; }
         .info-list { text-align: left; margin-bottom: 20px; color: #555; }
         .info-li { margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4; display: flex; align-items: flex-start;}
         .info-li i { width: 35px; text-align: center; margin-right: 15px; font-size: 1.3rem; margin-top: 2px;}
 
-        /* =========================================
-           MOBILE OPTIMIZATIONS (CSS Only)
-           ========================================= */
+        /* MOBILE OPTIMIZATION */
         @media (max-width: 900px) {
-            /* Start Card sizing */
-            .start-card {
-                padding: 30px 20px;
-                width: 85%;
-                max-width: 350px;
-            }
+            .start-card { padding: 30px 20px; width: 85%; max-width: 350px; }
             .logo-container { width: 100px; height: 100px; }
             .logo-sun { font-size: 6rem; }
             .logo-plant { font-size: 4rem; }
-            
             .title-main { font-size: 3.5rem; margin-bottom: 20px; }
             .btn-play { font-size: 2rem; padding: 15px 50px; }
             .btn-info { font-size: 1rem; padding: 10px 25px; }
 
-            /* HUD tweaks */
-            .hud-top {
-                padding: 10px;
-                gap: 10px;
-            }
-            .badge {
-                font-size: 1rem;
-                padding: 5px 15px;
-                border-width: 2px;
-            }
-            .btn-round {
-                width: 40px; height: 40px; font-size: 1rem;
-            }
+            .hud-top { padding: 10px; gap: 10px; }
+            .badge { font-size: 1rem; padding: 5px 15px; border-width: 2px; }
+            .btn-round { width: 40px; height: 40px; font-size: 1rem; }
 
-            /* QTE Ring scaling */
+            /* Mobile QTE Ring scaling */
             #qte-wrapper {
-                transform: translate(-50%, -50%) scale(0.9);
-                left: 50%;
-                top: 50%;
+                width: 140px; height: 140px;
             }
+            .qte-icon { width: 90px; height: 90px; font-size: 3rem; }
 
-            /* Feedback text */
             .feedback-text { font-size: 2rem; }
-
-            /* Big Message (Amazing!) */
-            #big-msg { 
-                font-size: 2.5rem; 
-                padding: 10px 30px; 
-                border-width: 4px; 
-            }
-
-            /* Modal adjustments */
+            #big-msg { font-size: 2.5rem; padding: 10px 30px; border-width: 4px; }
             .modal-box { padding: 25px; }
             .modal-h { font-size: 1.5rem; }
             .info-li { font-size: 0.9rem; }
@@ -428,6 +377,7 @@
                 </div>
                 
                 <div class="badge-container">
+                    <button class="btn-round" onclick="showHelp()" style="background:#42a5f5; border-color:#42a5f5"><i class="fa-solid fa-question"></i></button>
                     <button class="btn-round" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
                     <button class="btn-round" onclick="triggerReset()" style="background:#ef5350; border-color:#ef5350"><i class="fa-solid fa-rotate-left"></i></button>
                 </div>
@@ -452,15 +402,33 @@
 
         <div id="edu-modal" class="modal">
             <div class="modal-box" style="border-color: #558b2f;">
-                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> How is this educational?</div>
+                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> Educational Value</div>
+                
+
+
+[Image of the photosynthesis process diagram]
+
+
                 <div class="info-list">
-                    <div class="info-li"><i class="fa-solid fa-seedling"></i> <div>This game simulates how plants grow!</div></div>
-                    <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>Light:</strong> Provides energy.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-droplet" style="color:#039be5"></i> <div><strong>Water:</strong> Travels up the stem.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-wind" style="color:#78909c"></i> <div><strong>CO2:</strong> Taken from the air.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-bug" style="color:#d32f2f"></i> <div><strong>Pests:</strong> DO NOT CLICK! Wait for them to leave!</div></div>
+                    <div class="info-li"><i class="fa-solid fa-seedling"></i> <div><strong>Growth:</strong> Requires resources.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>Light:</strong> Photosynthesis energy.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-droplet" style="color:#039be5"></i> <div><strong>Water:</strong> Structure & transport.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-wind" style="color:#78909c"></i> <div><strong>CO2:</strong> Building material.</div></div>
                 </div>
                 <button class="btn-info" style="background:#558b2f; color:white; border-color:#558b2f" onclick="closeModals()">GOT IT</button>
+            </div>
+        </div>
+
+        <div id="help-modal" class="modal">
+            <div class="modal-box" style="border-color: #42a5f5;">
+                <div class="modal-h" style="color:#42a5f5;"><i class="fa-solid fa-gamepad"></i> How To Play</div>
+                <div class="info-list">
+                    <div class="info-li"><i class="fa-regular fa-hand-pointer"></i> <div>Tap the <strong>BIG BUTTON</strong> when the white ball is in the <strong>GREEN ZONE</strong>.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-check" style="color:#76ff03"></i> <div><strong>Sun/Water/Air:</strong> Tap to grow!</div></div>
+                    <div class="info-li"><i class="fa-solid fa-bug" style="color:#d32f2f"></i> <div><strong>Pests (Red):</strong> DO NOT TAP! Wait 2 seconds for them to leave.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-trophy" style="color:#fbc02d"></i> <div>Reach <strong>500cm</strong> before time runs out!</div></div>
+                </div>
+                <button class="btn-info" style="background:#42a5f5; color:white; border-color:#42a5f5" onclick="closeModals()">LET'S GROW</button>
             </div>
         </div>
 
@@ -744,13 +712,14 @@
             // 20% Chance for PEST (Don't Click)
             if(rand < 0.2) {
                 currentTargetType = 'pest';
-                // Wait for 1.5s then leave
+                
+                // IMPORTANT FIX: Wait 2.0s so user can see it, then switch
                 pestTimeout = setTimeout(() => {
                     if(gameActive) {
                         showFeedback("SAFE!", "#76ff03");
                         pickNewTarget();
                     }
-                }, 1500);
+                }, 2000);
             } else {
                 const types = ['sun', 'water', 'air'];
                 currentTargetType = types[Math.floor(Math.random() * 3)];
@@ -773,11 +742,22 @@
             
             wrap.style.display = 'flex';
 
-            const offsetX = (Math.random() - 0.5) * 200;
-            const offsetY = (Math.random() - 0.5) * 150;
-            wrap.style.left = `calc(50% + ${offsetX}px)`;
-            wrap.style.top = `calc(40% + ${offsetY}px)`;
+            // Get safe playable area logic
+            const safeW = width - 180; // Button is ~160px
+            const safeH = height - 300; // avoid HUD and bottom
             
+            // RANDOM POSITION (With safe padding)
+            // But if it's the SAME target type (like pest waiting), don't move it.
+            // For now, we move every time pickNewTarget() is called.
+            
+            const rX = 20 + Math.random() * safeW;
+            const rY = 100 + Math.random() * safeH; // 100px from top to avoid HUD
+
+            // Update Position
+            wrap.style.left = rX + 'px';
+            wrap.style.top = rY + 'px';
+            
+            // Animate Pop in
             wrap.classList.remove('active');
             void wrap.offsetWidth;
             wrap.classList.add('active');
@@ -799,12 +779,10 @@
         }
 
         // --- MOBILE INPUT FIX ---
-        // We use touchstart to make it respond instantly on mobile (no 300ms delay)
         const qteBtn = document.getElementById('qte-btn');
         
         qteBtn.addEventListener('mousedown', checkHit);
         qteBtn.addEventListener('touchstart', (e) => {
-            // Prevent ghost clicks
             if (e.cancelable) e.preventDefault(); 
             checkHit(e);
         }, {passive: false});
@@ -866,8 +844,10 @@
             el.className = 'feedback-text';
             el.innerText = text;
             el.style.position = 'absolute';
+            // Snap feedback to the current button location
             el.style.left = document.getElementById('qte-wrapper').style.left;
             el.style.top = document.getElementById('qte-wrapper').style.top;
+            
             el.style.transform = 'translate(-50%, -100%)';
             el.style.color = 'white';
             el.style.fontFamily = 'Chewy';
@@ -1057,12 +1037,16 @@
             m.style.display = 'flex';
             setTimeout(() => m.classList.add('show'), 10);
         }
+        function showHelp() { 
+            const m = document.getElementById('help-modal');
+            m.style.display = 'flex';
+            setTimeout(() => m.classList.add('show'), 10);
+        }
         function closeModals() { 
-            const em = document.getElementById('edu-modal');
-            em.classList.remove('show');
-            setTimeout(() => {
-                em.style.display = 'none';
-            }, 300);
+            document.querySelectorAll('.modal').forEach(m => {
+                m.classList.remove('show');
+                setTimeout(() => m.style.display = 'none', 300);
+            });
         }
 
         resize();
