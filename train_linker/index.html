@@ -290,8 +290,9 @@
         .modal-card.fail { border-color: var(--train-red); }
         .modal-card.fail .modal-title { color: var(--train-red); }
         
-        .modal-title { font-family: 'Titan One', cursive; font-size: 2.5rem; margin: 0; }
-        .modal-text { font-size: 1.2rem; color: #555; margin: 20px 0; font-weight: bold; line-height: 1.5; white-space: pre-wrap; }
+        /* LOWERCASE FONT FOR MODALS */
+        .modal-title { font-family: 'Titan One', cursive; font-size: 2.5rem; margin: 0; text-transform: lowercase; }
+        .modal-text { font-size: 1.2rem; color: #555; margin: 20px 0; font-weight: bold; line-height: 1.5; white-space: pre-wrap; text-transform: lowercase; }
         .modal-stars { font-size: 3rem; color: var(--train-yellow); margin-bottom: 20px; text-shadow: 0 3px 0 #d4a000; }
         @keyframes bounceIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -373,7 +374,6 @@
             }
 
             .game-wrapper { 
-                /* Center Origin Scaling */
                 transform: scale(0.85); 
                 transform-origin: center center;
                 width: 100vw; 
@@ -386,49 +386,51 @@
                 gap: 15px; 
             }
 
-            /* ADJUST PLAYGROUND HEIGHT */
             .playground-window {
                 flex-grow: 0; 
                 height: 55vh; 
                 min-height: 300px;
             }
 
-            /* COMPACT HUD with Better Spacing */
+            /* FIX FOR OVERLAPPING TEXT */
             .hud-bar { 
-                padding: 8px 12px; 
-                flex-wrap: wrap; 
-                justify-content: center; 
+                padding: 10px; 
+                display: flex;
+                flex-direction: column; /* Stack them */
                 gap: 5px; 
-                min-height: 60px; /* Taller to fit target */
-            }
-            .hud-left { 
-                position: absolute; top: 10px; left: 10px; transform: scale(0.9); transform-origin: left top; 
-            }
-            .level-badge { 
-                position: absolute; top: 10px; right: 10px; font-size: 0.8rem; padding: 6px 12px; 
+                min-height: auto;
+                position: relative;
             }
             
-            /* Overlap Fix: Move target box down slightly and ensure it clears buttons */
+            .hud-left { 
+                width: 100%;
+                justify-content: center; /* Center buttons */
+                gap: 15px;
+                transform: none; /* remove scaling */
+                position: static;
+            }
+
+            .level-badge { 
+                position: absolute; top: 10px; right: 10px; 
+                font-size: 0.8rem; padding: 4px 10px; 
+            }
+            
             .target-box { 
-                margin-top: 10px; 
+                margin-top: 5px; 
                 width: 100%; 
-                order: 3; 
-                padding-top: 20px; 
-                display: flex;
-                justify-content: center;
+                padding-top: 0; 
             } 
-            .hud-label { display: none; }
+            .hud-label { display: block; font-size: 0.7rem; margin-bottom: 2px; }
             .target-seq { 
-                font-size: 1.5rem; 
-                margin-top: 0px; 
+                font-size: 1.6rem; 
+                margin-top: 0; 
                 background: rgba(255,255,255,0.8);
-                padding: 2px 10px;
+                padding: 2px 15px;
                 border-radius: 10px;
             }
 
-            /* TIGHTER TRACK: 140% */
             .playground {
-                width: 140%; /* Reduced from huge value to be more manageable */
+                width: 140%; 
                 height: 100%;
                 border: none;
                 border-radius: 0;
@@ -484,6 +486,7 @@
     <div id="game-screen" class="screen">
         <div class="game-wrapper">
             <div class="hud-bar">
+                <div class="level-badge" id="level-display">Level 1</div>
                 <div class="hud-left">
                     <button class="icon-btn" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
                     <button class="icon-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></button>
@@ -493,7 +496,6 @@
                     <div class="hud-label">Connect Order</div>
                     <div class="target-seq" id="target-display">Loading...</div>
                 </div>
-                <div class="level-badge" id="level-display">Level 1</div>
             </div>
 
             <div class="playground-window">
@@ -516,11 +518,11 @@
 
     <div id="win-modal" class="modal-overlay">
         <div class="modal-card" id="win-card">
-            <div class="modal-title" id="modal-h">GREAT JOB!</div>
+            <div class="modal-title" id="modal-h">perfect!</div>
             <div class="modal-stars" id="modal-icon">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
             </div>
-            <div class="modal-text" id="win-msg">Level Complete!</div>
+            <div class="modal-text" id="win-msg">sequence connected!</div>
             <center>
                 <button class="btn-start" id="next-level-btn" onclick="nextLevel()">
                     NEXT <i class="fa-solid fa-arrow-right"></i>
@@ -534,6 +536,9 @@
             <button class="close-x" onclick="closeInfo()">X</button>
             <div class="info-inner">
                 <div class="info-header"><i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?</div>
+                
+
+
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-icon" style="color: var(--train-yellow);"><i class="fa-solid fa-brain"></i></span>
@@ -789,9 +794,7 @@
 
         function scatterCars() {
             const rect = playground.getBoundingClientRect();
-            // --- NEW: Dynamic track width based on device ---
-            // If mobile, we restricted the track to 140% via CSS.
-            // We need to use scrollWidth to get the full scrollable area size.
+            // Dynamic track width based on device
             const trackWidth = playground.scrollWidth; 
             
             cars.forEach(c => {
@@ -799,10 +802,7 @@
                 c.prev = null;
                 
                 // Spawn logic: Keep them within the visible/scrollable area
-                // Leave 20px padding on left, and car_width + 20px padding on right
                 c.x = 20 + Math.random() * (trackWidth - (CAR_W + 40));
-                
-                // Keep them vertically centered-ish but random
                 c.y = 20 + Math.random() * (rect.height - 100);
                 
                 updatePos(c);
@@ -827,7 +827,6 @@
             smoke.style.top = y + 'px';
             playground.appendChild(smoke);
             
-            // Remove after animation
             setTimeout(() => { smoke.remove(); }, 600);
         }
 
@@ -858,7 +857,6 @@
             const rect = playground.getBoundingClientRect();
             
             // Calculate position relative to the scrollable container
-            // We need to add playground.scrollLeft to account for scrolling
             draggedCar.x = (clientX - rect.left - offset.x) / scale + playground.scrollLeft;
             draggedCar.y = (clientY - rect.top - offset.y) / scale;
             
@@ -890,7 +888,6 @@
                     current.prev = other;
                     updatePos(other);
                     playSound('snap');
-                    // TRIGGER SMOKE at the join point
                     createSmoke(current.x, current.y + 40); 
                     break;
                 }
@@ -911,7 +908,7 @@
 
         function checkWin() {
             let heads = cars.filter(c => c.prev === null);
-            if (heads.length !== 1) { showModal("Connect ALL cars!", false); return; }
+            if (heads.length !== 1) { showModal("all cars must be linked!", false); return; }
             
             let current = heads[0];
             let count = 0;
@@ -922,8 +919,8 @@
                 current = current.next; count++;
             }
             
-            if (match && count === targetSeq.length && count === cars.length) { showModal("Excellent Work!", true); } 
-            else { showModal("Wrong Order!", false); }
+            if (match && count === targetSeq.length && count === cars.length) { showModal("sequence connected!", true); } 
+            else { showModal("the order is wrong...", false); }
         }
 
         function showModal(msg, success) {
@@ -931,24 +928,24 @@
             if (success) {
                 playSound('win');
                 winCard.className = 'modal-card win';
-                modalTitle.innerText = "GREAT JOB!";
+                modalTitle.innerText = "perfect!";
                 modalStars.innerHTML = '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>';
                 winModal.classList.add('show');
                 
                 if (currentLevelIdx < levels.length - 1) {
-                    nextBtn.innerHTML = `NEXT LEVEL <i class="fa-solid fa-arrow-right"></i>`;
+                    nextBtn.innerHTML = `NEXT <i class="fa-solid fa-arrow-right"></i>`;
                     nextBtn.onclick = nextLevel;
                 } else {
                     nextBtn.innerHTML = `HOME <i class="fa-solid fa-house"></i>`;
                     nextBtn.onclick = goHome;
-                    winMsg.innerText = "SHIFT ENDED!\nyour train has arrived";
-                    modalTitle.innerText = "TERMINAL REACHED";
+                    winMsg.innerText = "shift ended!\nall trains arrived safely";
+                    modalTitle.innerText = "terminal reached";
                 }
                 nextBtn.style.display = 'flex';
             } else {
                 playSound('error');
                 winCard.className = 'modal-card fail';
-                modalTitle.innerText = "OOPS!";
+                modalTitle.innerText = "oh no...";
                 modalStars.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
                 winModal.classList.add('show');
                 nextBtn.style.display = 'none';
