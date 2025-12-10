@@ -82,9 +82,11 @@
             align-items: center;
             gap: 8px;
             font-size: 1rem;
+            
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
+            
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: transform 0.2s;
         }
@@ -262,7 +264,7 @@
                     <i class="fa-solid fa-play"></i> START SYSTEM
                 </button>
                 <button class="btn" style="background:transparent; border:2px solid var(--neon-blue); color:var(--neon-blue);" onclick="showInfo()">
-                    <i class="fa-solid fa-brain"></i> LEARN MORE
+                    <i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE
                 </button>
             </div>
         </div>
@@ -337,7 +339,7 @@
     <div id="info-modal" class="modal">
         <div class="modal-box info-box">
             <h2 class="text-xl font-bold text-yellow-400 mb-4" style="font-family: 'Titan One'">
-                EDUCATIONAL VALUE
+                <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
             </h2>
             
             
@@ -387,7 +389,6 @@
         // --- AUDIO ENGINE (FIXED FOR IOS) ---
         const AudioSys = {
             ctx: null, muted: false,
-            // Function to wake up audio context on user interaction
             unlock() {
                 if (!this.ctx) {
                     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
