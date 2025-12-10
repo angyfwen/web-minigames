@@ -34,8 +34,8 @@
             width: 100vw;
             display: flex; justify-content: center; align-items: center;
             user-select: none;
-            /* MOBILE FIX: Prevent gestures/scrolling */
-            touch-action: none;
+            /* MOBILE FIX: Prevent gestures/scrolling globally */
+            touch-action: none; 
         }
 
         #game-stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
@@ -194,6 +194,10 @@
             z-index: 4; position: relative; color: white;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3); border: 5px solid white;
             cursor: pointer; transition: transform 0.1s;
+            /* CRITICAL MOBILE FIX: Allow rapid tapping without scrolling */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
         }
         .qte-icon:active { transform: scale(0.9); }
 
@@ -343,7 +347,6 @@
             /* HUD tweaks */
             .hud-top {
                 padding: 10px;
-                /* Stack badges slightly or reduce gap */
                 gap: 10px;
             }
             .badge {
@@ -357,9 +360,8 @@
 
             /* QTE Ring scaling */
             #qte-wrapper {
-                /* Slightly smaller ring on mobile */
                 transform: translate(-50%, -50%) scale(0.9);
-                left: 50%; /* Ensure centering */
+                left: 50%;
                 top: 50%;
             }
 
@@ -796,14 +798,23 @@
             zone.style.background = `conic-gradient(transparent ${targetStartAngle}deg, ${zoneColor} ${targetStartAngle}deg ${targetEndAngle}deg, transparent ${targetEndAngle}deg)`;
         }
 
+        // --- MOBILE INPUT FIX ---
+        // We use touchstart to make it respond instantly on mobile (no 300ms delay)
+        const qteBtn = document.getElementById('qte-btn');
+        
+        qteBtn.addEventListener('mousedown', checkHit);
+        qteBtn.addEventListener('touchstart', (e) => {
+            // Prevent ghost clicks
+            if (e.cancelable) e.preventDefault(); 
+            checkHit(e);
+        }, {passive: false});
+
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') checkHit(e);
         });
-        document.getElementById('qte-btn').addEventListener('mousedown', checkHit);
 
         function checkHit(e) {
             if (!gameActive) return;
-            if (e && e.preventDefault) e.preventDefault();
             
             if(currentTargetType === 'pest') {
                 // If you click a pest AT ALL, you fail immediately.
@@ -929,8 +940,6 @@
             const centerX = width / 2;
             const headScreenY = (isIntro) ? flowerIntroY : (height - HEAD_OFFSET);
             
-            // Draw Leaves (REMOVED as requested)
-
             // Draw Stem
             const stemGrad = ctx.createLinearGradient(centerX - 20, 0, centerX + 20, 0);
             stemGrad.addColorStop(0, '#33691e');
