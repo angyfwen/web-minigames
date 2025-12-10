@@ -105,18 +105,24 @@
             display: none; 
         }
 
+        /* TOP HUD: Stats only */
         .hud-top {
             position: absolute; top: 0; left: 0; width: 100%;
             padding: 20px; 
-            display: flex; justify-content: space-between; align-items: flex-start;
-            pointer-events: auto; z-index: 60;
+            display: flex; justify-content: flex-end; /* Align stats to right */
+            align-items: flex-start;
+            pointer-events: none; z-index: 60;
         }
         
-        .badge-container { 
-            display: flex; gap: 10px; 
-            /* Pushes badges to the right of the menu button */
-            margin-left: 120px; 
-            align-items: center;
+        .stats-container { 
+            display: flex; gap: 10px; pointer-events: auto;
+        }
+
+        /* BOTTOM HUD: Controls */
+        .hud-bottom {
+            position: absolute; bottom: 20px; left: 0; width: 100%;
+            display: flex; justify-content: center; gap: 15px;
+            pointer-events: auto; z-index: 60;
         }
 
         .badge {
@@ -140,12 +146,13 @@
         }
 
         .btn-round {
-            width: 50px; height: 50px; border-radius: 50%; border: 3px solid #fff;
-            background: rgba(0,0,0,0.2); color: white; font-size: 1.2rem; cursor: pointer;
+            width: 55px; height: 55px; border-radius: 50%; border: 3px solid #fff;
+            background: rgba(0,0,0,0.2); color: white; font-size: 1.4rem; cursor: pointer;
             backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center;
-            transition: 0.2s; pointer-events: auto;
+            transition: 0.2s; pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .btn-round:hover { background: white; color: #333; }
+        .btn-round:hover { background: white; color: #333; transform: scale(1.1); }
+        .btn-round:active { transform: scale(0.95); }
 
         /* --- RAINBOW MENU BUTTON (FIXED TOP LEFT) --- */
         .menu-btn-rainbow {
@@ -165,7 +172,6 @@
             align-items: center;
             gap: 8px;
             font-size: 1rem;
-            /* RAINBOW */
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
@@ -341,7 +347,7 @@
             border: 5px solid #7cb342; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             width: 85%; max-width: 340px; max-height: 90vh; overflow-y: auto;
         }
-        .modal-h { font-family: var(--font-title); font-size: 1.8rem; color: #33691e; line-height: 1; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .modal-h { font-family: var(--font-title); font-size: 1.8rem; color: #33691e; line-height: 1; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: lowercase; }
         .info-list { text-align: left; margin-bottom: 20px; color: #555; }
         .info-li { margin-bottom: 12px; font-size: 1rem; line-height: 1.3; display: flex; align-items: flex-start;}
         .info-li i { width: 30px; text-align: center; margin-right: 10px; font-size: 1.2rem; margin-top: 2px;}
@@ -355,35 +361,9 @@
             .btn-play { font-size: 2rem; padding: 12px 50px; }
             .btn-info { font-size: 0.9rem; padding: 10px 20px; }
 
-            .hud-top { 
-                padding: 15px; 
-                align-items: center;
-            }
-
-            /* --- ALIGNMENT FIX FOR MOBILE --- */
-            .menu-btn-rainbow {
-                top: 15px;
-                left: 15px;
-                font-size: 0.9rem;
-                padding: 8px 16px;
-            }
-
-            .badge-container { 
-                margin-left: 110px; /* Space for the button */
-                margin-top: 0;
-                flex-direction: row; 
-                gap: 5px; 
-                align-items: center;
-            }
-
-            .badge { 
-                font-size: 0.85rem; 
-                padding: 6px 12px; 
-                border-width: 2px;
-                white-space: nowrap;
-            }
-            
-            .btn-round { width: 40px; height: 40px; font-size: 1rem; }
+            .hud-top { padding: 15px; }
+            .badge { font-size: 1rem; padding: 5px 12px; border-width: 2px; }
+            .btn-round { width: 50px; height: 50px; font-size: 1.2rem; }
 
             /* Mobile QTE Ring scaling */
             #qte-wrapper { width: 140px; height: 140px; }
@@ -441,15 +421,15 @@
                         <i class="fa-solid fa-ruler-vertical"></i> <span id="height-val">0</span> cm
                     </div>
                     <div id="timer-badge-el" class="badge timer-badge">
-                        <i class="fa-solid fa-stopwatch"></i> <span id="timer-val">60</span>s
+                        <i class="fa-solid fa-stopwatch"></i> <span id="timer-val">40</span>s
                     </div>
                 </div>
-                
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-round" onclick="showHelp()" style="background:#42a5f5; border-color:#42a5f5"><i class="fa-solid fa-question"></i></button>
-                    <button class="btn-round" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
-                    <button class="btn-round" onclick="triggerReset()" style="background:#ef5350; border-color:#ef5350"><i class="fa-solid fa-rotate-left"></i></button>
-                </div>
+            </div>
+
+            <div class="hud-bottom">
+                <button class="btn-round" onclick="showHelp()" style="background:#42a5f5; border-color:#42a5f5"><i class="fa-solid fa-question"></i></button>
+                <button class="btn-round" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="snd-icon"></i></button>
+                <button class="btn-round" onclick="triggerReset()" style="background:#ef5350; border-color:#ef5350"><i class="fa-solid fa-rotate-left"></i></button>
             </div>
         </div>
 
@@ -471,27 +451,27 @@
 
         <div id="edu-modal" class="modal">
             <div class="modal-box" style="border-color: #558b2f;">
-                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> Educational Value</div>
+                <div class="modal-h" style="color:#558b2f;"><i class="fa-solid fa-brain"></i> educational value</div>
                 <div class="info-list">
-                    <div class="info-li"><i class="fa-solid fa-seedling"></i> <div><strong>Growth:</strong> Requires resources.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>Light:</strong> Photosynthesis energy.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-droplet" style="color:#039be5"></i> <div><strong>Water:</strong> Structure & transport.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-wind" style="color:#78909c"></i> <div><strong>CO2:</strong> Building material.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-seedling"></i> <div><strong>growth:</strong> requires resources.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-sun" style="color:#fbc02d"></i> <div><strong>light:</strong> photosynthesis energy.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-droplet" style="color:#039be5"></i> <div><strong>water:</strong> structure & transport.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-wind" style="color:#78909c"></i> <div><strong>co2:</strong> building material.</div></div>
                 </div>
-                <button class="btn-info" style="background:#558b2f; color:white; border-color:#558b2f" onclick="closeModals()">GOT IT</button>
+                <button class="btn-info" style="background:#558b2f; color:white; border-color:#558b2f" onclick="closeModals()">got it</button>
             </div>
         </div>
 
         <div id="help-modal" class="modal">
             <div class="modal-box" style="border-color: #42a5f5;">
-                <div class="modal-h" style="color:#42a5f5;"><i class="fa-solid fa-gamepad"></i> How To Play</div>
+                <div class="modal-h" style="color:#42a5f5;"><i class="fa-solid fa-gamepad"></i> how to play</div>
                 <div class="info-list">
-                    <div class="info-li"><i class="fa-regular fa-hand-pointer"></i> <div>Tap the <strong>BIG BUTTON</strong> when the white ball is in the <strong>GREEN ZONE</strong>.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-check" style="color:#76ff03"></i> <div><strong>Sun/Water/Air:</strong> Tap to grow!</div></div>
-                    <div class="info-li"><i class="fa-solid fa-bug" style="color:#d32f2f"></i> <div><strong>Pests (Red):</strong> DO NOT TAP! Wait 2 seconds for them to leave.</div></div>
-                    <div class="info-li"><i class="fa-solid fa-trophy" style="color:#fbc02d"></i> <div>Reach <strong>500cm</strong> before time runs out!</div></div>
+                    <div class="info-li"><i class="fa-regular fa-hand-pointer"></i> <div>tap the <strong>big button</strong> when the white ball is in the <strong>green zone</strong>.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-check" style="color:#76ff03"></i> <div><strong>sun/water/air:</strong> tap to grow!</div></div>
+                    <div class="info-li"><i class="fa-solid fa-bug" style="color:#d32f2f"></i> <div><strong>pests (red):</strong> do not tap! wait 2 seconds for them to leave.</div></div>
+                    <div class="info-li"><i class="fa-solid fa-trophy" style="color:#fbc02d"></i> <div>reach <strong>500cm</strong> before time runs out!</div></div>
                 </div>
-                <button class="btn-info" style="background:#42a5f5; color:white; border-color:#42a5f5" onclick="closeModals()">LET'S GROW</button>
+                <button class="btn-info" style="background:#42a5f5; color:white; border-color:#42a5f5" onclick="closeModals()">let's grow</button>
             </div>
         </div>
 
@@ -500,7 +480,7 @@
     <script>
         const HEAD_OFFSET = 350; 
         const TARGET_HEIGHT_CM = 500;
-        const CM_PER_HIT = 20; 
+        const CM_PER_HIT = 40; // DOUBLED GROWTH RATE
         const PIXELS_PER_CM = 5; 
         
         // Audio
@@ -557,7 +537,7 @@
         let logicHeightCm = 0;
         let visualHeightCm = 0;
         
-        let timeLeft = 60;
+        let timeLeft = 40; // SHORTENED TIMER
         let globalTimerInt;
         
         let currentTargetType = null;
@@ -568,7 +548,7 @@
         // PEST LOGIC
         let pestTimeout = null;
 
-        const NEEDLE_SPEED_CONST = 3.0; 
+        const NEEDLE_SPEED_CONST = 4.5; // FASTER NEEDLE
 
         const SKY_STOPS = [
             { pct: 0,  c1: [66, 165, 245], c2: [144, 202, 249] }, 
@@ -717,7 +697,7 @@
 
             logicHeightCm = 0;
             visualHeightCm = 0;
-            timeLeft = 60;
+            timeLeft = 40; // SHORTENED
             needleAngle = 0; 
             
             mainLoopId = requestAnimationFrame(gameLoop);
@@ -777,13 +757,13 @@
             if(rand < 0.2) {
                 currentTargetType = 'pest';
                 
-                // Wait 2.0s so user can see it, then switch
+                // Wait 1.5s so user can see it, then switch
                 pestTimeout = setTimeout(() => {
                     if(gameActive) {
                         showFeedback("SAFE!", "#76ff03");
                         pickNewTarget();
                     }
-                }, 2000);
+                }, 1500);
             } else {
                 const types = ['sun', 'water', 'air'];
                 currentTargetType = types[Math.floor(Math.random() * 3)];
@@ -936,12 +916,12 @@
             
             if(win) {
                 AudioSys.win();
-                msgEl.innerHTML = '<i class="fa-solid fa-trophy"></i> AMAZING!';
+                msgEl.innerHTML = '<i class="fa-solid fa-trophy"></i> amazing!';
                 msgEl.style.color = '#558b2f';
                 msgEl.style.borderColor = '#33691e';
             } else {
                 AudioSys.lose();
-                msgEl.innerHTML = '<i class="fa-solid fa-bell"></i> TIME\'S UP!';
+                msgEl.innerHTML = '<i class="fa-solid fa-bell"></i> time\'s up!';
                 msgEl.style.color = '#d32f2f';
                 msgEl.style.borderColor = '#b71c1c';
             }
