@@ -38,6 +38,8 @@
             color: #333;
             overflow: hidden;
             user-select: none;
+            /* CRITICAL: Lock body but allow internal elements to scroll */
+            touch-action: none; 
             animation: moveBg 20s linear infinite;
         }
 
@@ -65,11 +67,11 @@
             left: 20px;
             padding: 10px 24px;
             border-radius: 20px;
-            color: white; /* WHITE TEXT */
+            color: white; 
             font-family: 'Nunito', sans-serif;
             font-weight: 900;
             text-decoration: none;
-            text-transform: lowercase; /* SMALL LETTERS */
+            text-transform: lowercase; 
             cursor: pointer;
             z-index: 100;
             display: flex;
@@ -211,6 +213,10 @@
             position: relative;
             scrollbar-width: thin;
             scrollbar-color: var(--train-yellow) #5D4037;
+            
+            /* FIXED SCROLL FOR MOBILE */
+            touch-action: pan-x;
+            -webkit-overflow-scrolling: touch;
         }
 
         .playground-window::-webkit-scrollbar { height: 14px; }
@@ -234,6 +240,8 @@
             cursor: grab; z-index: 10; transition: transform 0.1s;
             background: linear-gradient(to bottom, var(--train-blue), #105a8b);
             border-radius: 15px 15px 5px 5px; border: 3px solid white; box-shadow: 5px 10px 10px rgba(0,0,0,0.3);
+            /* Important for drag */
+            touch-action: none;
         }
         .train-car::after { content: ''; position: absolute; right: -15px; top: 50px; width: 25px; height: 12px; background: #333; border-radius: 0 5px 5px 0; border: 2px solid #555; z-index: -1; }
         .train-car::before { content: ''; position: absolute; left: -10px; top: 50px; width: 15px; height: 12px; background: #222; border-radius: 5px 0 0 5px; z-index: -1; }
@@ -251,6 +259,13 @@
         .t-indigo { background: linear-gradient(to bottom, var(--train-indigo), #2a004b); }
         .t-violet { background: linear-gradient(to bottom, var(--train-violet), #ad53ad); }
         .train-car:active { cursor: grabbing; transform: scale(1.05); z-index: 100; }
+
+        /* SMOKE EFFECT */
+        .smoke-particle {
+            position: absolute; width: 20px; height: 20px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%; pointer-events: none; z-index: 20;
+        }
 
         .controls { display: flex; justify-content: center; gap: 20px; height: 80px; }
         .ctrl-btn { border: none; padding: 0 30px; border-radius: 20px; font-family: 'Titan One', cursive; font-size: 1.2rem; color: white; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px; transition: transform 0.1s; border-bottom: 4px solid rgba(0,0,0,0.2); }
@@ -352,7 +367,7 @@
             .main-title { font-size: 2.8rem; margin-bottom: 30px; } 
             .main-title span { font-size: 1.5rem; }
             .menu-buttons { gap: 25px; width: 90%; } 
-            .btn-start, .btn-info { font-size: 1.1rem; padding: 12px; }
+            .btn-start, .btn-info, .play-btn { font-size: 1.1rem; padding: 12px; }
 
             /* GAME SCREEN CENTERING */
             #game-screen.screen.active {
@@ -628,6 +643,37 @@
             document.getElementById('vol-icon').className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
         }
 
+        // --- SMOKE EFFECT ---
+        function createSmoke(x, y) {
+            for(let i=0; i<6; i++) {
+                const part = document.createElement('div');
+                part.style.position = 'absolute';
+                part.style.width = '20px';
+                part.style.height = '20px';
+                part.style.background = 'rgba(255,255,255,0.7)';
+                part.style.borderRadius = '50%';
+                part.style.zIndex = '50';
+                part.style.pointerEvents = 'none';
+                
+                // Position near connection point
+                part.style.left = (x + Math.random() * 20) + 'px';
+                part.style.top = (y + 30 + Math.random() * 10) + 'px';
+                
+                document.getElementById('playground').appendChild(part);
+
+                const destX = (Math.random() - 0.5) * 60;
+                const destY = -50 - Math.random() * 30;
+
+                part.animate([
+                    { transform: `translate(0, 0) scale(0.5)`, opacity: 0.8 },
+                    { transform: `translate(${destX}px, ${destY}px) scale(1.5)`, opacity: 0 }
+                ], {
+                    duration: 600 + Math.random() * 400,
+                    easing: 'ease-out'
+                }).onfinish = () => part.remove();
+            }
+        }
+
         // --- WORD BANKS ---
         const wordPools = {
             3: ['CAT', 'DOG', 'BUS', 'VAN', 'SUN', 'FOX', 'BAT', 'HAT', 'PIG', 'ANT', 'COW'],
@@ -767,7 +813,6 @@
             cars.forEach(c => {
                 c.next = null;
                 c.prev = null;
-                // Scatter logic accounting for playground scaling
                 const scatterWidth = isMobile ? rect.width * 2 : rect.width; 
                 c.x = 20 + Math.random() * (scatterWidth - (CAR_W + 50));
                 c.y = 20 + Math.random() * (rect.height - 100);
@@ -787,7 +832,17 @@
 
         // --- INTERACTION ---
         function onMouseDown(e) { startDrag(e.target, e.clientX, e.clientY); document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp); }
-        function onTouchStart(e) { e.preventDefault(); const touch = e.touches[0]; startDrag(e.target, touch.clientX, touch.clientY); document.addEventListener('touchmove', onTouchMove, {passive: false}); document.addEventListener('touchend', onTouchEnd); }
+        function onTouchStart(e) { 
+            // e.preventDefault(); // REMOVED: Allow default unless grabbing a car
+            const touch = e.touches[0]; 
+            // Only prevent default if we actually hit a car
+            if (e.target.closest('.train-car')) {
+                e.preventDefault();
+                startDrag(e.target, touch.clientX, touch.clientY); 
+            }
+            document.addEventListener('touchmove', onTouchMove, {passive: false}); 
+            document.addEventListener('touchend', onTouchEnd); 
+        }
 
         function startDrag(target, clientX, clientY) {
             const carEl = target.closest('.train-car');
@@ -804,15 +859,18 @@
         }
 
         function onMouseMove(e) { moveDrag(e.clientX, e.clientY); }
-        function onTouchMove(e) { e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
+        function onTouchMove(e) { 
+            if (draggedCar) {
+                e.preventDefault(); 
+                moveDrag(e.touches[0].clientX, e.touches[0].clientY); 
+            }
+        }
 
         function moveDrag(clientX, clientY) {
             if (!draggedCar) return;
-            // Need to account for the scale transform on mobile
             const scale = isMobile ? 0.85 : 1; 
             const rect = playground.getBoundingClientRect();
             
-            // Adjust calculation for scale
             draggedCar.x = (clientX - rect.left - offset.x) / scale;
             draggedCar.y = (clientY - rect.top - offset.y) / scale;
             
@@ -844,6 +902,7 @@
                     current.prev = other;
                     updatePos(other);
                     playSound('snap');
+                    createSmoke(current.x, current.y); // PUFF!
                     break;
                 }
             }
