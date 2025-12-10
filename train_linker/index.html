@@ -38,8 +38,6 @@
             color: #333;
             overflow: hidden;
             user-select: none;
-            /* FIX: Allow scrolling inside containers, but stop rubber-banding */
-            overscroll-behavior: none;
             animation: moveBg 20s linear infinite;
         }
 
@@ -60,7 +58,7 @@
         .screen.active { display: flex; animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* --- RAINBOW MENU BUTTON (TOP LEFT) --- */
+        /* --- RAINBOW MENU BUTTON --- */
         .menu-btn-rainbow {
             position: absolute;
             top: 20px;
@@ -196,29 +194,28 @@
         .level-badge { background: var(--train-blue); color: white; padding: 10px 20px; border-radius: 15px; font-family: 'Titan One', cursive; font-size: 1.2rem; box-shadow: 0 5px 0 #0d4a75; white-space: nowrap; }
         .target-box { display: flex; flex-direction: column; align-items: center; flex-grow: 1; }
         .hud-label { font-size: 0.8rem; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .target-seq { font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-red); }
+        .target-seq { font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-red); text-align: center; }
 
         /* PLAYGROUND CONTAINER */
         .playground-window {
             flex-grow: 1;
             background-color: #8D6E63;
             border-radius: 30px;
-            overflow-x: auto; /* Allow Scroll */
+            overflow-x: auto; 
             overflow-y: hidden;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.3);
             border: 8px solid #5D4037;
             position: relative;
             scrollbar-width: thin;
             scrollbar-color: var(--train-yellow) #5D4037;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
 
         .playground-window::-webkit-scrollbar { height: 14px; }
         .playground-window::-webkit-scrollbar-track { background: #5D4037; border-radius: 0 0 20px 20px; }
         .playground-window::-webkit-scrollbar-thumb { background-color: var(--train-yellow); border-radius: 20px; border: 3px solid #5D4037; }
+        .playground-window::-webkit-scrollbar-thumb:hover { background-color: #ffda6a; }
 
         .playground {
-            /* Desktop default */
             width: 100%; height: 100%;
             position: relative;
             background-image: 
@@ -234,8 +231,6 @@
             cursor: grab; z-index: 10; transition: transform 0.1s;
             background: linear-gradient(to bottom, var(--train-blue), #105a8b);
             border-radius: 15px 15px 5px 5px; border: 3px solid white; box-shadow: 5px 10px 10px rgba(0,0,0,0.3);
-            /* Important for dragging */
-            touch-action: none;
         }
         .train-car::after { content: ''; position: absolute; right: -15px; top: 50px; width: 25px; height: 12px; background: #333; border-radius: 0 5px 5px 0; border: 2px solid #555; z-index: -1; }
         .train-car::before { content: ''; position: absolute; left: -10px; top: 50px; width: 15px; height: 12px; background: #222; border-radius: 5px 0 0 5px; z-index: -1; }
@@ -254,24 +249,27 @@
         .t-violet { background: linear-gradient(to bottom, var(--train-violet), #ad53ad); }
         .train-car:active { cursor: grabbing; transform: scale(1.05); z-index: 100; }
 
-        /* SMOKE EFFECT */
-        .smoke {
-            position: absolute; width: 20px; height: 20px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%; pointer-events: none; z-index: 20;
-            animation: puff 0.8s ease-out forwards;
-        }
-        @keyframes puff {
-            0% { transform: translate(0, 0) scale(0.5); opacity: 0.8; }
-            100% { transform: translate(0, -40px) scale(2); opacity: 0; }
-        }
-
         .controls { display: flex; justify-content: center; gap: 20px; height: 80px; }
         .ctrl-btn { border: none; padding: 0 30px; border-radius: 20px; font-family: 'Titan One', cursive; font-size: 1.2rem; color: white; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px; transition: transform 0.1s; border-bottom: 4px solid rgba(0,0,0,0.2); }
         .ctrl-btn:active { transform: translateY(6px); box-shadow: none; border-bottom: none; }
         .btn-reset { background: var(--train-yellow); color: #5c4300; }
         .btn-check { background: var(--train-green); }
         .btn-break { background: var(--train-red); }
+
+        /* SMOKE EFFECT */
+        .smoke-particle {
+            position: absolute;
+            width: 20px; height: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+            animation: puffUp 0.6s ease-out forwards;
+        }
+        @keyframes puffUp {
+            0% { transform: scale(0.5) translateY(0); opacity: 0.8; }
+            100% { transform: scale(2.5) translateY(-40px); opacity: 0; }
+        }
 
         /* MODAL */
         .modal-overlay {
@@ -287,7 +285,6 @@
             max-width: 450px; width: 90%; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
         }
-
         .modal-card.win { border-color: var(--train-green); }
         .modal-card.win .modal-title { color: var(--train-green); }
         .modal-card.fail { border-color: var(--train-red); }
@@ -300,20 +297,48 @@
 
         /* --- INFO POPUP --- */
         .info-card {
-            background: #fff; padding: 10px; border-radius: 30px; width: 90%; max-width: 600px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 30px;
+            width: 90%; max-width: 600px;
             background-image: repeating-linear-gradient(-45deg, var(--train-red), var(--train-red) 15px, var(--train-yellow) 15px, var(--train-yellow) 30px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center; position: relative;
         }
-        .info-inner { background: #fff; border-radius: 20px; padding: 30px; border: 4px solid #333; }
-        .info-header { font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-blue); margin-bottom: 20px; text-shadow: 2px 2px 0 #ddd; text-transform: uppercase; }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .info-item { background: #f9f9f9; padding: 15px; border-radius: 15px; border: 2px solid #eee; }
+
+        .info-inner {
+            background: #fff; border-radius: 20px; padding: 30px; border: 4px solid #333;
+        }
+
+        .info-header {
+            font-family: 'Titan One', cursive; font-size: 1.8rem; color: var(--train-blue); margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #ddd; text-transform: uppercase;
+        }
+
+        .info-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 25px;
+        }
+
+        .info-item {
+            background: #f9f9f9; padding: 15px; border-radius: 15px; border: 2px solid #eee;
+        }
+
         .info-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
         .info-title { font-weight: 900; color: #333; display: block; margin-bottom: 5px; font-size: 1rem; }
         .info-desc { font-size: 0.8rem; color: #666; line-height: 1.3; }
-        .btn-ok { background: var(--train-green); color: white; border: none; padding: 10px 40px; border-radius: 50px; font-family: 'Titan One', cursive; font-size: 1.5rem; cursor: pointer; box-shadow: 0 6px 0 #5f9609; transition: 0.1s; }
+
+        .btn-ok {
+            background: var(--train-green); color: white; border: none; padding: 10px 40px;
+            border-radius: 50px; font-family: 'Titan One', cursive; font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 6px 0 #5f9609; transition: 0.1s;
+        }
         .btn-ok:active { transform: translateY(6px); box-shadow: none; }
-        .close-x { position: absolute; top: -15px; right: -15px; width: 40px; height: 40px; background: var(--train-red); color: white; border-radius: 50%; border: 3px solid white; font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+
+        .close-x {
+            position: absolute; top: -15px; right: -15px; width: 40px; height: 40px;
+            background: var(--train-red); color: white; border-radius: 50%; border: 3px solid white;
+            font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
 
         /* --- MOBILE PATCH (CENTERING & SCROLL) --- */
         @media (max-width: 768px) {
@@ -348,6 +373,7 @@
             }
 
             .game-wrapper { 
+                /* Center Origin Scaling */
                 transform: scale(0.85); 
                 transform-origin: center center;
                 width: 100vw; 
@@ -360,28 +386,53 @@
                 gap: 15px; 
             }
 
+            /* ADJUST PLAYGROUND HEIGHT */
             .playground-window {
                 flex-grow: 0; 
                 height: 55vh; 
                 min-height: 300px;
             }
 
-            /* FIX: LIMIT PLAYGROUND WIDTH SO IT DOESN'T SCROLL FOREVER */
+            /* COMPACT HUD with Better Spacing */
+            .hud-bar { 
+                padding: 8px 12px; 
+                flex-wrap: wrap; 
+                justify-content: center; 
+                gap: 5px; 
+                min-height: 60px; /* Taller to fit target */
+            }
+            .hud-left { 
+                position: absolute; top: 10px; left: 10px; transform: scale(0.9); transform-origin: left top; 
+            }
+            .level-badge { 
+                position: absolute; top: 10px; right: 10px; font-size: 0.8rem; padding: 6px 12px; 
+            }
+            
+            /* Overlap Fix: Move target box down slightly and ensure it clears buttons */
+            .target-box { 
+                margin-top: 10px; 
+                width: 100%; 
+                order: 3; 
+                padding-top: 20px; 
+                display: flex;
+                justify-content: center;
+            } 
+            .hud-label { display: none; }
+            .target-seq { 
+                font-size: 1.5rem; 
+                margin-top: 0px; 
+                background: rgba(255,255,255,0.8);
+                padding: 2px 10px;
+                border-radius: 10px;
+            }
+
+            /* TIGHTER TRACK: 140% */
             .playground {
-                /* Reduced from 180% to 120% so its easier to find trains */
-                width: 120%; 
+                width: 140%; /* Reduced from huge value to be more manageable */
                 height: 100%;
                 border: none;
                 border-radius: 0;
             }
-
-            /* COMPACT HUD */
-            .hud-bar { padding: 8px 12px; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 50px; }
-            .hud-left { position: absolute; top: 8px; left: 10px; transform: scale(0.85); transform-origin: left top; }
-            .level-badge { position: absolute; top: 8px; right: 10px; font-size: 0.9rem; padding: 6px 12px; }
-            .target-box { margin-top: 0; width: 100%; order: 3; padding-top: 5px; } 
-            .hud-label { display: none; }
-            .target-seq { font-size: 1.3rem; margin-top: 25px; }
 
             .train-car { width: 110px; height: 70px; font-size: 1.8rem; } 
             .wheels { bottom: -10px; }
@@ -737,26 +788,22 @@
         }
 
         function scatterCars() {
-            // Updated scatter logic for better mobile containment
-            // Use offsetWidth to get current scrollable width
-            const boxWidth = playground.offsetWidth; 
-            const boxHeight = playground.offsetHeight;
+            const rect = playground.getBoundingClientRect();
+            // --- NEW: Dynamic track width based on device ---
+            // If mobile, we restricted the track to 140% via CSS.
+            // We need to use scrollWidth to get the full scrollable area size.
+            const trackWidth = playground.scrollWidth; 
             
             cars.forEach(c => {
                 c.next = null;
                 c.prev = null;
                 
-                // Keep trains strictly within the container
-                // 20px padding from left/top, minus width of car for max right
-                const maxX = boxWidth - (CAR_W + 20); 
-                const maxY = boxHeight - 100;
+                // Spawn logic: Keep them within the visible/scrollable area
+                // Leave 20px padding on left, and car_width + 20px padding on right
+                c.x = 20 + Math.random() * (trackWidth - (CAR_W + 40));
                 
-                c.x = 20 + Math.random() * maxX;
-                c.y = 20 + Math.random() * maxY;
-                
-                // Final safety clamp
-                if(c.x < 10) c.x = 10;
-                if(c.y < 10) c.y = 10;
+                // Keep them vertically centered-ish but random
+                c.y = 20 + Math.random() * (rect.height - 100);
                 
                 updatePos(c);
             });
@@ -773,17 +820,15 @@
         }
 
         // --- SMOKE EFFECT ---
-        function spawnSmoke(x, y) {
-            for(let i=0; i<5; i++) {
-                let s = document.createElement('div');
-                s.className = 'smoke';
-                // Adjust position relative to the connection point
-                s.style.left = (x + Math.random()*20 - 10) + 'px';
-                s.style.top = (y - 10 + Math.random()*10) + 'px';
-                s.style.animationDelay = (i*0.1) + 's';
-                playground.appendChild(s);
-                setTimeout(() => s.remove(), 1000);
-            }
+        function createSmoke(x, y) {
+            const smoke = document.createElement('div');
+            smoke.className = 'smoke-particle';
+            smoke.style.left = x + 'px';
+            smoke.style.top = y + 'px';
+            playground.appendChild(smoke);
+            
+            // Remove after animation
+            setTimeout(() => { smoke.remove(); }, 600);
         }
 
         // --- INTERACTION ---
@@ -809,11 +854,12 @@
 
         function moveDrag(clientX, clientY) {
             if (!draggedCar) return;
-            // Account for scale
             const scale = isMobile ? 0.85 : 1; 
             const rect = playground.getBoundingClientRect();
             
-            draggedCar.x = (clientX - rect.left - offset.x) / scale;
+            // Calculate position relative to the scrollable container
+            // We need to add playground.scrollLeft to account for scrolling
+            draggedCar.x = (clientX - rect.left - offset.x) / scale + playground.scrollLeft;
             draggedCar.y = (clientY - rect.top - offset.y) / scale;
             
             updatePos(draggedCar);
@@ -842,12 +888,10 @@
                     current.y = other.y;
                     other.next = current;
                     current.prev = other;
-                    
-                    // Trigger Smoke at the connection point
-                    spawnSmoke(current.x, current.y + 20);
-
                     updatePos(other);
                     playSound('snap');
+                    // TRIGGER SMOKE at the join point
+                    createSmoke(current.x, current.y + 40); 
                     break;
                 }
             }
