@@ -22,11 +22,10 @@
             --grid-off: #151515;
         }
 
-        /* NUCLEAR SCROLL FIX FOR MOBILE */
+        /* NUCLEAR SCROLL FIX */
         html, body {
             margin: 0; padding: 0;
             width: 100vw; height: 100vh; 
-            /* Fix height for Safari address bar */
             height: 100dvh; 
             position: fixed; top: 0; left: 0;
             overflow: hidden;
@@ -39,19 +38,24 @@
             user-select: none; -webkit-user-select: none;
         }
 
-        /* --- BACKGROUND --- */
+        /* --- BACKGROUND (BRIGHTER NOW!) --- */
         .disco-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             overflow: hidden; z-index: 0; pointer-events: none;
+            background: #050505; /* Slightly lighter black to help blend */
         }
         .beam {
             position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
-            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 255, 0.1) 20deg, transparent 40deg, rgba(255, 0, 255, 0.1) 140deg, transparent 160deg, rgba(255, 255, 0, 0.1) 260deg, transparent 280deg);
-            animation: spin 15s linear infinite; opacity: 0.6; mix-blend-mode: screen;
+            /* Increased opacity for better visibility */
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 255, 0.4) 20deg, transparent 40deg, rgba(255, 0, 255, 0.4) 140deg, transparent 160deg, rgba(255, 255, 0, 0.4) 260deg, transparent 280deg);
+            animation: spin 15s linear infinite; 
+            opacity: 0.8; /* Way brighter */
+            mix-blend-mode: screen;
         }
         .beam.two {
-            animation-direction: reverse; animation-duration: 20s; opacity: 0.4;
-            background: conic-gradient(from 180deg, transparent 0deg, rgba(0, 255, 0, 0.1) 20deg, transparent 40deg);
+            animation-direction: reverse; animation-duration: 20s; 
+            opacity: 0.6; /* Way brighter */
+            background: conic-gradient(from 180deg, transparent 0deg, rgba(0, 255, 0, 0.4) 20deg, transparent 40deg);
         }
         @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
 
@@ -65,23 +69,56 @@
         .screen.active { display: flex; animation: fadeUp 0.3s ease; }
         @keyframes fadeUp { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
 
-        /* --- GAME PANEL (Responsive Box) --- */
+        /* --- START SCREEN STYLES (FIXED) --- */
+        .start-container { 
+            text-align: center; 
+            /* Glassmorphism to make text pop against bright background */
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .logo-line {
+            font-family: 'Titan One', cursive; font-size: 3.8rem; line-height: 0.9;
+            color: transparent; -webkit-text-stroke: 2px var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+        .logo-line.pink { -webkit-text-stroke: 2px var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); }
+        
+        /* EQUALIZER FIX */
+        .equalizer { 
+            display: flex; gap: 8px; justify-content: center; 
+            height: 60px; /* Taller */
+            margin: 20px 0; 
+            align-items: flex-end; 
+        }
+        .bar { 
+            width: 12px; 
+            background: #fff; 
+            border-radius: 4px; 
+            animation: bounce 0.6s infinite alternate ease-in-out;
+            box-shadow: 0 0 10px currentColor; 
+        }
+        @keyframes bounce { 0% {height: 20%;} 100% {height: 100%;} }
+
+        /* --- GAME PANEL --- */
         .game-panel {
             background: rgba(10, 10, 10, 0.95); border: 1px solid #333;
             border-radius: 16px; padding: 16px; 
             width: 95%; max-width: 900px;
-            /* Flex layout to fit vertical screens */
             display: flex; flex-direction: column; gap: 10px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8); 
             position: relative; z-index: 20;
-            max-height: 98vh; /* Ensure it fits */
+            max-height: 98vh; 
         }
 
-        /* --- TERMINAL (Instructions) --- */
         .terminal {
             background: #020202; border-radius: 8px; padding: 12px;
             border: 1px solid var(--neon-blue); display: flex; flex-direction: column;
-            flex-shrink: 0; /* Don't shrink this too much */
+            flex-shrink: 0;
         }
         .term-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 6px; }
         .term-title { color: var(--neon-blue); font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
@@ -90,33 +127,28 @@
         .number { color: var(--neon-yellow); font-weight: bold; }
         .comment { color: #666; font-style: italic; font-size: 0.8rem; }
 
-        /* --- SEQUENCER GRID (The Main Issue) --- */
         .sequencer-container { 
             position: relative; background: #050505; 
             padding: 8px; border-radius: 10px; border: 1px solid #333; 
-            z-index: 30; 
-            flex-grow: 1; /* Take up remaining space */
+            z-index: 30; flex-grow: 1; 
             display: flex; flex-direction: column; justify-content: center;
         }
 
-        /* Responsive Grid Logic */
         .grid-layout {
             display: grid; 
-            /* 1st col is label (auto width), rest are beats (1fr each) */
             grid-template-columns: 50px repeat(8, 1fr); 
-            gap: 4px;
-            width: 100%;
+            gap: 4px; width: 100%;
         }
 
         .col-header { text-align: center; color: #555; font-size: 0.7rem; font-weight: bold; padding-bottom: 4px;}
         .track-label { 
             display: flex; align-items: center; justify-content: flex-start;
             font-weight: bold; font-size: 0.7rem; color: #888; 
-            text-transform: uppercase; letter-spacing: 0px;
+            text-transform: uppercase;
         }
 
         .beat-btn { 
-            width: 100%; aspect-ratio: 1; /* Perfect squares */
+            width: 100%; aspect-ratio: 1; 
             background-color: var(--grid-off); border: 1px solid #333; 
             border-radius: 4px; cursor: pointer; position: relative; z-index: 40; 
             touch-action: manipulation;
@@ -127,20 +159,14 @@
         .row-2.active { background-color: var(--neon-yellow) !important; color: var(--neon-yellow); }
         .row-3.active { background-color: var(--neon-green) !important; color: var(--neon-green); }
 
-        /* Sweep Bar needs to match grid */
         .sweep-bar { 
-            position: absolute; top: 25px; 
-            /* Calculated dynamically in JS or approximate left position */
-            left: 58px; 
+            position: absolute; top: 25px; left: 58px; 
             width: 2px; height: calc(100% - 35px); 
             background: white; box-shadow: 0 0 10px white; 
             pointer-events: none; display: none; z-index: 100; 
         }
 
-        /* --- CONTROLS --- */
-        .controls { 
-            display: flex; flex-direction: column; gap: 8px; margin-top: 5px; flex-shrink: 0;
-        }
+        .controls { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; flex-shrink: 0; }
         .control-row { display: flex; gap: 8px; width: 100%; }
         
         .btn { 
@@ -148,27 +174,14 @@
             font-family: 'Fira Code', monospace; font-weight: bold; font-size: 0.9rem; 
             cursor: pointer; text-transform: uppercase; 
             display: flex; align-items: center; justify-content: center; gap: 6px; 
-            transition: 0.1s; flex: 1; /* Stretch to fill */
-            touch-action: manipulation;
+            transition: 0.1s; flex: 1; touch-action: manipulation;
         }
         .btn:active { transform: scale(0.96); }
 
         .btn-play { background: var(--neon-green); color: black; }
         .btn-stop { background: var(--neon-pink); color: white; display: none; }
-        .btn-submit { background: var(--neon-yellow); color: black; flex: 2; /* Bigger */ }
-        .btn-icon { background: #222; color: #fff; border: 1px solid #444; flex: 0 0 45px; } /* Square buttons */
-        
-        /* --- START SCREEN STYLES --- */
-        .start-container { text-align: center; }
-        .logo-line {
-            font-family: 'Titan One', cursive; font-size: 4rem; line-height: 0.9;
-            color: transparent; -webkit-text-stroke: 2px var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
-        }
-        .logo-line.pink { -webkit-text-stroke: 2px var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); }
-        .equalizer { display: flex; gap: 6px; justify-content: center; height: 30px; margin: 20px 0; align-items: flex-end; }
-        .bar { width: 8px; background: #fff; animation: bounce 0.5s infinite alternate; border-radius: 4px; }
-        @keyframes bounce { 0% {height: 30%;} 100% {height: 100%;} }
+        .btn-submit { background: var(--neon-yellow); color: black; flex: 2; }
+        .btn-icon { background: #222; color: #fff; border: 1px solid #444; flex: 0 0 45px; }
 
         /* --- MODALS --- */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(5px); }
@@ -179,8 +192,6 @@
         }
         .finish-box { border-color: var(--neon-pink); }
         .info-box { border-color: var(--neon-yellow); text-align: left; }
-        
-        /* Info List */
         .info-item { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
         .info-title { color: var(--neon-blue); font-weight: bold; display: block; margin-bottom: 4px; }
         .info-desc { color: #999; font-size: 0.85rem; }
@@ -197,12 +208,15 @@
     <div id="start-screen" class="screen active">
         <div class="start-container">
             <div class="logo-line">RHYTHM</div>
+            
             <div class="equalizer">
-                <div class="bar" style="background:var(--neon-blue)"></div>
-                <div class="bar" style="background:var(--neon-green); animation-delay:0.1s"></div>
-                <div class="bar" style="background:var(--neon-yellow); animation-delay:0.2s"></div>
-                <div class="bar" style="background:var(--neon-pink); animation-delay:0.3s"></div>
+                <div class="bar" style="background:var(--neon-blue); height: 40%;"></div>
+                <div class="bar" style="background:var(--neon-green); animation-delay:0.1s; height: 70%;"></div>
+                <div class="bar" style="background:var(--neon-yellow); animation-delay:0.2s; height: 50%;"></div>
+                <div class="bar" style="background:var(--neon-pink); animation-delay:0.3s; height: 90%;"></div>
+                <div class="bar" style="background:var(--neon-blue); animation-delay:0.4s; height: 60%;"></div>
             </div>
+            
             <div class="logo-line pink">CODER</div>
             
             <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 15px; width: 240px;">
@@ -230,8 +244,7 @@
 
             <div class="sequencer-container">
                 <div class="sweep-bar" id="sweep-bar"></div>
-                <div class="grid-layout" id="main-grid">
-                    </div>
+                <div class="grid-layout" id="main-grid"></div>
             </div>
 
             <div class="controls">
@@ -474,8 +487,6 @@
             }
             
             // Move sweep bar (calculated based on layout)
-            // 50px offset + (currentStep * 1fr width)
-            // A rough % approximation works for responsive
             const leftPercent = 14 + (currentStep * 10.7); // Approximate alignment
             sweepBar.style.left = `${leftPercent}%`;
 
