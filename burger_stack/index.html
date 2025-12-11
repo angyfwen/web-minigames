@@ -43,14 +43,21 @@
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
-            /* FIXED: Set exact height/width to prevent cutoff */
-            width: 100vw; height: 100vh;
-            position: fixed; overflow: hidden;
+            width: 100%; 
+            /* FIXED: Use min-height 100vh to cover full mobile screen */
+            min-height: 100vh;
+            /* FIXED: Prevent "bouncing" the page on mobile which cuts off background */
+            overscroll-behavior: none;
+            position: fixed; 
+            overflow: hidden;
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            /* FIXED: Removed background-attachment: scroll to fix mobile visual glitch */
+            background-attachment: scroll; 
+            /* FIXED: Ensure pattern repeats everywhere */
+            background-repeat: no-repeat, repeat;
+            background-size: cover, auto;
             animation: bgScroll 3s linear infinite;
             color: var(--text-main);
             touch-action: none; 
@@ -74,13 +81,16 @@
         }
         @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* FIXED: Hidden by default, shown only in game */
+        /* FIXED: Moved specific positioning here for when it's inside game screen */
         .nav-group-right { 
             pointer-events: auto; 
-            display: none; /* Changed from flex to none */
-            gap: 10px; 
+            display: flex; gap: 10px; 
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
         }
-        
+
         .nav-btn {
             background: white; border: none; width: 40px; height: 40px; border-radius: 12px;
             cursor: pointer; font-size: 1.1rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
@@ -91,6 +101,8 @@
         .screen {
             width: 100%; height: 100%; display: none;
             flex-direction: column; align-items: center; justify-content: center;
+            /* Added relative here so the buttons can position absolute relative to this */
+            position: relative; 
         }
         .screen.active { display: flex; }
 
@@ -275,11 +287,6 @@
         <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
             <i class="fa-solid fa-gamepad"></i> menu
         </a>
-        <div class="nav-group-right">
-            <button class="nav-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
-            <button class="nav-btn" onclick="toggleMute()" title="Mute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
-            <button class="nav-btn" onclick="openHelp()" title="Help"><i class="fa-solid fa-question"></i></button>
-        </div>
     </div>
 
     <div id="start-screen" class="screen active">
@@ -292,6 +299,12 @@
     </div>
 
     <div id="game-screen" class="screen">
+        <div class="nav-group-right">
+            <button class="nav-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+            <button class="nav-btn" onclick="toggleMute()" title="Mute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
+            <button class="nav-btn" onclick="openHelp()" title="Help"><i class="fa-solid fa-question"></i></button>
+        </div>
+
         <div class="game-wrapper">
             
             <div class="info-panel">
@@ -432,8 +445,6 @@
             initAudio(); 
             document.getElementById('start-screen').classList.remove('active');
             document.getElementById('game-screen').classList.add('active');
-            // FIXED: Show the right side buttons only when game starts
-            document.querySelector('.nav-group-right').style.display = 'flex';
             currentLevelNum = 1;
             initLevel();
         }
@@ -442,8 +453,6 @@
             document.getElementById('game-screen').classList.remove('active');
             document.getElementById('start-screen').classList.add('active');
             document.getElementById('win-modal').style.display = 'none';
-            // FIXED: Hide the right side buttons when going home
-            document.querySelector('.nav-group-right').style.display = 'none';
         }
 
         function initLevel() {
