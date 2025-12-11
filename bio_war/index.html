@@ -87,6 +87,20 @@
         .btn-help{ background:linear-gradient(to bottom,var(--btn-blue-top),var(--btn-blue-bot)); box-shadow:0px 8px 0px #003366; }
         .btn-icon{ padding:15px;border-radius:50%;width:50px;height:50px;justify-content:center; }
 
+        /* RAINBOW MENU BUTTON (Styled like modern-btn but smaller/custom) */
+        .menu-btn-rainbow {
+            border:none; padding:0 20px; height: 50px; border-radius: 50px;
+            font-family:'fredoka one',cursive; font-size:1.2rem; color:white;
+            text-decoration: none; cursor:pointer;
+            display:flex; align-items:center; gap:8px;
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; animation: gradientMove 4s ease infinite;
+            box-shadow: 0px 4px 0px rgba(0,0,0,0.3); /* Match other icons depth */
+            transition: transform 0.1s;
+        }
+        .menu-btn-rainbow:active { transform: translateY(4px); box-shadow: none; }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
         #game-hud{ position:absolute; top:0; left:0; width:100%; display:none; justify-content:space-between; padding:20px 40px; padding-top:max(20px,env(safe-area-inset-top)); padding-left:max(40px,env(safe-area-inset-left)); padding-right:max(40px,env(safe-area-inset-right)); box-sizing:border-box; z-index:15; pointer-events:none; }
 
         .hud-card{ background:var(--card-bg); border-radius:20px; padding:15px 25px; border:2px solid rgba(255,255,255,.1); backdrop-filter:blur(10px); display:flex; flex-direction:column; align-items:flex-start; box-shadow:0 10px 20px rgba(0,0,0,.3); min-width:150px; }
@@ -98,8 +112,11 @@
         .progress-container{ width:100%; height:12px; background:rgba(0,0,0,.5); border-radius:10px; overflow:hidden; margin-top:5px; }
         .progress-bar{ height:100%; width:100%; background: linear-gradient(90deg,#ff4444,#ff8800); transition:width .3s; }
 
-        #controls-area{ position:absolute; bottom:0; left:0; display:none; gap:15px; z-index:15; padding-bottom:max(30px,env(safe-area-inset-bottom)); padding-left:max(30px,env(safe-area-inset-left)); }
-        @media (max-width:850px),(max-height:500px){ #controls-area{ padding-bottom:10px; padding-left:10px; gap:8px; } .btn-icon{ width:40px; height:40px; font-size:.9rem; padding:0; } }
+        #controls-area{ position:absolute; bottom:0; left:0; width: 100%; display:none; justify-content:space-between; align-items: flex-end; z-index:15; padding: 20px; padding-bottom:max(30px,env(safe-area-inset-bottom)); padding-left:max(30px,env(safe-area-inset-left)); padding-right:max(30px,env(safe-area-inset-right)); pointer-events: none; }
+        
+        .controls-left, .controls-right { display: flex; gap: 15px; pointer-events: auto; }
+
+        @media (max-width:850px),(max-height:500px){ #controls-area{ padding: 10px; gap:8px; } .btn-icon, .menu-btn-rainbow { height:40px; font-size:.9rem; } .btn-icon { width: 40px; padding: 0; } .menu-btn-rainbow { padding: 0 15px; } }
 
         .modal-overlay{ position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.8); z-index:100; display:none; justify-content:center; align-items:center; backdrop-filter:blur(5px); padding:20px; box-sizing:border-box; }
 
@@ -124,13 +141,11 @@
         #go-reason{ font-size:1.05rem; margin-top:6px; color:#ffaaaa; padding: 0 16px; }
         #go-score{ font-size:1.25rem; margin-bottom:10px; text-transform:none; }
 
-        /* make the single return button occupy a centered full-width feel on mobile */
         #game-over-screen .btn-area{ width:100%; display:flex; justify-content:center; margin-top:8px; }
         #game-over-screen .btn-group{ flex-direction:row; gap:14px; flex-wrap:wrap; justify-content:center; width:100%; max-width:680px; }
 
         @media (max-width:640px){
             #game-over-screen .btn-group{ flex-direction:column; gap:10px; align-items:center; }
-            /* ensure single button looks big, centered and never clipped */
             #game-over-screen .modern-btn{ padding:12px 18px; font-size:1.05rem; border-radius:18px; width:92%; max-width:420px; }
             #game-over-screen .modern-btn.full{ width:92%; }
             #game-over-screen #go-icon{ font-size:3.2rem !important; }
@@ -141,58 +156,17 @@
 
         @media (max-height:420px){ .modal-box{ max-height:calc(100vh - 40px); overflow-y:auto; } #game-over-screen{ padding-top:12px; padding-bottom:12px; } }
         
-        /* === END SCREEN MOBILE FIX — MATCH START SCREEN SIZING === */
         @media (max-width: 850px), (max-height: 500px) {
-
-            #go-icon {
-                font-size: 2.5rem !important;
-                margin-bottom: 6px;
-            }
-
-            #go-title {
-                font-size: 2rem !important;
-                letter-spacing: 1px !important;
-                line-height: 1.1;
-            }
-
-            #go-reason {
-                font-size: 0.85rem !important;
-                padding: 0 10px !important;
-            }
-
-            #go-score {
-                font-size: 0.9rem !important;
-                margin-bottom: 10px !important;
-            }
-
-            #game-over-screen .modern-btn {
-            position: relative;         /* allow absolute child */
-            display: flex;
-            justify-content: center;    /* center text + inline content */
-            align-items: center;
-            gap: 0;                     /* remove gap so icon won't shift text */
-            padding-left: 48px;         /* keep space for the icon so centered text isn't overlapped */
-            box-sizing: border-box;
-            }
-
-            /* the icon inside that button gets absolute left placement */
-            #game-over-screen .modern-btn i.fa-solid {
-            position: absolute;
-            left: 14px;                 /* tweak if you want it a bit more inward/outward */
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;       /* avoid accidental clicks on the icon */
-            }
-
-            /* on very small screens reduce padding so button never overflows */
+            #go-icon { font-size: 2.5rem !important; margin-bottom: 6px; }
+            #go-title { font-size: 2rem !important; letter-spacing: 1px !important; line-height: 1.1; }
+            #go-reason { font-size: 0.85rem !important; padding: 0 10px !important; }
+            #go-score { font-size: 0.9rem !important; margin-bottom: 10px !important; }
+            #game-over-screen .modern-btn { position: relative; display: flex; justify-content: center; align-items: center; gap: 0; padding-left: 48px; box-sizing: border-box; }
+            #game-over-screen .modern-btn i.fa-solid { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
             @media (max-width: 420px) {
-            #game-over-screen .modern-btn {
-                padding-left: 42px;
-                padding-right: 18px;
+            #game-over-screen .modern-btn { padding-left: 42px; padding-right: 18px; }
             }
-            }
-
-}
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
@@ -222,14 +196,20 @@
         <div class="hud-card"><div class="hud-label"><i class="fa-solid fa-heart-pulse"></i> integrity</div><div class="progress-container"><div class="progress-bar" id="health-bar"></div></div><div style="font-size:.8rem;margin-top:5px;color:#aaa;" id="health-text">100%</div></div>
     </div>
 
-    <div id="controls-area" class="interactive">
-        <button class="modern-btn btn-red btn-icon" onclick="GameApp.goHome()" title="abort mission" style="background:linear-gradient(to bottom,#ff4444,#990000);box-shadow:0px 8px 0px #550000;"><i class="fa-solid fa-house"></i></button>
-        <button class="modern-btn btn-info btn-icon" onclick="GameApp.toggleMute()" id="mute-btn" title="toggle audio"><i class="fa-solid fa-volume-high"></i></button>
-        <button class="modern-btn btn-start btn-icon" onclick="GameApp.startGame()" title="restart mission"><i class="fa-solid fa-rotate-right"></i></button>
-        <button class="modern-btn btn-help btn-icon" onclick="GameApp.toggleInfo('help')" title="how to play"><i class="fa-solid fa-question"></i></button>
+    <div id="controls-area">
+        <div class="controls-left">
+            <button class="modern-btn btn-red btn-icon" onclick="GameApp.goHome()" title="abort mission" style="background:linear-gradient(to bottom,#ff4444,#990000);box-shadow:0px 8px 0px #550000;"><i class="fa-solid fa-house"></i></button>
+        </div>
+        <div class="controls-right">
+            <button class="modern-btn btn-info btn-icon" onclick="GameApp.toggleMute()" id="mute-btn" title="toggle audio"><i class="fa-solid fa-volume-high"></i></button>
+            <button class="modern-btn btn-start btn-icon" onclick="GameApp.startGame()" title="restart mission"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="modern-btn btn-help btn-icon" onclick="GameApp.toggleInfo('help')" title="how to play"><i class="fa-solid fa-question"></i></button>
+            <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow" title="menu">
+                <i class="fa-solid fa-gamepad"></i> menu
+            </a>
+        </div>
     </div>
 
-    <!-- game over screen: only contains return to start button (restart removed) -->
     <div id="game-over-screen" class="screen interactive" role="region" aria-labelledby="go-title" aria-hidden="true">
         <div id="go-icon"></div>
         <h1 id="go-title">title</h1>
@@ -273,7 +253,7 @@
             </div>
             <div class="modal-content">
                 <p><strong>controls:</strong></p>
-                <p><i class="fa-solid fa-hand-pointer"></i> <strong>drag</strong> the white cell to move.</p>
+                <p><i class="fa-solid fa-hand-pointer"></i> <strong>tap or drag</strong> anywhere to move the cell.</p>
                 <hr style="border:0;border-top:1px solid rgba(255,255,255,.06);margin:12px 0;">
                 <p><strong>objectives:</strong></p>
                 <ul style="padding-left:20px;"><li>absorb <strong style="color:#00ff00">green pathogens</strong> to score (+10).</li><li>avoid <strong style="color:#ff4444">red blood cells</strong> (-20 health & -10 score).</li></ul>
@@ -399,11 +379,30 @@
             this.targetScore = 300; this.timeLeft = 30; this.score = 0; this.health = 100; this.isGameOver = false;
             const isMobile = window.innerWidth < 850 || window.innerHeight < 500; this.scaleRatio = isMobile ? 0.6 : 1;
             this.bgEmitter = this.add.particles(0,0,'plasma',{ x: window.innerWidth+50, y:{min:0,max:window.innerHeight}, lifespan:3000, speedX:{min:-300,max:-600}, scale:{start:1,end:0.5}, quantity:1, blendMode:'ADD', frequency:200 });
-            this.player = this.physics.add.sprite(200,300,'macrophage'); this.player.setCollideWorldBounds(true); this.player.setScale(this.scaleRatio);
+            
+            // CENTER SPAWN
+            this.player = this.physics.add.sprite(window.innerWidth/2, window.innerHeight/2, 'macrophage'); 
+            this.player.setCollideWorldBounds(true); this.player.setScale(this.scaleRatio);
             this.player.setInteractive({ cursor:'pointer' }); this.input.addPointer(1); this.input.setDraggable(this.player);
             this.player.lastX = this.player.x; this.player.lastY = this.player.y;
             this.tweens.add({ targets:this.player, scaleX:1.1*this.scaleRatio, scaleY:0.95*this.scaleRatio, yoyo:true, repeat:-1, duration:500 });
-            this.input.on('drag',(pointer,gameObject,dragX,dragY)=>{ if(this.isGameOver || !GameApp.isPlaying) return; gameObject.x = dragX; gameObject.y = dragY; });
+            
+            // Tap to move target logic
+            this.moveTarget = null;
+            this.input.on('pointerdown', (pointer) => {
+                 if(this.isGameOver || !GameApp.isPlaying) return;
+                 // If not dragging the player itself
+                 if(!pointer.curr || !pointer.curr.length || pointer.curr[0] !== this.player) {
+                     this.moveTarget = new Phaser.Math.Vector2(pointer.x, pointer.y);
+                 }
+            });
+
+            this.input.on('drag',(pointer,gameObject,dragX,dragY)=>{ 
+                if(this.isGameOver || !GameApp.isPlaying) return; 
+                this.moveTarget = null; // Drag overrides tap move
+                gameObject.x = dragX; gameObject.y = dragY; 
+            });
+            
             this.enemies = this.physics.add.group(); this.friendlies = this.physics.add.group();
             this.emitter = this.add.particles(0,0,'spark',{ speed:{min:100,max:300}, scale:{start:1,end:0}, lifespan:400, blendMode:'ADD', emitting:false });
             this.time.addEvent({ delay:400, callback:this.spawnEnemy, callbackScope:this, loop:true });
@@ -416,6 +415,21 @@
         }
         update(){
             if(this.isGameOver || !GameApp.isPlaying) return;
+            
+            // Smooth move to tap target
+            if (this.moveTarget) {
+                const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.moveTarget.x, this.moveTarget.y);
+                if (distance < 10) {
+                    this.body.setVelocity(0);
+                    this.moveTarget = null;
+                } else {
+                    this.physics.moveToObject(this.player, this.moveTarget, 300);
+                }
+            } else {
+                // If dragging stopped, stop velocity from physics move
+                if(!this.input.activePointer.isDown) this.player.body.setVelocity(0);
+            }
+
             let dx = this.player.x - this.player.lastX; let dy = this.player.y - this.player.lastY;
             if(Math.abs(dx) > 1 || Math.abs(dy) > 1){ let angle = Math.atan2(dy,dx); this.player.rotation = Phaser.Math.Angle.RotateTo(this.player.rotation, angle, 0.2); }
             this.player.lastX = this.player.x; this.player.lastY = this.player.y;
