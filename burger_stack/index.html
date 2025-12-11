@@ -35,6 +35,7 @@
             -webkit-user-select: none;
         }
 
+        /* Moved animation to body::before to prevent cutoff */
         @keyframes bgScroll {
             0% { background-position: center center, 0 0; }
             100% { background-position: center center, 56.6px 0; }
@@ -45,14 +46,26 @@
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             position: fixed; overflow: hidden;
+            /* Just the base color here */
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            touch-action: none; 
+        }
+
+        /* FIXED: This pseudo-element creates a full-screen wallpaper 
+           that won't get cut off when the mobile address bar moves */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            background-attachment: scroll; 
+            background-size: cover, 56.6px 56.6px; /* Ensure pattern tiles perfectly */
             animation: bgScroll 3s linear infinite;
-            color: var(--text-main);
-            touch-action: none; 
+            will-change: background-position; /* Optimizes for mobile */
         }
 
         /* --- NAVIGATION --- */
@@ -130,8 +143,7 @@
         .terminal {
             flex: 1.5; background: #1e272e; border-radius: 10px; padding: 10px;
             font-family: 'Fira Code', monospace; font-size: 0.7rem; color: #d2dae2;
-            /* CHANGE: Removed column-reverse so it flows Top -> Bottom */
-            display: flex; flex-direction: column; 
+            display: flex; flex-direction: column; /* Flows top to bottom now */
             border: 2px solid #485460;
             overflow-y: auto;
             touch-action: pan-y;
@@ -530,7 +542,6 @@
             if(action==='error' || action==='success') line.innerText = item;
             
             terminalLog.appendChild(line);
-            // This ensures the bottom screen (most recent input) is always visible
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }
 
