@@ -14,11 +14,8 @@
 
     <style>
         :root {
-            /* THEME: Premium Red */
             --bg-color: #A31621; 
             --bg-pattern: #8D121B;
-
-            /* Ingredient Colors */
             --bun-base: #FFB370;    
             --patty-base: #795548;
             --patty-shadow: #5D4037;
@@ -28,17 +25,10 @@
             --lettuce-shadow: #7CB342;
             --tomato-base: #EF5350;
             --tomato-shadow: #D32F2F;
-            
-            /* UI Colors */
             --text-main: #2D3436;
         }
 
-        /* MOBILE FIX: STOP DOUBLE TAP ZOOM */
-        * { 
-            -webkit-tap-highlight-color: transparent; 
-            box-sizing: border-box; 
-            touch-action: manipulation; /* This stops the double-tap zoom on buttons */
-        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
         @keyframes bgScroll {
             0% { background-position: center center, 0 0; }
@@ -47,535 +37,244 @@
 
         html, body {
             font-family: 'Nunito', sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             width: 100%; height: 100%;
-            position: fixed; 
-            overflow: hidden;
-            overscroll-behavior: none;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            
+            position: fixed; overflow: hidden;
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            
             background-attachment: scroll; 
-            background-size: auto, auto;
             animation: bgScroll 3s linear infinite;
-            
             color: var(--text-main);
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 15px; z-index: 1000; pointer-events: none;
+        }
+        
+        .menu-btn-rainbow {
+            pointer-events: auto;
+            padding: 8px 16px; border-radius: 20px; color: white;
+            font-family: 'Nunito', sans-serif; font-weight: 900; text-decoration: none;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; animation: gradientMove 4s ease infinite; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); border: 2px solid rgba(255,255,255,0.2);
+        }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .nav-group-right { pointer-events: auto; display: flex; gap: 10px; }
+        .nav-btn {
+            background: white; border: none; width: 40px; height: 40px; border-radius: 12px;
+            cursor: pointer; font-size: 1.1rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         /* --- SCREENS --- */
         .screen {
-            width: 100%; 
-            height: 100%;
-            display: none;
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
         }
-        
-        .screen.active { display: flex; animation: fadeOnly 0.4s ease; }
-        @keyframes fadeOnly { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- NAVIGATION (TOP) --- */
-        .menu-btn-rainbow {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px 24px;
-            border-radius: 20px;
-            color: white;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 900;
-            text-decoration: none;
-            text-transform: lowercase;
-            cursor: pointer;
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
-            background-size: 300% 100%; 
-            animation: gradientMove 4s ease infinite; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        .menu-btn-rainbow:hover { transform: scale(1.05); }
-        .menu-btn-rainbow:active { transform: scale(0.95); }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .nav-group-right {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 2000;
-        }
-
-        .nav-btn {
-            background: white; border: none; width: 45px; height: 45px; border-radius: 12px;
-            cursor: pointer; font-size: 1.2rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.1s;
-        }
-        .nav-btn:hover { transform: translateY(-3px); } 
-        .nav-btn:active { transform: translateY(2px); box-shadow: none; }
-
+        .screen.active { display: flex; }
 
         /* --- START SCREEN --- */
         .menu-card {
-            background: #fff;
-            padding: 60px 80px;
-            border-radius: 30px;
-            text-align: center;
-            border-bottom: 12px solid rgba(0,0,0,0.1);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-            transform: rotate(-2deg);
-            margin: 20px;
+            background: #fff; padding: 40px; border-radius: 30px; text-align: center;
+            border-bottom: 8px solid rgba(0,0,0,0.1); box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            transform: rotate(-2deg); margin: 20px; max-width: 90%;
         }
+        h1 { font-family: 'Fredoka One', cursive; font-size: 3rem; margin: 0 0 10px 0; color: #2d3436; text-shadow: 2px 2px 0 #eee; }
+        .subtitle { font-size: 1.1rem; color: #636e72; font-weight: 800; margin-bottom: 30px; }
         
-        h1 {
-            font-family: 'Fredoka One', cursive; font-size: 4rem; margin: 0;
-            color: #2d3436; 
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0 #eee;
-            margin-bottom: 10px;
+        .btn-start, .btn-info-main {
+            border: none; padding: 15px 30px; font-size: 1.2rem; font-family: 'Fredoka One';
+            border-radius: 50px; cursor: pointer; color: white; display: block; width: 100%; margin-bottom: 15px;
         }
-        
-        .subtitle { font-size: 1.4rem; color: #636e72; font-weight: 800; margin: 0 0 40px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-start { background: #2d3436; box-shadow: 0 6px 0 #000; }
+        .btn-info-main { background: #00cec9; box-shadow: 0 6px 0 #00b894; }
 
-        .btn-start {
-            background: #2d3436; color: white; border: none;
-            padding: 18px 50px; font-size: 2rem; font-family: 'Fredoka One';
-            border-radius: 20px; cursor: pointer; transition: all 0.1s;
-            box-shadow: 0 8px 0 #000; display: block; width: 100%; margin-bottom: 20px;
-        }
-        .btn-start:active { transform: translateY(8px); box-shadow: none; }
-
-        .btn-info-main {
-            background: #00cec9; color: white; border: none;
-            padding: 15px 40px; font-size: 1.2rem; font-family: 'Fredoka One';
-            border-radius: 50px; cursor: pointer; transition: all 0.1s;
-            box-shadow: 0 6px 0 #00b894;
-        }
-        .btn-info-main:active { transform: translateY(6px); box-shadow: none; }
-
-
-        /* --- GAME LAYOUT --- */
+        /* --- GAME LAYOUT (CSS GRID/FLEX MIX) --- */
         .game-wrapper {
-            width: 95%; max-width: 1400px; 
-            min-height: 90vh;
-            height: auto;
-            display: grid; 
-            grid-template-columns: 320px 1fr 380px;
-            gap: 30px;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-            margin: auto; 
-        }
-
-        /* --- CONTROLS --- */
-        .controls-panel {
-            background: #fff;
-            padding: 25px; border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            border-bottom: 8px solid rgba(0,0,0,0.05);
+            width: 100%; height: 100%;
+            padding-top: 70px; 
+            padding-bottom: 10px;
             display: flex; flex-direction: column;
-            overflow: hidden; 
+            gap: 10px;
         }
 
-        .controls-inner {
-            width: 100%;
+        /* TOP: TICKET + TERMINAL */
+        .info-panel {
+            display: flex; gap: 10px; padding: 0 10px;
+            height: 120px; flex-shrink: 0;
         }
-
-        .mobile-drawer-header { display: none; }
-
-        .header-code {
-            text-align: center; font-weight: bold; margin-bottom: 10px; 
-            font-family:'Fira Code'; color: #b2bec3; 
-            background: #2d3436; padding: 6px; border-radius: 8px; font-size: 0.9rem;
-        }
-
-        .controls-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
-            margin-bottom: 15px; 
-        }
-        
-        .ing-btn {
-            border: none; padding: 15px 10px; border-radius: 12px;
-            font-family: 'Fredoka One'; font-size: 1rem; color: white;
-            cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2);
-            text-transform: uppercase; transition: transform 0.1s;
-            text-shadow: 0 2px 0 rgba(0,0,0,0.2);
-        }
-        .ing-btn:active { transform: translateY(6px); box-shadow: none; }
-        
-        .b-bun-top { background: linear-gradient(to bottom, #FFB370, #F57F17); }
-        .b-tomato { background: linear-gradient(to bottom, #EF5350, #C62828); }
-        .b-lettuce { background: linear-gradient(to bottom, #9CCC65, #558B2F); }
-        .b-cheese { background: linear-gradient(to bottom, #FFD54F, #F9A825); color: #7f5f00;}
-        .b-patty { background: linear-gradient(to bottom, #8D6E63, #4E342E); }
-        .b-bun-bot { background: linear-gradient(to bottom, #FFCC80, #EF6C00); }
-
-        .action-row {
-            display: flex; gap: 10px; width: 100%; margin-top: 5px;
-        }
-
-        .btn-pop {
-            background: #ff7675; color: white; flex: 1;
-            padding: 15px; font-size: 1.2rem; font-family: 'Fredoka One';
-            border: none; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 5px 0 #d63031; 
-        }
-        .btn-pop:active { transform: translateY(5px); box-shadow: none; }
-
-        .btn-serve {
-            background: #fdcb6e; color: #2d3436; flex: 1;
-            padding: 18px; font-size: 1.6rem; font-family: 'Fredoka One';
-            border: none; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 8px 0 #e17055;
-        }
-        .btn-serve:active { transform: translateY(8px); box-shadow: none; }
-
-        /* --- STACK AREA --- */
-        .plate-area {
-            height: 100%; display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-end;
-            position: relative;
-            padding-bottom: 20px;
-            min-height: 400px;
-        }
-
-        /* FIXED BURGER POSITION */
-        #burger-stack {
-            width: 100%;
-            display: flex; flex-direction: column-reverse;
-            align-items: center;
-            /* LIFTED THE BURGER UP HERE */
-            margin-bottom: 0px; 
-            z-index: 10;
-            filter: none !important;
-            transform: scale(0.8); 
-            transform-origin: bottom center;
-        }
-
-        .food {
-            display: flex; justify-content: center; align-items: center;
-            font-weight: 900; font-size: 1rem; color: transparent;
-            position: relative; 
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            margin-bottom: -10px; 
-            transform-origin: center bottom;
-        }
-        .food.new { animation: dropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
-        @keyframes dropIn { 
-            0% { transform: translateY(-300px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Ingredients */
-        .f-bun-bot { width: 280px; height: 60px; background: var(--bun-base); border-radius: 15px 15px 40px 40px; margin-bottom: 0px; }
-        .f-patty { width: 290px; height: 60px; background: var(--patty-base); border-radius: 20px; background-image: repeating-linear-gradient(180deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 15px); margin-bottom: -12px; }
-        .f-cheese { width: 300px; height: 25px; background: var(--cheese-base); border-radius: 10px; z-index: 5; margin-bottom: -5px; }
-        .f-cheese::after { content: ''; position: absolute; width: 40px; height: 25px; background: var(--cheese-base); border-radius: 0 0 10px 10px; top: 15px; right: 50px; box-shadow: 60px 0 0 var(--cheese-base); }
-        .f-lettuce { width: 310px; height: 40px; background: var(--lettuce-base); border-radius: 20px; margin-bottom: -12px; background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.1) 50%); background-size: 20px 20px; }
-        .f-tomato { width: 270px; height: 45px; background: var(--tomato-base); border-radius: 25px; margin-bottom: -12px; }
-        
-        .f-bun-top { 
-            width: 310px; height: 90px; background-color: var(--bun-base);
-            border-radius: 155px 155px 20px 20px; margin-bottom: -20px; position: relative;
-        }
-        .f-bun-top::after { 
-            content: ' , . , ` , '; color: rgba(255, 224, 130, 0.8); 
-            position: absolute; top: 20px; left: 0; right: 0; text-align: center;
-            font-size: 2.2rem; letter-spacing: 15px; font-weight: bold;
-        }
-
-        .index-marker {
-            position: absolute; left: -80px; top: 50%; transform: translateY(-50%);
-            font-family: 'Fira Code', monospace; color: #fff; background: #2d3436;
-            padding: 4px 10px; border-radius: 8px; font-size: 0.9rem;
-            box-shadow: 2px 2px 0 rgba(0,0,0,0.2); display: flex; align-items: center;
-        }
-        .index-marker::after { content: ''; position: absolute; right: -20px; top: 50%; width: 20px; height: 2px; background: rgba(0,0,0,0.3); }
-
-        .plate {
-            width: 380px; height: 50px; background: #fff; border-radius: 50%;
-            border-bottom: 8px solid #ddd; box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 1;
-        }
-
-        /* --- RIGHT PANEL (TICKET & TERMINAL) --- */
-        .right-panel { display: flex; flex-direction: column; gap: 20px; height: 80vh; }
-        
         .ticket {
-            background: #fffdf5; padding: 20px; font-family: 'Courier Prime', monospace; text-align: center;
-            background-image: linear-gradient(135deg, transparent 5px, #fffdf5 5px), linear-gradient(225deg, transparent 5px, #fffdf5 5px);
-            background-size: 20px 20px; background-repeat: repeat-x; background-position: bottom;
-            padding-bottom: 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: rotate(2deg);
+            flex: 1; background: #fffdf5; padding: 10px; font-family: 'Courier Prime', monospace;
+            border-radius: 10px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .ticket-header { border-bottom: 2px dashed #b2bec3; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; color: #636e72; }
-        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; min-height: 100px; justify-content: center; }
-        .mini-food { width: 100px; height: 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+        .ticket-header { font-size: 0.7rem; font-weight: bold; color: #636e72; border-bottom: 1px dashed #b2bec3; width: 100%; text-align: center; margin-bottom: 5px; }
+        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; overflow: hidden; justify-content: center; height: 100%; }
+        .mini-food { width: 50px; height: 8px; border-radius: 4px; box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
 
         .terminal {
-            background: #1e272e; border-radius: 15px; flex-grow: 1; box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            padding: 20px; font-family: 'Fira Code', monospace; font-size: 0.95rem; color: #d2dae2;
+            flex: 1.5; background: #1e272e; border-radius: 10px; padding: 10px;
+            font-family: 'Fira Code', monospace; font-size: 0.7rem; color: #d2dae2;
             display: flex; flex-direction: column-reverse; border: 2px solid #485460;
-            overflow-y: auto; 
-            min-height: 0;
+            overflow-y: auto;
         }
-        
-        .log-line { margin-bottom: 8px; border-bottom: 1px solid #485460; padding-bottom: 4px; }
-        .k-obj { color: #4bcffa; } .k-method { color: #badc58; } .k-str { color: #ffbe76; } .k-comment { color: #808e9b; font-style: italic; font-size: 0.85rem;} .k-return { color: #ef5777; } 
+        .log-line { margin-bottom: 4px; border-bottom: 1px solid #485460; padding-bottom: 2px; }
 
-        .terminal::-webkit-scrollbar { width: 12px; }
-        .terminal::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; margin: 10px; }
-        .terminal::-webkit-scrollbar-thumb { background: #485460; border-radius: 10px; border: 3px solid #1e272e; }
-        .terminal::-webkit-scrollbar-thumb:hover { background: #57606f; }
+        /* MIDDLE: PLATE */
+        .plate-area {
+            flex-grow: 1; 
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            position: relative; overflow: hidden;
+            padding-bottom: 20px;
+        }
+        #burger-stack {
+            display: flex; flex-direction: column-reverse; align-items: center;
+            margin-bottom: -45px; z-index: 10;
+            transform: scale(0.8); transform-origin: bottom center;
+        }
+        .plate {
+            width: 300px; height: 40px; background: #fff; border-radius: 50%;
+            border-bottom: 6px solid #ddd; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1;
+        }
+
+        /* BOTTOM: CONTROLS */
+        .controls-panel {
+            background: #fff; 
+            /* FIXED: Rounded corners all around for mobile */
+            border-radius: 25px;
+            padding: 15px; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            flex-shrink: 0; z-index: 20;
+            /* FIXED: Make narrower and float off bottom */
+            width: 95%;
+            margin: 0 auto 10px auto;
+        }
+        .header-code {
+            text-align: center; font-weight: bold; margin-bottom: 8px; font-family:'Fira Code'; 
+            color: #b2bec3; background: #2d3436; padding: 4px; border-radius: 6px; font-size: 0.8rem;
+        }
+        .controls-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; 
+        }
+        .ing-btn {
+            border: none; padding: 12px 5px; border-radius: 10px;
+            font-family: 'Fredoka One'; font-size: 0.85rem; color: white; cursor: pointer; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2); text-transform: uppercase; text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+        .ing-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .action-row { display: flex; gap: 10px; }
+        .btn-pop, .btn-serve {
+            flex: 1; padding: 12px; font-size: 1rem; font-family: 'Fredoka One';
+            border: none; border-radius: 12px; cursor: pointer; color: white;
+        }
+        .btn-pop { background: #ff7675; box-shadow: 0 4px 0 #d63031; }
+        .btn-serve { background: #fdcb6e; color: #2d3436; box-shadow: 0 4px 0 #e17055; }
+        .btn-pop:active, .btn-serve:active { transform: translateY(4px); box-shadow: none; }
+
+        /* Ingredient Colors */
+        .b-bun-top { background: #FFB370; } .b-tomato { background: #EF5350; } .b-lettuce { background: #9CCC65; }
+        .b-cheese { background: #FFD54F; color: #7f5f00; } .b-patty { background: #795548; } .b-bun-bot { background: #FFCC80; }
+
+        /* Burger Components */
+        .food { display: flex; justify-content: center; align-items: center; margin-bottom: -12px; position: relative; font-weight: 900; }
+        .food.new { animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes dropIn { 0% { transform: translateY(-200px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+        .f-bun-bot { width: 280px; height: 60px; background: var(--bun-base); border-radius: 15px 15px 40px 40px; margin-bottom: 0; }
+        .f-patty { width: 290px; height: 60px; background: var(--patty-base); border-radius: 20px; }
+        .f-cheese { width: 300px; height: 25px; background: var(--cheese-base); border-radius: 10px; margin-bottom: -6px; z-index: 2; }
+        .f-lettuce { width: 310px; height: 40px; background: var(--lettuce-base); border-radius: 20px; }
+        .f-tomato { width: 270px; height: 45px; background: var(--tomato-base); border-radius: 25px; }
+        .f-bun-top { width: 310px; height: 90px; background: var(--bun-base); border-radius: 155px 155px 20px 20px; margin-bottom: -20px; }
+        
+        .index-marker {
+            position: absolute; left: -60px; top: 50%; transform: translateY(-50%);
+            font-family: 'Fira Code', monospace; color: #fff; background: #2d3436;
+            padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;
+        }
 
         /* --- MODALS --- */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none;
-            justify-content: center; align-items: center; z-index: 500; backdrop-filter: blur(8px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none;
+            justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px);
         }
         .modal-card {
-            background: white; padding: 50px; border-radius: 30px; text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5); width: 500px; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
+            background: white; padding: 30px; border-radius: 25px; text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); width: 85%; max-width: 400px; position: relative;
         }
-        @keyframes bounceIn { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
-        .close-btn { position: absolute; top: 20px; right: 25px; font-size: 2rem; cursor: pointer; color: #b2bec3; transition: 0.2s; }
-        .close-btn:hover { color: #2d3436; transform: rotate(90deg); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #b2bec3; }
+        
+        .info-block { display: flex; gap: 15px; text-align: left; margin-bottom: 15px; align-items: flex-start; }
+        .info-icon { font-size: 1.5rem; color: #00cec9; background: #e0fbfb; padding: 10px; border-radius: 50%; }
+        .info-text h3 { margin: 0; font-family: 'Fredoka One'; font-size: 1.1rem; }
+        .info-text p { margin: 0; font-size: 0.9rem; color: #636e72; }
 
-        .info-block { text-align: left; margin-bottom: 25px; display: flex; gap: 20px; align-items: flex-start; }
-        .info-icon { font-size: 2.2rem; color: #00cec9; width: 50px; text-align: center; background: #e0fbfb; padding: 10px; border-radius: 50%; }
-        .info-text h3 { margin: 0 0 5px 0; font-family: 'Fredoka One'; color: #2d3436; font-size: 1.3rem; }
-        .info-text p { margin: 0; line-height: 1.5; color: #636e72; font-size: 1rem; }
-
-        .shake { animation: shake 0.4s; }
-        /* SHAKE ANIMATION FOR WRONG ORDER */
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px) rotate(-5deg); } 75% { transform: translateX(15px) rotate(5deg); } }
-
-        .nav-btn {
-            position: absolute; top: 30px; background: white; border: none; width: 50px; height: 50px; border-radius: 15px;
-            cursor: pointer; z-index: 200; font-size: 1.2rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.1s;
-        }
-        .nav-btn:hover { transform: translateY(-3px); } .nav-btn:active { transform: translateY(2px); box-shadow: none; }
-        .btn-home { left: 30px; } 
-        .btn-mute { right: 30px; }
-        .btn-help { right: 90px; } 
-
-        /* =========================================
-           MOBILE OPTIMIZATIONS (Portrait & Landscape Phone)
-           ========================================= */
-        @media (max-width: 900px) {
-            
-            .screen.active {
-                transform: scale(0.80);
-                transform-origin: top center;
-                display: flex;
-                justify-content: flex-start; 
-                align-items: center;
-                height: 100%;
-                width: 100%;
-                overflow: hidden; 
-                padding-top: 60px;
-            }
-
-            .game-wrapper, .modal-card, .menu-card {
-                max-height: 100vh;
-                overflow-y: hidden; 
-            }
-
-            .menu-card {
-                padding: 30px 20px; 
-                width: 85%; 
-                max-width: 350px;
-                margin: 0;
-                transform: rotate(0deg); 
-            }
-            h1 { font-size: 2.8rem; }
-            .subtitle { font-size: 1.1rem; margin-bottom: 25px; }
-            .btn-start { font-size: 1.5rem; padding: 15px; }
-            .btn-info-main { font-size: 1rem; padding: 12px; }
-
-            .modal-card {
-                width: 85%; 
-                max-width: 380px; 
-                padding: 25px;
-                max-height: 80vh;
-                overflow-y: auto; 
-                margin: 0 auto; 
-            }
-            .info-block { flex-direction: row; gap: 12px; margin-bottom: 15px; }
-            .info-icon { font-size: 1.5rem; width: 40px; padding: 8px; }
-            .info-text h3 { font-size: 1.1rem; }
-            .info-text p { font-size: 0.9rem; }
-            .close-btn { top: 10px; right: 15px; font-size: 1.5rem; }
-
+        /* Desktop Adjustments */
+        @media (min-width: 900px) {
             .game-wrapper {
-                display: flex;
-                flex-direction: column;
-                min-height: 100dvh;
-                height: auto;
-                padding: 10px;
-                padding-top: 10px; 
-                gap: 10px;
-                overflow-y: visible;
-                box-sizing: border-box;
+                flex-direction: row; align-items: center; justify-content: center;
+                max-width: 1200px; margin: 0 auto; padding-top: 0;
             }
-
-            .right-panel {
-                order: 1; 
-                flex-direction: row; 
-                height: auto;
-                width: 100%;
-                gap: 10px;
-                margin-bottom: 0;
+            .info-panel {
+                flex-direction: column; height: 80vh; width: 300px; order: 3;
             }
-            .ticket {
-                flex: 1;
-                padding: 10px;
-                padding-bottom: 20px;
-                transform: rotate(0deg); 
-            }
-            .ticket-header { margin-bottom: 5px; font-size: 0.8rem; }
-            .target-view { min-height: 60px; gap: 3px; }
-            .mini-food { width: 60px; height: 10px; border-radius: 4px; }
-            
-            .terminal {
-                flex: 1;
-                height: 150px; 
-                min-height: 150px;
-                padding: 10px;
-                font-size: 0.7rem;
-            }
-
-            .plate-area {
-                order: 2;
-                flex: 1;
-                width: 100%;
-                justify-content: flex-end;
-                transform: scale(0.75);
-                transform-origin: center bottom;
-                margin-bottom: 0;
-                margin-top: -80px; 
-            }
-
             .controls-panel {
-                order: 3;
-                width: 95%;
-                margin: 0 auto 10px auto;
-                height: auto;
-                padding: 15px;
-                border-radius: 25px; /* Rounded all corners */
+                width: 320px; order: 1; border-radius: 25px; margin: 0;
             }
-
-            .controls-grid {
-                grid-template-columns: repeat(3, 1fr); 
-                gap: 8px;
-                margin-bottom: 5px; 
-            }
-            .header-code {
-                padding: 5px;
-                margin-bottom: 5px;
-                font-size: 0.8rem;
-            }
-            
-            .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
-            
-            /* Side by side action buttons */
-            .action-row {
-                display: flex; gap: 8px;
-            }
-            .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; margin: 0; }
-
-            .nav-btn { top: 15px; width: 40px; height: 40px; font-size: 1rem; }
-            .btn-home { left: 15px; }
-            .btn-mute { right: 15px; }
-            .btn-help { right: 65px; }
+            .plate-area { order: 2; transform: scale(1); }
+            .nav-container { padding: 20px; }
         }
     </style>
 </head>
 <body>
+
+    <div class="nav-container">
+        <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+            <i class="fa-solid fa-gamepad"></i> menu
+        </a>
+        <div class="nav-group-right">
+            <button class="nav-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+            <button class="nav-btn" onclick="toggleMute()" title="Mute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
+            <button class="nav-btn" onclick="openHelp()" title="Help"><i class="fa-solid fa-question"></i></button>
+        </div>
+    </div>
 
     <div id="start-screen" class="screen active">
         <div class="menu-card">
             <h1>STACKY'S<br>CODE DINER</h1>
             <p class="subtitle">Delicious Data Structures</p>
             <button class="btn-start" onclick="startGame()">START SHIFT <i class="fa-solid fa-play"></i></button>
-            <button class="btn-info-main" onclick="openEdu()"><i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE</i></button>
-        </div>
-    </div>
-
-    <div id="edu-modal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="close-btn" onclick="closeEdu()">&times;</div>
-            <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 15px;">
-                <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
-            </h2>
-            <div class="info-block">
-                <div class="info-icon"><i class="fa-solid fa-layer-group"></i></div>
-                <div class="info-text"><h3>LIFO Rule</h3><p><strong>Last-In, First-Out.</strong> Just like a burger, the last ingredient you put on is the first one you have to take off to fix a mistake.</p></div>
-            </div>
-            <div class="info-block">
-                <div class="info-icon"><i class="fa-solid fa-arrow-down"></i></div>
-                <div class="info-text"><h3>Push & Pop</h3><p>In coding, adding an item is called <strong>PUSH</strong>. Removing the top item is called <strong>POP</strong>.</p></div>
-            </div>
-            <div class="info-block">
-                <div class="info-icon"><i class="fa-solid fa-terminal"></i></div>
-                <div class="info-text"><h3>Arrays</h3><p>Computers store lists in <strong>Arrays</strong>. They start counting at 0, not 1! Watch the terminal on the right as you play.</p></div>
-            </div>
-            <button class="btn-start" style="font-size: 1.2rem; padding: 12px; margin-bottom: 0;" onclick="closeEdu()">GOT IT!</button>
-        </div>
-    </div>
-
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="close-btn" onclick="closeHelp()">&times;</div>
-            <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem;">HOW TO PLAY</h2>
-            <div class="info-block">
-                <div class="info-icon" style="background: #e0f0fb; color: #4488ff;"><i class="fa-solid fa-clipboard-list"></i></div>
-                <div class="info-text"><h3>1. Check the Ticket</h3><p>Look at the order on the right. Build the burger from the <strong>bottom up</strong> to match.</p></div>
-            </div>
-            <div class="info-block">
-                <div class="info-icon" style="background: #e0f0fb; color: #4488ff;"><i class="fa-solid fa-plus"></i></div>
-                <div class="info-text"><h3>2. Push Ingredients</h3><p>Click the ingredient buttons to <strong>stack.push()</strong> them onto the plate.</p></div>
-            </div>
-            <div class="info-block">
-                <div class="info-icon" style="background: #ffe0e0; color: #ff4444;"><i class="fa-solid fa-rotate-left"></i></div>
-                <div class="info-text"><h3>3. Made a mistake?</h3><p>Click "UNDO" to <strong>stack.pop()</strong> (remove) the top item.</p></div>
-            </div>
-            <button class="btn-start" style="font-size: 1.2rem; padding: 12px; margin-bottom: 0;" onclick="closeHelp()">LET'S COOK!</button>
+            <button class="btn-info-main" onclick="openEdu()"><i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE</button>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
-        <button class="nav-btn btn-home" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
-        <button class="nav-btn btn-help" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
-        <button class="nav-btn btn-mute" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
-
         <div class="game-wrapper">
+            
+            <div class="info-panel">
+                <div class="ticket">
+                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
+                    <div class="target-view" id="target-view"></div>
+                </div>
+                <div class="terminal" id="terminal-log">
+                    <div class="log-line">// System ready...</div>
+                </div>
+            </div>
+
+            <div class="plate-area">
+                <div id="burger-stack"></div>
+                <div class="plate"></div>
+            </div>
+
             <div class="controls-panel">
                 <div class="header-code">stack.push( ... )</div>
                 <div class="controls-grid">
@@ -586,46 +285,104 @@
                     <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
                     <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
                 </div>
-                <div class="header-code" style="margin-top:10px;">stack.pop()</div>
+                
+                <div class="header-code" style="margin-top:5px;">stack.pop() & serve()</div>
                 <div class="action-row">
-                    <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
-                    <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
+                    <button class="btn-pop" onclick="popItem()">UNDO</button>
+                    <button class="btn-serve" onclick="checkOrder()">SERVE</button>
                 </div>
             </div>
 
-            <div class="plate-area">
-                <div id="burger-stack"></div>
-                <div class="plate"></div>
-            </div>
-
-            <div class="right-panel">
-                <div class="ticket">
-                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
-                    <div class="target-view" id="target-view"></div>
-                </div>
-                <div class="terminal" id="terminal-log">
-                    <div style="color: #636e72; margin-bottom: 10px; font-style: italic;">// System initialized...<br>// Waiting for chef input...</div>
-                </div>
-            </div>
         </div>
     </div>
 
     <div id="win-modal" class="modal-overlay">
         <div class="modal-card">
-            <h1 id="modal-title" style="color: #00b894; font-family: 'Fredoka One'; font-size: 3rem; margin: 0;">TASTY!</h1>
-            <p id="modal-text" style="font-size: 1.3rem; margin: 20px 0; color: #636e72;">The code logic is delicious.</p>
-            <button class="btn-start" id="next-btn" onclick="nextLevel()">NEXT LEVEL</button>
+            <h1 id="modal-title" style="color: #00b894; font-family: 'Fredoka One'; font-size: 2.5rem;">TASTY!</h1>
+            <p id="modal-text" style="font-size: 1.1rem; margin: 15px 0; color: #636e72;">Order compiled successfully.</p>
+            <button class="btn-start" id="next-btn" onclick="nextLevel()">NEXT ORDER</button>
+        </div>
+    </div>
+
+    <div id="edu-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="close-btn" onclick="closeEdu()">&times;</div>
+            <h2 style="font-family: 'Fredoka One'; color: #2d3436; font-size: 1.8rem; margin-bottom: 20px;">EDUCATIONAL VALUE</h2>
+            <div class="info-block">
+                <div class="info-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="info-text"><h3>LIFO Rule</h3><p>Last-In, First-Out. The last item added is the first one removed.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="info-text"><h3>Push & Pop</h3><p>Adding is PUSH. Removing is POP.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon"><i class="fa-solid fa-terminal"></i></div>
+                <div class="info-text"><h3>Arrays</h3><p>Computers list items in Arrays starting at index 0.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="close-btn" onclick="closeHelp()">&times;</div>
+            <h2 style="font-family: 'Fredoka One'; color: #2d3436; font-size: 1.8rem; margin-bottom: 20px;">HOW TO PLAY</h2>
+            <div class="info-block">
+                <div class="info-icon" style="background:#e0f0fb; color:#4488ff;"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div class="info-text"><h3>1. Read Order</h3><p>Check the ticket to see what to build (Bottom to Top).</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon" style="background:#e0f0fb; color:#4488ff;"><i class="fa-solid fa-plus"></i></div>
+                <div class="info-text"><h3>2. Stack It</h3><p>Click ingredients to PUSH them onto the plate.</p></div>
+            </div>
+            <div class="info-block">
+                <div class="info-icon" style="background:#ffe0e0; color:#ff4444;"><i class="fa-solid fa-rotate-left"></i></div>
+                <div class="info-text"><h3>3. Fix It</h3><p>Use UNDO to POP the top item if you make a mistake.</p></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
+        // --- SCROLL LOCK ---
         document.addEventListener('touchmove', function(e) {
-            // Allow scroll only inside terminal and modals
             if (!e.target.closest('.terminal') && !e.target.closest('.modal-card')) {
                 e.preventDefault();
             }
         }, { passive: false });
+
+        // --- AUDIO ---
+        let audioCtx;
+        let isMuted = false;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        function playTone(type) {
+            if (isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if(type==='push'){
+                osc.type='triangle'; osc.frequency.setValueAtTime(200,now); osc.frequency.exponentialRampToValueAtTime(50,now+0.1);
+                gain.gain.setValueAtTime(0.3,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.1);
+            } else if(type==='pop'){
+                osc.type='sine'; osc.frequency.setValueAtTime(400,now); osc.frequency.linearRampToValueAtTime(800,now+0.1);
+                gain.gain.setValueAtTime(0.2,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.1);
+            } else if(type==='error'){
+                osc.type='sawtooth'; osc.frequency.setValueAtTime(150,now);
+                gain.gain.setValueAtTime(0.4,now); gain.gain.linearRampToValueAtTime(0.01,now+0.2);
+            } else if(type==='win'){
+                osc.type='sine'; osc.frequency.setValueAtTime(523,now);
+                gain.gain.setValueAtTime(0.2,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.3);
+            }
+            osc.start(now); osc.stop(now+0.3);
+        }
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('mute-icon').className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+            initAudio();
+        }
 
         // --- GAME LOGIC ---
         let currentLevelNum = 1;
@@ -633,107 +390,31 @@
         let currentTargetOrder = [];
         let userStack = [];
         const MAX_STACK_SIZE = 8;
-        let isMuted = false;
         
-        function generateRandomOrder(level) {
-            let order = ['bun-bot'];
-            const ingredients = ['patty', 'cheese', 'lettuce', 'tomato'];
-            let minItems = Math.min(Math.floor(level / 2) + 1, 4);
-            let maxItems = Math.min(level + 2, 6); 
-            
-            let count = Math.floor(Math.random() * (maxItems - minItems + 1)) + minItems;
-            
-            for(let i=0; i<count; i++) {
-                const randomIng = ingredients[Math.floor(Math.random() * ingredients.length)];
-                order.push(randomIng);
-            }
-            order.push('bun-top');
-            return order;
-        }
-
-        // --- AUDIO SYSTEM ---
-        let audioCtx;
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
-
-        function playTone(type) {
-            if (isMuted || !audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-
-            if (type === 'push') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
-                gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15);
-            } else if (type === 'pop') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.1);
-                gainNode.gain.setValueAtTime(0.2, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'error') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
-                gainNode.gain.setValueAtTime(0.4, now); gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2);
-            } else if (type === 'win') {
-                playNote(523.25, now); playNote(659.25, now + 0.1); playNote(783.99, now + 0.2); playNote(1046.50, now + 0.3, 0.4);
-            }
-        }
-
-        function playNote(freq, time, duration = 0.1) {
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = 'sine'; osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.2, time); gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
-            osc.start(time); osc.stop(time + duration);
-        }
-
-        function toggleMute() {
-            isMuted = !isMuted;
-            const icon = document.getElementById('mute-icon');
-            if (isMuted) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark'); }
-            else { icon.classList.remove('fa-volume-xmark'); icon.classList.add('fa-volume-high'); initAudio(); playTone('pop'); }
-        }
-
-        // --- DOM & NAV ---
         const stackEl = document.getElementById('burger-stack');
         const targetView = document.getElementById('target-view');
         const levelDisplay = document.getElementById('level-display');
-        const winModal = document.getElementById('win-modal');
         const terminalLog = document.getElementById('terminal-log');
-        const modalTitle = document.getElementById('modal-title');
-        const modalText = document.getElementById('modal-text');
-        const nextBtn = document.getElementById('next-btn');
 
         function startGame() {
             initAudio(); 
-            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('start-screen').classList.remove('active');
             document.getElementById('game-screen').classList.add('active');
             currentLevelNum = 1;
             initLevel();
         }
 
         function goHome() {
-            userStack = [];
-            currentLevelNum = 1; // Reset Level
             document.getElementById('game-screen').classList.remove('active');
-            document.getElementById('start-screen').style.display = 'flex';
+            document.getElementById('start-screen').classList.add('active');
             document.getElementById('win-modal').style.display = 'none';
-            stackEl.innerHTML = '';
         }
 
-        function openEdu() { initAudio(); playTone('pop'); document.getElementById('edu-modal').style.display = 'flex'; }
-        function closeEdu() { initAudio(); playTone('push'); document.getElementById('edu-modal').style.display = 'none'; }
-        
-        function openHelp() { initAudio(); playTone('pop'); document.getElementById('help-modal').style.display = 'flex'; }
-        function closeHelp() { initAudio(); playTone('push'); document.getElementById('help-modal').style.display = 'none'; }
-
-        // --- GAMEPLAY ---
         function initLevel() {
             userStack = [];
             stackEl.innerHTML = '';
-            terminalLog.innerHTML = '<div style="color: #636e72; margin-bottom: 10px; font-style: italic;">// New Level Started<br>// Stack is empty</div>';
-            winModal.style.display = 'none';
+            terminalLog.innerHTML = '<div class="log-line">// New Order Received</div>';
+            document.getElementById('win-modal').style.display = 'none';
             
             currentTargetOrder = generateRandomOrder(currentLevelNum);
             levelDisplay.innerText = `ORDER #${currentLevelNum}`;
@@ -747,115 +428,95 @@
             });
         }
 
+        function generateRandomOrder(level) {
+            let order = ['bun-bot'];
+            const ingredients = ['patty', 'cheese', 'lettuce', 'tomato'];
+            let count = Math.min(level + 2, 6);
+            for(let i=0; i<count; i++) order.push(ingredients[Math.floor(Math.random()*ingredients.length)]);
+            order.push('bun-top');
+            return order;
+        }
+
         function pushItem(type) {
             initAudio();
-            
             if (userStack.length >= MAX_STACK_SIZE) {
-                logToTerminal('error', 'Stack Overflow Exception!');
-                playTone('error');
-                document.querySelector('.ticket').classList.add('shake');
-                setTimeout(() => document.querySelector('.ticket').classList.remove('shake'), 400);
-                return;
+                logToTerminal('error', 'Stack Overflow!');
+                playTone('error'); return;
             }
-
             userStack.push(type);
             playTone('push');
             
             const el = document.createElement('div');
             el.className = `food f-${type} new`;
             el.style.zIndex = userStack.length;
-
-            const indexSpan = document.createElement('div');
-            indexSpan.className = 'index-marker';
-            indexSpan.innerText = `[${userStack.length - 1}]`;
-            el.appendChild(indexSpan);
-
-            stackEl.appendChild(el); 
-            logToTerminal('push', type, userStack.length - 1);
+            const idx = document.createElement('div');
+            idx.className = 'index-marker';
+            idx.innerText = `[${userStack.length-1}]`;
+            el.appendChild(idx);
+            stackEl.appendChild(el);
+            logToTerminal('push', type, userStack.length-1);
         }
 
         function popItem() {
             initAudio();
             if (userStack.length === 0) {
-                logToTerminal('error', 'Cannot pop() empty stack!');
+                logToTerminal('error', 'Stack Empty!');
                 playTone('error'); return;
             }
-            const removedItem = userStack.pop();
+            const removed = userStack.pop();
             playTone('pop');
             if (stackEl.lastChild) stackEl.removeChild(stackEl.lastChild);
-            logToTerminal('pop', removedItem);
+            logToTerminal('pop', removed);
         }
 
         function checkOrder() {
             initAudio();
-            let correct = true;
-            let i = 0;
-            if (userStack.length !== currentTargetOrder.length) correct = false;
-            else {
-                for (i = 0; i < currentTargetOrder.length; i++) {
-                    if (userStack[i] !== currentTargetOrder[i]) { correct = false; break; }
-                }
-            }
+            let correct = (userStack.length === currentTargetOrder.length) && 
+                          userStack.every((v, i) => v === currentTargetOrder[i]);
 
             if (correct) {
                 playTone('win');
-                if (currentLevelNum >= MAX_ORDERS) {
-                    modalTitle.innerText = "SHIFT COMPLETE!";
-                    modalText.innerText = "Great work! Time to clock out.";
-                    nextBtn.innerText = "CLOCK OUT 🕒";
-                    nextBtn.onclick = goHome;
-                } else {
-                    modalTitle.innerText = "TASTY!";
-                    modalText.innerText = "Order compiled successfully.";
-                    nextBtn.innerText = "NEXT ORDER";
-                    nextBtn.onclick = nextLevel;
-                }
-                
-                winModal.style.display = 'flex';
-                logToTerminal('success', 'Arrays Matched!');
+                logToTerminal('success', 'Order Complete!');
+                document.getElementById('modal-title').innerText = currentLevelNum >= MAX_ORDERS ? "SHIFT OVER!" : "TASTY!";
+                document.getElementById('next-btn').innerText = currentLevelNum >= MAX_ORDERS ? "CLOCK OUT" : "NEXT ORDER";
+                document.getElementById('next-btn').onclick = currentLevelNum >= MAX_ORDERS ? goHome : nextLevel;
+                document.getElementById('win-modal').style.display = 'flex';
             } else {
                 playTone('error');
-                logToTerminal('error', 'MismatchException: Stack error.');
+                logToTerminal('error', 'Wrong Ingredients!');
                 document.querySelector('.ticket').classList.add('shake');
                 setTimeout(() => document.querySelector('.ticket').classList.remove('shake'), 400);
             }
         }
 
-        function nextLevel() {
-            currentLevelNum++;
-            initLevel();
-        }
+        function nextLevel() { currentLevelNum++; initLevel(); }
 
-        function logToTerminal(action, item, index = 0) {
+        function logToTerminal(action, item, idx) {
             const line = document.createElement('div');
             line.className = 'log-line';
-            if (action === 'push') {
-                const cleanName = formatName(item);
-                line.innerHTML = `<span class="k-obj">stack</span>.<span class="k-method">push</span>(<span class="k-str">"${cleanName}"</span>); <span class="k-comment">// Index ${index}</span>`;
-            } else if (action === 'pop') {
-                const cleanName = formatName(item);
-                line.innerHTML = `<span class="k-obj">stack</span>.<span class="k-method">pop</span>(); <span class="k-return">=> Returns "${cleanName}"</span>`;
-            } else if (action === 'error') {
-                line.innerHTML = `<span style="color:#ff7675; font-weight:bold;">⛔ ${item}</span>`;
-            } else if (action === 'success') {
-                line.innerHTML = `<span style="color:#badc58; font-weight:bold;">✔ ${item}</span>`;
-            }
+            if(action==='push') line.innerHTML = `<span style="color:#00cec9">stack.push</span>("${item}") <span style="color:#636e72">// [${idx}]</span>`;
+            else if(action==='pop') line.innerHTML = `<span style="color:#e17055">stack.pop()</span> -> "${item}"`;
+            else if(action==='error') line.style.color = '#ff7675';
+            else line.style.color = '#00b894';
+            if(action==='error' || action==='success') line.innerText = item;
+            
             terminalLog.appendChild(line);
             terminalLog.scrollTop = terminalLog.scrollHeight;
         }
 
-        function getColor(type) {
-            if(type.includes('bun')) return '#F57F17';
-            if(type === 'patty') return '#795548';
-            if(type === 'cheese') return '#FFD54F';
-            if(type === 'lettuce') return '#9CCC65';
-            if(type === 'tomato') return '#EF5350';
-            return '#333';
+        function getColor(t) {
+            if(t.includes('bun')) return '#FFB370';
+            if(t==='patty') return '#795548';
+            if(t==='cheese') return '#FFD54F';
+            if(t==='lettuce') return '#9CCC65';
+            return '#EF5350';
         }
 
-        function formatName(str) {
-            return str.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-        }
+        /* Modal Funcs */
+        function openEdu() { document.getElementById('edu-modal').style.display = 'flex'; }
+        function closeEdu() { document.getElementById('edu-modal').style.display = 'none'; }
+        function openHelp() { document.getElementById('help-modal').style.display = 'flex'; }
+        function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
     </script>
 </body>
 </html>
