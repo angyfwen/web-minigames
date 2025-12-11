@@ -61,7 +61,21 @@
             color: var(--text-main);
         }
 
-        /* --- RAINBOW MENU BUTTON (TOP LEFT) --- */
+        /* --- SCREENS --- */
+        .screen {
+            width: 100%; 
+            height: 100%;
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            position: absolute; top: 0; left: 0;
+        }
+        
+        .screen.active { display: flex; animation: fadeOnly 0.4s ease; }
+        @keyframes fadeOnly { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- NAVIGATION BAR (TOP) --- */
+        
+        /* Left: Menu Button */
         .menu-btn-rainbow {
             position: fixed;
             top: 20px;
@@ -79,12 +93,9 @@
             align-items: center;
             gap: 8px;
             font-size: 1rem;
-            
-            /* Rainbow Gradient */
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
-            
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: transform 0.2s;
             border: 2px solid rgba(255,255,255,0.2);
@@ -98,17 +109,32 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- SCREENS --- */
-        .screen {
-            width: 100%; 
-            height: 100%;
-            display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-            position: absolute; top: 0; left: 0;
+        /* Right: Game Controls Group */
+        .nav-group-right {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 2000;
         }
+
+        .icon-btn {
+            width: 45px; height: 45px;
+            border-radius: 15px; /* Square-ish rounded */
+            background: rgba(255,255,255,0.9);
+            border: none;
+            color: #2D3436;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .icon-btn:hover { transform: scale(1.1); }
+        .icon-btn:active { transform: scale(0.95); }
         
-        .screen.active { display: flex; animation: fadeOnly 0.4s ease; }
-        @keyframes fadeOnly { from { opacity: 0; } to { opacity: 1; } }
+        .muted i::before { content: "\f6a9"; }
 
         /* --- START SCREEN --- */
         .menu-card {
@@ -170,6 +196,12 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             border-bottom: 8px solid rgba(0,0,0,0.05);
             display: flex; flex-direction: column;
+            overflow: hidden; /* For mobile scroll container */
+        }
+
+        /* Inner container for mobile scrolling */
+        .controls-scroll-area {
+            width: 100%;
         }
 
         .header-code {
@@ -199,21 +231,26 @@
         .b-patty { background: linear-gradient(to bottom, #8D6E63, #4E342E); }
         .b-bun-bot { background: linear-gradient(to bottom, #FFCC80, #EF6C00); }
 
+        /* Action Buttons Container (Side by Side) */
+        .action-row {
+            display: flex; gap: 10px; margin-top: 5px;
+        }
+
         .btn-pop {
-            background: #ff7675; color: white; width: 100%;
-            padding: 15px; font-size: 1.2rem; font-family: 'Fredoka One';
+            background: #ff7675; color: white; flex: 1;
+            padding: 15px; font-size: 1.1rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 5px 0 #d63031; margin-top: 5px; margin-bottom: 10px;
+            box-shadow: 0 5px 0 #d63031; 
         }
         .btn-pop:active { transform: translateY(5px); box-shadow: none; }
 
         .btn-serve {
-            background: #fdcb6e; color: #2d3436; width: 100%;
-            padding: 18px; font-size: 1.6rem; font-family: 'Fredoka One';
+            background: #fdcb6e; color: #2d3436; flex: 1;
+            padding: 15px; font-size: 1.1rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 8px 0 #e17055;
+            box-shadow: 0 5px 0 #e17055;
         }
-        .btn-serve:active { transform: translateY(8px); box-shadow: none; }
+        .btn-serve:active { transform: translateY(5px); box-shadow: none; }
 
         /* --- STACK AREA --- */
         .plate-area {
@@ -343,36 +380,22 @@
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px) rotate(-5deg); } 75% { transform: translateX(15px) rotate(5deg); } }
 
-        .nav-btn {
-            position: absolute; top: 30px; background: white; border: none; width: 50px; height: 50px; border-radius: 15px;
-            cursor: pointer; z-index: 200; font-size: 1.2rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.1s;
-        }
-        .nav-btn:hover { transform: translateY(-3px); } .nav-btn:active { transform: translateY(2px); box-shadow: none; }
-        .btn-home { right: 150px; } /* Moved to right group */
-        .btn-mute { right: 30px; }
-        .btn-help { right: 90px; } 
-
         /* =========================================
            MOBILE OPTIMIZATIONS (Portrait & Landscape Phone)
            ========================================= */
         @media (max-width: 900px) {
             
-            .menu-btn-rainbow {
-                top: 15px; left: 15px;
-                font-size: 0.8rem;
-                padding: 8px 16px;
-            }
-
+            /* KEY FIX: Scale down and SHIFT UP */
             .screen.active {
                 transform: scale(0.80) translateY(-5%); 
-                transform-origin: center center;
+                transform-origin: top center;
+                display: flex;
+                justify-content: flex-start; 
+                align-items: center;
                 height: 100%;
                 width: 100%;
                 overflow: hidden; 
-                display: flex;
-                justify-content: center;
-                align-items: center;
+                padding-top: 60px;
             }
 
             .game-wrapper, .modal-card, .menu-card {
@@ -380,6 +403,7 @@
                 overflow-y: hidden; 
             }
 
+            /* --- MENU SCREEN SQUISH --- */
             .menu-card {
                 padding: 30px 20px; 
                 width: 85%; 
@@ -392,33 +416,35 @@
             .btn-start { font-size: 1.5rem; padding: 15px; }
             .btn-info-main { font-size: 1rem; padding: 12px; }
 
+            /* --- MODAL SQUISH --- */
             .modal-card {
-                width: 80%; 
-                max-width: 320px; 
-                padding: 20px;
-                max-height: 70vh;
+                width: 85%; 
+                max-width: 380px; 
+                padding: 25px;
+                max-height: 80vh;
                 overflow-y: auto; 
                 margin: 0 auto; 
             }
-            .info-block { flex-direction: row; gap: 10px; margin-bottom: 12px; }
-            .info-icon { font-size: 1.2rem; width: 35px; padding: 6px; }
-            .info-text h3 { font-size: 1rem; }
-            .info-text p { font-size: 0.8rem; }
+            .info-block { flex-direction: row; gap: 12px; margin-bottom: 15px; }
+            .info-icon { font-size: 1.5rem; width: 40px; padding: 8px; }
+            .info-text h3 { font-size: 1.1rem; }
+            .info-text p { font-size: 0.9rem; }
             .close-btn { top: 10px; right: 15px; font-size: 1.5rem; }
-            #modal-title { font-size: 2.5rem !important; }
 
+            /* --- GAME LAYOUT REARRANGEMENT --- */
             .game-wrapper {
                 display: flex;
                 flex-direction: column;
                 min-height: 100dvh;
                 height: auto;
                 padding: 10px;
-                padding-top: 20px; 
+                padding-top: 10px; 
                 gap: 10px;
                 overflow-y: visible;
                 box-sizing: border-box;
             }
 
+            /* --- ORDER/TERMINAL (TOP SECTION) --- */
             .right-panel {
                 order: 1; 
                 flex-direction: row; 
@@ -445,6 +471,7 @@
                 font-size: 0.7rem;
             }
 
+            /* --- BURGER STACK (MIDDLE SECTION) --- */
             .plate-area {
                 order: 2;
                 flex: 1;
@@ -456,16 +483,16 @@
                 margin-top: -80px; 
             }
 
+            /* --- CONTROLS (BOTTOM SECTION) --- */
             .controls-panel {
                 order: 3;
                 width: 100%;
                 height: auto;
                 padding: 15px;
-                /* Increased bottom padding */
-                padding-bottom: 40px; 
                 border-radius: 20px 20px 0 0;
             }
 
+            /* Grid Layout for Ingredients */
             .controls-grid {
                 grid-template-columns: repeat(3, 1fr); 
                 gap: 8px;
@@ -478,12 +505,15 @@
             }
             
             .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
-            .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; }
 
-            .nav-btn { top: 10px; width: 40px; height: 40px; font-size: 1rem; }
-            .btn-home { right: 130px; }
-            .btn-mute { right: 15px; }
-            .btn-help { right: 70px; }
+            /* Adjust Menu Button for mobile */
+            .menu-btn-rainbow {
+                top: 15px; left: 15px;
+                padding: 8px 16px; font-size: 0.9rem;
+            }
+            .nav-group-right {
+                top: 15px; right: 15px;
+            }
         }
     </style>
 </head>
@@ -492,6 +522,12 @@
     <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
         <i class="fa-solid fa-gamepad"></i> menu
     </a>
+
+    <div class="nav-group-right">
+        <button class="icon-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+        <button class="icon-btn" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
+        <button class="icon-btn" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
+    </div>
 
     <div id="start-screen" class="screen active">
         <div class="menu-card">
@@ -509,9 +545,10 @@
                 <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
             </h2>
             
-            <div class="w-full h-1 bg-gray-200 rounded mb-4"></div>
-
             
+
+[Image of computer data structures diagram]
+
 
             <div class="info-block">
                 <div class="info-icon"><i class="fa-solid fa-layer-group"></i></div>
@@ -550,24 +587,26 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <button class="nav-btn btn-home" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
-        <button class="nav-btn btn-help" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
-        <button class="nav-btn btn-mute" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
-
+        
         <div class="game-wrapper">
             <div class="controls-panel">
-                <div class="header-code">stack.push( ... )</div>
-                <div class="controls-grid">
-                    <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
-                    <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
-                    <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
-                    <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
-                    <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
-                    <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
+                <div class="controls-scroll-area">
+                    <div class="header-code">stack.push( ... )</div>
+                    <div class="controls-grid">
+                        <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
+                        <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
+                        <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
+                        <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
+                        <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
+                        <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
+                    </div>
                 </div>
-                <div class="header-code" style="margin-top:10px;">stack.pop()</div>
-                <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
-                <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
+
+                <div class="header-code" style="margin-top:5px; border-top:1px solid #eee; padding-top:10px;">actions</div>
+                <div class="action-row">
+                    <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
+                    <button class="btn-serve" onclick="checkOrder()">SERVE 🛎️</button>
+                </div>
             </div>
 
             <div class="plate-area">
