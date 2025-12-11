@@ -137,7 +137,9 @@
         }
         #burger-stack {
             display: flex; flex-direction: column-reverse; align-items: center;
-            margin-bottom: -45px; z-index: 10;
+            /* FIXED: Raised the burger stack up so it sits better on the plate */
+            margin-bottom: -25px; 
+            z-index: 10;
             transform: scale(0.8); transform-origin: bottom center;
         }
         .plate {
@@ -148,12 +150,10 @@
         /* BOTTOM: CONTROLS */
         .controls-panel {
             background: #fff; 
-            /* FIXED: Rounded corners all around for mobile */
             border-radius: 25px;
             padding: 15px; 
             box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
             flex-shrink: 0; z-index: 20;
-            /* FIXED: Make narrower and float off bottom */
             width: 95%;
             margin: 0 auto 10px auto;
         }
