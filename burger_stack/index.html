@@ -75,7 +75,7 @@
 
         /* --- NAVIGATION BAR (TOP) --- */
         
-        /* Left: Menu Button */
+        /* Left: Rainbow Menu Button */
         .menu-btn-rainbow {
             position: fixed;
             top: 20px;
@@ -109,7 +109,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Right: Game Controls Group */
+        /* Right: Nav Group (Home, Help, Mute) */
         .nav-group-right {
             position: fixed;
             top: 20px;
@@ -119,22 +119,19 @@
             z-index: 2000;
         }
 
-        .icon-btn {
+        .nav-btn {
+            position: relative; /* Reset position for flexbox */
+            top: auto; left: auto; right: auto;
             width: 45px; height: 45px;
-            border-radius: 15px; /* Square-ish rounded */
-            background: rgba(255,255,255,0.9);
-            border: none;
-            color: #2D3436;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.2s;
+            border-radius: 12px;
+            background: white; border: none;
+            cursor: pointer; font-size: 1.2rem; color: #2d3436; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.1s;
         }
-        .icon-btn:hover { transform: scale(1.1); }
-        .icon-btn:active { transform: scale(0.95); }
-        
-        .muted i::before { content: "\f6a9"; }
+        .nav-btn:hover { transform: translateY(-3px); } 
+        .nav-btn:active { transform: translateY(2px); box-shadow: none; }
+
 
         /* --- START SCREEN --- */
         .menu-card {
@@ -196,12 +193,6 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             border-bottom: 8px solid rgba(0,0,0,0.05);
             display: flex; flex-direction: column;
-            overflow: hidden; /* For mobile scroll container */
-        }
-
-        /* Inner container for mobile scrolling */
-        .controls-scroll-area {
-            width: 100%;
         }
 
         .header-code {
@@ -231,24 +222,29 @@
         .b-patty { background: linear-gradient(to bottom, #8D6E63, #4E342E); }
         .b-bun-bot { background: linear-gradient(to bottom, #FFCC80, #EF6C00); }
 
-        /* Action Buttons Container (Side by Side) */
+        /* Action Row for Side-by-Side Buttons */
         .action-row {
-            display: flex; gap: 10px; margin-top: 5px;
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+            margin-bottom: 5px;
         }
 
         .btn-pop {
-            background: #ff7675; color: white; flex: 1;
+            background: #ff7675; color: white;
             padding: 15px; font-size: 1.1rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer;
             box-shadow: 0 5px 0 #d63031; 
+            flex: 1; /* Stretch */
         }
         .btn-pop:active { transform: translateY(5px); box-shadow: none; }
 
         .btn-serve {
-            background: #fdcb6e; color: #2d3436; flex: 1;
+            background: #fdcb6e; color: #2d3436; 
             padding: 15px; font-size: 1.1rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer;
             box-shadow: 0 5px 0 #e17055;
+            flex: 1; /* Stretch */
         }
         .btn-serve:active { transform: translateY(5px); box-shadow: none; }
 
@@ -362,7 +358,7 @@
         /* --- MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none;
-            justify-content: center; align-items: center; z-index: 500; backdrop-filter: blur(8px);
+            justify-content: center; align-items: center; z-index: 2500; backdrop-filter: blur(8px);
         }
         .modal-card {
             background: white; padding: 50px; border-radius: 30px; text-align: center;
@@ -385,9 +381,9 @@
            ========================================= */
         @media (max-width: 900px) {
             
-            /* KEY FIX: Scale down and SHIFT UP */
+            /* KEY FIX 1: Scale down and SHIFT UP */
             .screen.active {
-                transform: scale(0.80) translateY(-5%); 
+                transform: scale(0.80);
                 transform-origin: top center;
                 display: flex;
                 justify-content: flex-start; 
@@ -395,12 +391,27 @@
                 height: 100%;
                 width: 100%;
                 overflow: hidden; 
-                padding-top: 60px;
+                padding-top: 60px; /* Safe buffer */
             }
 
             .game-wrapper, .modal-card, .menu-card {
                 max-height: 100vh;
                 overflow-y: hidden; 
+            }
+
+            /* --- MENU BUTTON ADJUST --- */
+            .menu-btn-rainbow {
+                top: 15px; left: 15px;
+                font-size: 0.8rem;
+                padding: 8px 16px;
+            }
+
+            /* --- NAV GROUP RIGHT --- */
+            .nav-group-right {
+                top: 15px; right: 15px;
+            }
+            .nav-btn {
+                width: 40px; height: 40px; font-size: 1rem;
             }
 
             /* --- MENU SCREEN SQUISH --- */
@@ -492,7 +503,6 @@
                 border-radius: 20px 20px 0 0;
             }
 
-            /* Grid Layout for Ingredients */
             .controls-grid {
                 grid-template-columns: repeat(3, 1fr); 
                 gap: 8px;
@@ -505,15 +515,10 @@
             }
             
             .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
-
-            /* Adjust Menu Button for mobile */
-            .menu-btn-rainbow {
-                top: 15px; left: 15px;
-                padding: 8px 16px; font-size: 0.9rem;
-            }
-            .nav-group-right {
-                top: 15px; right: 15px;
-            }
+            
+            /* COMPACT ACTION ROW */
+            .action-row { gap: 8px; margin-top: 5px; }
+            .btn-serve, .btn-pop { font-size: 1rem; padding: 12px 5px; }
         }
     </style>
 </head>
@@ -524,9 +529,9 @@
     </a>
 
     <div class="nav-group-right">
-        <button class="icon-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
-        <button class="icon-btn" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
-        <button class="icon-btn" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
+        <button class="nav-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
+        <button class="nav-btn" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
+        <button class="nav-btn" onclick="openHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
     </div>
 
     <div id="start-screen" class="screen active">
@@ -544,12 +549,6 @@
             <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 15px;">
                 <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
             </h2>
-            
-            
-
-[Image of computer data structures diagram]
-
-
             <div class="info-block">
                 <div class="info-icon"><i class="fa-solid fa-layer-group"></i></div>
                 <div class="info-text"><h3>LIFO Rule</h3><p><strong>Last-In, First-Out.</strong> Just like a burger, the last ingredient you put on is the first one you have to take off to fix a mistake.</p></div>
@@ -587,10 +586,14 @@
     </div>
 
     <div id="game-screen" class="screen">
-        
         <div class="game-wrapper">
             <div class="controls-panel">
-                <div class="controls-scroll-area">
+                <div class="mobile-drawer-header">
+                    <div class="panel-handle"></div>
+                    <div class="scroll-hint-text">Scroll for more <i class="fa-solid fa-arrow-down"></i></div>
+                </div>
+
+                <div class="controls-inner">
                     <div class="header-code">stack.push( ... )</div>
                     <div class="controls-grid">
                         <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
@@ -600,12 +603,12 @@
                         <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
                         <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
                     </div>
-                </div>
-
-                <div class="header-code" style="margin-top:5px; border-top:1px solid #eee; padding-top:10px;">actions</div>
-                <div class="action-row">
-                    <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
-                    <button class="btn-serve" onclick="checkOrder()">SERVE 🛎️</button>
+                    <div class="header-code" style="margin-top:10px;">stack.pop()</div>
+                    
+                    <div class="action-row">
+                        <button class="btn-pop" onclick="popItem()">UNDO</button>
+                        <button class="btn-serve" onclick="checkOrder()">SERVE 🛎️</button>
+                    </div>
                 </div>
             </div>
 
@@ -638,7 +641,7 @@
         // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
         document.addEventListener('touchmove', function(e) {
             // Allow scroll only inside terminal and modals
-            if (!e.target.closest('.terminal') && !e.target.closest('.modal-card')) {
+            if (!e.target.closest('.terminal') && !e.target.closest('.modal-card') && !e.target.closest('.controls-inner')) {
                 e.preventDefault();
             }
         }, { passive: false });
