@@ -35,17 +35,7 @@
 
         * { -webkit-tap-highlight-color: transparent; }
 
-        /* --- BACKGROUND ANIMATION FIX --- */
-        @keyframes bgScroll {
-            /* Layer 1 (Radial): Stays at "center center"
-               Layer 2 (Stripes): Moves from "0 0" to "56.6px 0"
-               (56.6px is the horizontal repeat distance for a 40px diagonal stripe at 45deg)
-            */
-            0% { background-position: center center, 0 0; }
-            100% { background-position: center center, 56.6px 0; }
-        }
-
-        /* --- NUCLEAR SCROLL FIX & BODY SETUP --- */
+        /* --- NUCLEAR SCROLL FIX --- */
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0;
@@ -63,23 +53,49 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            
             background-color: var(--bg-color);
-            /* Layer 1: Vignette (Static shadow)
-               Layer 2: Stripes (Moving pattern)
-            */
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            
-            /* Removed 'fixed' attachment to fix animation jitter */
-            background-attachment: scroll; 
-            background-size: auto, auto;
-            
-            /* Speed: 3s linear loop */
-            animation: bgScroll 3s linear infinite;
-            
+            background-attachment: fixed;
             color: var(--text-main);
+        }
+
+        /* --- RAINBOW MENU BUTTON (TOP LEFT) --- */
+        .menu-btn-rainbow {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 24px;
+            border-radius: 20px;
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            text-decoration: none;
+            text-transform: lowercase;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            
+            /* Rainbow Gradient */
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; 
+            animation: gradientMove 4s ease infinite; 
+            
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+        .menu-btn-rainbow:active { transform: scale(0.95); }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* --- SCREENS --- */
@@ -87,9 +103,7 @@
             width: 100%; 
             height: 100%;
             display: none;
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
+            flex-direction: column; align-items: center; justify-content: center;
             position: absolute; top: 0; left: 0;
         }
         
@@ -149,26 +163,14 @@
             margin: auto; 
         }
 
-        /* --- CONTROLS PANEL --- */
+        /* --- CONTROLS --- */
         .controls-panel {
             background: #fff;
-            border-radius: 25px;
+            padding: 25px; border-radius: 25px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             border-bottom: 8px solid rgba(0,0,0,0.05);
-            display: flex; 
-            flex-direction: column;
-            overflow: hidden; 
+            display: flex; flex-direction: column;
         }
-        
-        /* Inner container for scrolling */
-        .controls-inner {
-            padding: 25px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* Mobile specific elements (hidden on desktop) */
-        .mobile-drawer-header { display: none; }
 
         .header-code {
             text-align: center; font-weight: bold; margin-bottom: 10px; 
@@ -284,12 +286,10 @@
             background: #fffdf5; padding: 20px; font-family: 'Courier Prime', monospace; text-align: center;
             background-image: linear-gradient(135deg, transparent 5px, #fffdf5 5px), linear-gradient(225deg, transparent 5px, #fffdf5 5px);
             background-size: 20px 20px; background-repeat: repeat-x; background-position: bottom;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: rotate(2deg);
-            /* Center Content */
-            display: flex; flex-direction: column;
+            padding-bottom: 40px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transform: rotate(2deg);
         }
-        .ticket-header { margin-bottom: 15px; font-weight: bold; color: #636e72; border-bottom: 2px dashed #b2bec3; padding-bottom: 10px; }
-        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; justify-content: center; flex-grow: 1; padding-bottom: 15px;}
+        .ticket-header { border-bottom: 2px dashed #b2bec3; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; color: #636e72; }
+        .target-view { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; min-height: 100px; justify-content: center; }
         .mini-food { width: 100px; height: 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
 
         /* --- SCROLLABLE TERMINAL --- */
@@ -349,7 +349,7 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.1s;
         }
         .nav-btn:hover { transform: translateY(-3px); } .nav-btn:active { transform: translateY(2px); box-shadow: none; }
-        .btn-home { left: 30px; } 
+        .btn-home { right: 150px; } /* Moved to right group */
         .btn-mute { right: 30px; }
         .btn-help { right: 90px; } 
 
@@ -358,28 +358,21 @@
            ========================================= */
         @media (max-width: 900px) {
             
-            /* GLOBAL MOBILE SCREEN SETTINGS */
+            .menu-btn-rainbow {
+                top: 15px; left: 15px;
+                font-size: 0.8rem;
+                padding: 8px 16px;
+            }
+
             .screen.active {
-                transform: scale(0.80);
-                transform-origin: top center;
-                display: flex;
+                transform: scale(0.80) translateY(-5%); 
+                transform-origin: center center;
                 height: 100%;
                 width: 100%;
                 overflow: hidden; 
-            }
-
-            /* SPECIFIC START SCREEN FIX: CENTER IT! */
-            #start-screen.active {
+                display: flex;
                 justify-content: center;
                 align-items: center;
-                padding-top: 0;
-                transform-origin: center center;
-            }
-
-            /* SPECIFIC GAME SCREEN FIX: ALIGN TOP */
-            #game-screen.active {
-                justify-content: flex-start;
-                padding-top: 60px;
             }
 
             .game-wrapper, .modal-card, .menu-card {
@@ -400,29 +393,29 @@
             .btn-info-main { font-size: 1rem; padding: 12px; }
 
             .modal-card {
-                width: 85%; 
-                max-width: 380px; 
-                padding: 25px;
-                max-height: 80vh;
+                width: 80%; 
+                max-width: 320px; 
+                padding: 20px;
+                max-height: 70vh;
                 overflow-y: auto; 
                 margin: 0 auto; 
             }
-            .info-block { flex-direction: row; gap: 12px; margin-bottom: 15px; }
-            .info-icon { font-size: 1.5rem; width: 40px; padding: 8px; }
-            .info-text h3 { font-size: 1.1rem; }
-            .info-text p { font-size: 0.9rem; }
+            .info-block { flex-direction: row; gap: 10px; margin-bottom: 12px; }
+            .info-icon { font-size: 1.2rem; width: 35px; padding: 6px; }
+            .info-text h3 { font-size: 1rem; }
+            .info-text p { font-size: 0.8rem; }
             .close-btn { top: 10px; right: 15px; font-size: 1.5rem; }
+            #modal-title { font-size: 2.5rem !important; }
 
-            /* --- GAME LAYOUT REARRANGEMENT --- */
             .game-wrapper {
                 display: flex;
                 flex-direction: column;
-                height: 100dvh;
-                max-height: 100dvh;
+                min-height: 100dvh;
+                height: auto;
                 padding: 10px;
-                padding-top: 10px; 
+                padding-top: 20px; 
                 gap: 10px;
-                overflow: hidden; 
+                overflow-y: visible;
                 box-sizing: border-box;
             }
 
@@ -434,27 +427,14 @@
                 gap: 10px;
                 margin-bottom: 0;
             }
-
-            /* FIXED: Ticket Layout for centering */
             .ticket {
                 flex: 1;
-                padding: 10px 10px 15px 10px; /* Reduced padding bottom */
-                transform: rotate(0deg);
-                display: flex; /* Use flexbox for layout */
-                flex-direction: column;
+                padding: 10px;
+                padding-bottom: 20px;
+                transform: rotate(0deg); 
             }
-            .ticket-header { 
-                flex: 0 0 auto; /* Header doesn't grow */
-                margin-bottom: 5px; font-size: 0.8rem; border-bottom: 2px dashed #b2bec3; padding-bottom: 5px;
-            }
-            /* FIXED: Target view centers vertically */
-            .target-view { 
-                flex: 1 1 auto; /* Grow to fill space */
-                min-height: 0;
-                gap: 3px; 
-                justify-content: center; /* Center vertically */
-                padding: 5px 0;
-            }
+            .ticket-header { margin-bottom: 5px; font-size: 0.8rem; }
+            .target-view { min-height: 60px; gap: 3px; }
             .mini-food { width: 60px; height: 10px; border-radius: 4px; }
             
             .terminal {
@@ -476,55 +456,14 @@
                 margin-top: -80px; 
             }
 
-            /* --- CONTROLS PANEL (MOBILE SPECIFIC STYLE) --- */
             .controls-panel {
                 order: 3;
                 width: 100%;
-                flex: 1; 
-                min-height: 0;
-                padding: 0; 
-                
-                /* FIXED: ROUND CORNERS EVERYWHERE */
-                border-radius: 30px !important; 
-                margin: 10px; /* Float above bottom edge */
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Stronger shadow for floating effect */
-                background: #fff;
-            }
-
-            /* Header for the drawer (Fixed at top of panel) */
-            .mobile-drawer-header {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 12px 0 8px 0;
-                background: #fff; 
-                border-bottom: 1px solid rgba(0,0,0,0.05);
-            }
-
-            /* The "Handle" Pill */
-            .panel-handle {
-                width: 40px;
-                height: 5px;
-                background: #b2bec3;
-                border-radius: 10px;
-                margin-bottom: 5px;
-            }
-            
-            /* Text to tell user to scroll */
-            .scroll-hint-text {
-                font-size: 0.7rem;
-                color: #b2bec3;
-                font-weight: bold;
-                letter-spacing: 1px;
-                text-transform: uppercase;
-            }
-
-            /* Inner scrolling area */
-            .controls-inner {
-                flex: 1;
-                overflow-y: auto; 
+                height: auto;
                 padding: 15px;
-                padding-bottom: 30px; /* Less padding needed now that it floats */
+                /* Increased bottom padding */
+                padding-bottom: 40px; 
+                border-radius: 20px 20px 0 0;
             }
 
             .controls-grid {
@@ -541,14 +480,18 @@
             .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
             .btn-serve, .btn-pop { font-size: 1.1rem; padding: 12px; }
 
-            .nav-btn { top: 15px; width: 40px; height: 40px; font-size: 1rem; }
-            .btn-home { left: 15px; }
+            .nav-btn { top: 10px; width: 40px; height: 40px; font-size: 1rem; }
+            .btn-home { right: 130px; }
             .btn-mute { right: 15px; }
-            .btn-help { right: 65px; }
+            .btn-help { right: 70px; }
         }
     </style>
 </head>
 <body>
+
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+        <i class="fa-solid fa-gamepad"></i> menu
+    </a>
 
     <div id="start-screen" class="screen active">
         <div class="menu-card">
@@ -565,6 +508,11 @@
             <h2 style="font-family: 'Fredoka One'; margin-top:0; color: #2d3436; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 15px;">
                 <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
             </h2>
+            
+            <div class="w-full h-1 bg-gray-200 rounded mb-4"></div>
+
+            
+
             <div class="info-block">
                 <div class="info-icon"><i class="fa-solid fa-layer-group"></i></div>
                 <div class="info-text"><h3>LIFO Rule</h3><p><strong>Last-In, First-Out.</strong> Just like a burger, the last ingredient you put on is the first one you have to take off to fix a mistake.</p></div>
@@ -608,25 +556,18 @@
 
         <div class="game-wrapper">
             <div class="controls-panel">
-                <div class="mobile-drawer-header">
-                    <div class="panel-handle"></div>
-                    <div class="scroll-hint-text">Scroll for more <i class="fa-solid fa-arrow-down"></i></div>
+                <div class="header-code">stack.push( ... )</div>
+                <div class="controls-grid">
+                    <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
+                    <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
+                    <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
+                    <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
+                    <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
+                    <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
                 </div>
-
-                <div class="controls-inner">
-                    <div class="header-code">stack.push( ... )</div>
-                    <div class="controls-grid">
-                        <button class="ing-btn b-bun-top" onclick="pushItem('bun-top')">Top Bun</button>
-                        <button class="ing-btn b-tomato" onclick="pushItem('tomato')">Tomato</button>
-                        <button class="ing-btn b-lettuce" onclick="pushItem('lettuce')">Lettuce</button>
-                        <button class="ing-btn b-cheese" onclick="pushItem('cheese')">Cheese</button>
-                        <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
-                        <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
-                    </div>
-                    <div class="header-code" style="margin-top:10px;">stack.pop()</div>
-                    <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
-                    <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
-                </div>
+                <div class="header-code" style="margin-top:10px;">stack.pop()</div>
+                <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
+                <button class="btn-serve" onclick="checkOrder()">SERVE ORDER 🛎️</button>
             </div>
 
             <div class="plate-area">
@@ -657,10 +598,8 @@
     <script>
         // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
         document.addEventListener('touchmove', function(e) {
-            // Allow scroll only inside terminal, modals, and the new CONTROLS INNER
-            if (!e.target.closest('.terminal') && 
-                !e.target.closest('.modal-card') && 
-                !e.target.closest('.controls-inner')) {
+            // Allow scroll only inside terminal and modals
+            if (!e.target.closest('.terminal') && !e.target.closest('.modal-card')) {
                 e.preventDefault();
             }
         }, { passive: false });
