@@ -53,7 +53,7 @@
         .nav-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 15px; z-index: 1000; pointer-events: none; /* Let clicks pass through empty space */
+            padding: 0 15px; z-index: 1000; pointer-events: none;
         }
         
         .menu-btn-rainbow {
@@ -100,7 +100,7 @@
         /* --- GAME LAYOUT (CSS GRID/FLEX MIX) --- */
         .game-wrapper {
             width: 100%; height: 100%;
-            padding-top: 70px; /* Space for Navbar */
+            padding-top: 70px; 
             padding-bottom: 10px;
             display: flex; flex-direction: column;
             gap: 10px;
@@ -128,9 +128,9 @@
         }
         .log-line { margin-bottom: 4px; border-bottom: 1px solid #485460; padding-bottom: 2px; }
 
-        /* MIDDLE: PLATE (Flexible Space) */
+        /* MIDDLE: PLATE */
         .plate-area {
-            flex-grow: 1; /* Takes available space */
+            flex-grow: 1; 
             display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
             position: relative; overflow: hidden;
             padding-bottom: 20px;
@@ -147,9 +147,15 @@
 
         /* BOTTOM: CONTROLS */
         .controls-panel {
-            background: #fff; border-radius: 25px 25px 0 0;
-            padding: 15px; box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+            background: #fff; 
+            /* FIXED: Rounded corners all around for mobile */
+            border-radius: 25px;
+            padding: 15px; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
             flex-shrink: 0; z-index: 20;
+            /* FIXED: Make narrower and float off bottom */
+            width: 95%;
+            margin: 0 auto 10px auto;
         }
         .header-code {
             text-align: center; font-weight: bold; margin-bottom: 8px; font-family:'Fira Code'; 
@@ -254,6 +260,21 @@
     <div id="game-screen" class="screen">
         <div class="game-wrapper">
             
+            <div class="info-panel">
+                <div class="ticket">
+                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
+                    <div class="target-view" id="target-view"></div>
+                </div>
+                <div class="terminal" id="terminal-log">
+                    <div class="log-line">// System ready...</div>
+                </div>
+            </div>
+
+            <div class="plate-area">
+                <div id="burger-stack"></div>
+                <div class="plate"></div>
+            </div>
+
             <div class="controls-panel">
                 <div class="header-code">stack.push( ... )</div>
                 <div class="controls-grid">
@@ -269,21 +290,6 @@
                 <div class="action-row">
                     <button class="btn-pop" onclick="popItem()">UNDO</button>
                     <button class="btn-serve" onclick="checkOrder()">SERVE</button>
-                </div>
-            </div>
-
-            <div class="plate-area">
-                <div id="burger-stack"></div>
-                <div class="plate"></div>
-            </div>
-
-            <div class="info-panel">
-                <div class="ticket">
-                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
-                    <div class="target-view" id="target-view"></div>
-                </div>
-                <div class="terminal" id="terminal-log">
-                    <div class="log-line">// System ready...</div>
                 </div>
             </div>
 
