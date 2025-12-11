@@ -14,8 +14,11 @@
 
     <style>
         :root {
+            /* THEME: Premium Red */
             --bg-color: #A31621; 
             --bg-pattern: #8D121B;
+
+            /* Ingredient Colors */
             --bun-base: #FFB370;    
             --patty-base: #795548;
             --patty-shadow: #5D4037;
@@ -25,10 +28,13 @@
             --lettuce-shadow: #7CB342;
             --tomato-base: #EF5350;
             --tomato-shadow: #D32F2F;
+            
+            /* UI Colors */
             --text-main: #2D3436;
         }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        /* DISABLE ALL DEFAULT TOUCH ACTIONS */
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; touch-action: none; }
 
         @keyframes bgScroll {
             0% { background-position: center center, 0 0; }
@@ -37,15 +43,30 @@
 
         html, body {
             font-family: 'Nunito', sans-serif;
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             width: 100%; height: 100%;
-            position: fixed; overflow: hidden;
+            position: fixed; 
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none; /* Critical for preventing zoom */
+            user-select: none;
+            -webkit-user-select: none;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
+            
             background-attachment: scroll; 
+            background-size: auto, auto;
             animation: bgScroll 3s linear infinite;
+            
             color: var(--text-main);
         }
 
@@ -133,14 +154,15 @@
             flex-grow: 1; 
             display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
             position: relative; overflow: hidden;
-            padding-bottom: 20px;
+            /* FIX 1: Increased padding bottom to raise the plate visual */
+            padding-bottom: 60px; 
         }
         #burger-stack {
             display: flex; flex-direction: column-reverse; align-items: center;
-            /* FIXED: Raised the burger stack up so it sits better on the plate */
-            margin-bottom: -25px; 
+            /* FIX 1: Changed negative margin to lift burger UP */
+            margin-bottom: -15px; 
             z-index: 10;
-            transform: scale(0.8); transform-origin: bottom center;
+            transform: scale(0.85); transform-origin: bottom center;
         }
         .plate {
             width: 300px; height: 40px; background: #fff; border-radius: 50%;
@@ -168,6 +190,7 @@
             border: none; padding: 12px 5px; border-radius: 10px;
             font-family: 'Fredoka One'; font-size: 0.85rem; color: white; cursor: pointer; 
             box-shadow: 0 4px 0 rgba(0,0,0,0.2); text-transform: uppercase; text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+            touch-action: manipulation;
         }
         .ing-btn:active { transform: translateY(4px); box-shadow: none; }
 
@@ -175,6 +198,7 @@
         .btn-pop, .btn-serve {
             flex: 1; padding: 12px; font-size: 1rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer; color: white;
+            touch-action: manipulation;
         }
         .btn-pop { background: #ff7675; box-shadow: 0 4px 0 #d63031; }
         .btn-serve { background: #fdcb6e; color: #2d3436; box-shadow: 0 4px 0 #e17055; }
@@ -260,21 +284,6 @@
     <div id="game-screen" class="screen">
         <div class="game-wrapper">
             
-            <div class="info-panel">
-                <div class="ticket">
-                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
-                    <div class="target-view" id="target-view"></div>
-                </div>
-                <div class="terminal" id="terminal-log">
-                    <div class="log-line">// System ready...</div>
-                </div>
-            </div>
-
-            <div class="plate-area">
-                <div id="burger-stack"></div>
-                <div class="plate"></div>
-            </div>
-
             <div class="controls-panel">
                 <div class="header-code">stack.push( ... )</div>
                 <div class="controls-grid">
@@ -290,6 +299,21 @@
                 <div class="action-row">
                     <button class="btn-pop" onclick="popItem()">UNDO</button>
                     <button class="btn-serve" onclick="checkOrder()">SERVE</button>
+                </div>
+            </div>
+
+            <div class="plate-area">
+                <div id="burger-stack"></div>
+                <div class="plate"></div>
+            </div>
+
+            <div class="info-panel">
+                <div class="ticket">
+                    <div class="ticket-header"><span id="level-display">ORDER #1</span></div>
+                    <div class="target-view" id="target-view"></div>
+                </div>
+                <div class="terminal" id="terminal-log">
+                    <div class="log-line">// System ready...</div>
                 </div>
             </div>
 
@@ -343,12 +367,20 @@
     </div>
 
     <script>
-        // --- SCROLL LOCK ---
+        // --- SCROLL LOCK & DOUBLE TAP FIX ---
         document.addEventListener('touchmove', function(e) {
             if (!e.target.closest('.terminal') && !e.target.closest('.modal-card')) {
                 e.preventDefault();
             }
         }, { passive: false });
+
+        // Double tap prevention for zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (event) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) { event.preventDefault(); }
+            lastTouchEnd = now;
+        }, false);
 
         // --- AUDIO ---
         let audioCtx;
