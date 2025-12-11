@@ -35,7 +35,13 @@
 
         * { -webkit-tap-highlight-color: transparent; }
 
-        /* --- NUCLEAR SCROLL FIX --- */
+        /* --- BACKGROUND ANIMATION FIX --- */
+        @keyframes bgScroll {
+            0% { background-position: center center, 0 0; }
+            100% { background-position: center center, 56.6px 0; }
+        }
+
+        /* --- NUCLEAR SCROLL FIX & BODY SETUP --- */
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0;
@@ -53,11 +59,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            background-attachment: fixed;
+            
+            background-attachment: scroll; 
+            background-size: auto, auto;
+            animation: bgScroll 3s linear infinite;
+            
             color: var(--text-main);
         }
 
@@ -66,16 +77,16 @@
             width: 100%; 
             height: 100%;
             display: none;
-            flex-direction: column; align-items: center; justify-content: center;
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
             position: absolute; top: 0; left: 0;
         }
         
         .screen.active { display: flex; animation: fadeOnly 0.4s ease; }
         @keyframes fadeOnly { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- NAVIGATION BAR (TOP) --- */
-        
-        /* Left: Rainbow Menu Button */
+        /* --- NAVIGATION (TOP) --- */
         .menu-btn-rainbow {
             position: fixed;
             top: 20px;
@@ -96,7 +107,7 @@
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
             border: 2px solid rgba(255,255,255,0.2);
         }
@@ -109,7 +120,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Right: Nav Group (Home, Help, Mute) */
         .nav-group-right {
             position: fixed;
             top: 20px;
@@ -120,14 +130,9 @@
         }
 
         .nav-btn {
-            position: relative; /* Reset position for flexbox */
-            top: auto; left: auto; right: auto;
-            width: 45px; height: 45px;
-            border-radius: 12px;
-            background: white; border: none;
-            cursor: pointer; font-size: 1.2rem; color: #2d3436; 
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.1s;
+            background: white; border: none; width: 45px; height: 45px; border-radius: 12px;
+            cursor: pointer; font-size: 1.2rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.1s;
         }
         .nav-btn:hover { transform: translateY(-3px); } 
         .nav-btn:active { transform: translateY(2px); box-shadow: none; }
@@ -193,7 +198,17 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             border-bottom: 8px solid rgba(0,0,0,0.05);
             display: flex; flex-direction: column;
+            /* Allow internal scrolling on small screens */
+            overflow: hidden; 
         }
+
+        .controls-inner {
+            width: 100%;
+            /* Default for desktop */
+        }
+
+        /* Header for mobile drawer */
+        .mobile-drawer-header { display: none; }
 
         .header-code {
             text-align: center; font-weight: bold; margin-bottom: 10px; 
@@ -222,31 +237,26 @@
         .b-patty { background: linear-gradient(to bottom, #8D6E63, #4E342E); }
         .b-bun-bot { background: linear-gradient(to bottom, #FFCC80, #EF6C00); }
 
-        /* Action Row for Side-by-Side Buttons */
+        /* ACTION ROW (Undo & Serve) */
         .action-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            display: flex; gap: 10px; width: 100%; margin-top: 5px;
         }
 
         .btn-pop {
-            background: #ff7675; color: white;
-            padding: 15px; font-size: 1.1rem; font-family: 'Fredoka One';
+            background: #ff7675; color: white; flex: 1;
+            padding: 15px; font-size: 1.2rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer;
             box-shadow: 0 5px 0 #d63031; 
-            flex: 1; /* Stretch */
         }
         .btn-pop:active { transform: translateY(5px); box-shadow: none; }
 
         .btn-serve {
-            background: #fdcb6e; color: #2d3436; 
-            padding: 15px; font-size: 1.1rem; font-family: 'Fredoka One';
+            background: #fdcb6e; color: #2d3436; flex: 1;
+            padding: 18px; font-size: 1.6rem; font-family: 'Fredoka One';
             border: none; border-radius: 12px; cursor: pointer;
-            box-shadow: 0 5px 0 #e17055;
-            flex: 1; /* Stretch */
+            box-shadow: 0 8px 0 #e17055;
         }
-        .btn-serve:active { transform: translateY(5px); box-shadow: none; }
+        .btn-serve:active { transform: translateY(8px); box-shadow: none; }
 
         /* --- STACK AREA --- */
         .plate-area {
@@ -358,7 +368,7 @@
         /* --- MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none;
-            justify-content: center; align-items: center; z-index: 2500; backdrop-filter: blur(8px);
+            justify-content: center; align-items: center; z-index: 500; backdrop-filter: blur(8px);
         }
         .modal-card {
             background: white; padding: 50px; border-radius: 30px; text-align: center;
@@ -383,30 +393,29 @@
             
             /* KEY FIX 1: Scale down and SHIFT UP */
             .screen.active {
+                /* Scale to 80% and anchor top center */
                 transform: scale(0.80);
                 transform-origin: top center;
+                
+                /* Layout */
                 display: flex;
                 justify-content: flex-start; 
                 align-items: center;
-                height: 100%;
-                width: 100%;
-                overflow: hidden; 
-                padding-top: 60px; /* Safe buffer */
+                
+                height: 100%; width: 100%; overflow: hidden; 
+                padding-top: 60px; /* Buffer for top controls */
             }
 
             .game-wrapper, .modal-card, .menu-card {
                 max-height: 100vh;
                 overflow-y: hidden; 
             }
-
-            /* --- MENU BUTTON ADJUST --- */
+            
+            /* --- TOP BUTTONS (Mobile) --- */
             .menu-btn-rainbow {
                 top: 15px; left: 15px;
-                font-size: 0.8rem;
-                padding: 8px 16px;
+                font-size: 0.8rem; padding: 8px 16px;
             }
-
-            /* --- NAV GROUP RIGHT --- */
             .nav-group-right {
                 top: 15px; right: 15px;
             }
@@ -436,11 +445,12 @@
                 overflow-y: auto; 
                 margin: 0 auto; 
             }
-            .info-block { flex-direction: row; gap: 12px; margin-bottom: 15px; }
-            .info-icon { font-size: 1.5rem; width: 40px; padding: 8px; }
-            .info-text h3 { font-size: 1.1rem; }
-            .info-text p { font-size: 0.9rem; }
+            .info-block { flex-direction: row; gap: 10px; margin-bottom: 12px; }
+            .info-icon { font-size: 1.2rem; width: 35px; padding: 6px; }
+            .info-text h3 { font-size: 1rem; }
+            .info-text p { font-size: 0.8rem; }
             .close-btn { top: 10px; right: 15px; font-size: 1.5rem; }
+            #modal-title { font-size: 2.5rem !important; }
 
             /* --- GAME LAYOUT REARRANGEMENT --- */
             .game-wrapper {
@@ -502,6 +512,27 @@
                 padding: 15px;
                 border-radius: 20px 20px 0 0;
             }
+            
+            .controls-inner {
+                padding: 15px;
+                padding-bottom: 40px; /* Extra spacing for mobile gesture bar */
+            }
+
+            /* Mobile Drawer Header */
+            .mobile-drawer-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 8px 0;
+                background: #fff; 
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+            }
+            .panel-handle {
+                width: 40px; height: 5px; background: #b2bec3; border-radius: 10px; margin-bottom: 5px;
+            }
+            .scroll-hint-text {
+                font-size: 0.7rem; color: #b2bec3; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;
+            }
 
             .controls-grid {
                 grid-template-columns: repeat(3, 1fr); 
@@ -516,9 +547,8 @@
             
             .ing-btn { padding: 12px 5px; font-size: 0.8rem; }
             
-            /* COMPACT ACTION ROW */
-            .action-row { gap: 8px; margin-top: 5px; }
-            .btn-serve, .btn-pop { font-size: 1rem; padding: 12px 5px; }
+            /* --- SIDE BY SIDE ACTION ROW --- */
+            .btn-serve, .btn-pop { font-size: 1rem; padding: 12px; margin: 0; }
         }
     </style>
 </head>
@@ -527,7 +557,7 @@
     <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
         <i class="fa-solid fa-gamepad"></i> menu
     </a>
-
+    
     <div class="nav-group-right">
         <button class="nav-btn" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
         <button class="nav-btn" onclick="toggleMute()" title="Mute/Unmute"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
@@ -603,11 +633,12 @@
                         <button class="ing-btn b-patty" onclick="pushItem('patty')">Patty</button>
                         <button class="ing-btn b-bun-bot" onclick="pushItem('bun-bot')">Bot Bun</button>
                     </div>
+                    
                     <div class="header-code" style="margin-top:10px;">stack.pop()</div>
                     
                     <div class="action-row">
-                        <button class="btn-pop" onclick="popItem()">UNDO</button>
-                        <button class="btn-serve" onclick="checkOrder()">SERVE 🛎️</button>
+                        <button class="btn-pop" onclick="popItem()">UNDO (POP)</button>
+                        <button class="btn-serve" onclick="checkOrder()">SERVE</button>
                     </div>
                 </div>
             </div>
