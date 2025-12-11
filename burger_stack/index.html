@@ -35,7 +35,6 @@
             -webkit-user-select: none;
         }
 
-        /* Moved animation to body::before to prevent cutoff */
         @keyframes bgScroll {
             0% { background-position: center center, 0 0; }
             100% { background-position: center center, 56.6px 0; }
@@ -44,28 +43,17 @@
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
-            width: 100%; height: 100%;
+            /* FIXED: Set exact height/width to prevent cutoff */
+            width: 100vw; height: 100vh;
             position: fixed; overflow: hidden;
-            /* Just the base color here */
-            background-color: var(--bg-color); 
-            color: var(--text-main);
-            touch-action: none; 
-        }
-
-        /* FIXED: This pseudo-element creates a full-screen wallpaper 
-           that won't get cut off when the mobile address bar moves */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1;
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            background-size: cover, 56.6px 56.6px; /* Ensure pattern tiles perfectly */
+            /* FIXED: Removed background-attachment: scroll to fix mobile visual glitch */
             animation: bgScroll 3s linear infinite;
-            will-change: background-position; /* Optimizes for mobile */
+            color: var(--text-main);
+            touch-action: none; 
         }
 
         /* --- NAVIGATION --- */
@@ -86,7 +74,13 @@
         }
         @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        .nav-group-right { pointer-events: auto; display: flex; gap: 10px; }
+        /* FIXED: Hidden by default, shown only in game */
+        .nav-group-right { 
+            pointer-events: auto; 
+            display: none; /* Changed from flex to none */
+            gap: 10px; 
+        }
+        
         .nav-btn {
             background: white; border: none; width: 40px; height: 40px; border-radius: 12px;
             cursor: pointer; font-size: 1.1rem; color: #2d3436; display: flex; align-items: center; justify-content: center;
@@ -143,7 +137,7 @@
         .terminal {
             flex: 1.5; background: #1e272e; border-radius: 10px; padding: 10px;
             font-family: 'Fira Code', monospace; font-size: 0.7rem; color: #d2dae2;
-            display: flex; flex-direction: column; /* Flows top to bottom now */
+            display: flex; flex-direction: column; 
             border: 2px solid #485460;
             overflow-y: auto;
             touch-action: pan-y;
@@ -438,6 +432,8 @@
             initAudio(); 
             document.getElementById('start-screen').classList.remove('active');
             document.getElementById('game-screen').classList.add('active');
+            // FIXED: Show the right side buttons only when game starts
+            document.querySelector('.nav-group-right').style.display = 'flex';
             currentLevelNum = 1;
             initLevel();
         }
@@ -446,6 +442,8 @@
             document.getElementById('game-screen').classList.remove('active');
             document.getElementById('start-screen').classList.add('active');
             document.getElementById('win-modal').style.display = 'none';
+            // FIXED: Hide the right side buttons when going home
+            document.querySelector('.nav-group-right').style.display = 'none';
         }
 
         function initLevel() {
