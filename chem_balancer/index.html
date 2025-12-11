@@ -29,7 +29,6 @@
             font-family: 'Fredoka', sans-serif;
             background-color: var(--bg-deep);
             color: var(--text-main);
-            /* These lines freeze the app on screen */
             width: 100%;
             height: 100%;
             position: fixed; 
@@ -55,13 +54,12 @@
             text-decoration: none;
             text-transform: lowercase;
             cursor: pointer;
-            z-index: 2000; /* Highest priority */
+            z-index: 2000;
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 1rem;
             
-            /* Rainbow Gradient */
             background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
             background-size: 300% 100%; 
             animation: gradientMove 4s ease infinite; 
@@ -222,7 +220,6 @@
             background: #1e293b; color: var(--primary);
             font-family: 'Titan One', cursive; font-size: 1.8rem;
             text-align: center; outline: none; transition: 0.2s;
-            /* CRITICAL for mobile responsiveness */
             touch-action: manipulation;
         }
         .chem-input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary); transform: scale(1.05); }
@@ -329,6 +326,8 @@
         }
         .info-box { border-color: var(--secondary); box-shadow: 0 0 50px rgba(139, 92, 246, 0.3); pointer-events: auto; cursor: default; }
         
+        .help-box { border-color: var(--primary); box-shadow: 0 0 50px rgba(6, 182, 212, 0.3); pointer-events: auto; cursor: default; }
+
         @keyframes popIn { from {transform: scale(0.5); opacity: 0;} to {transform: scale(1); opacity: 1;} }
 
         .tap-hint { animation: pulse 1.5s infinite; opacity: 0.7; font-size: 0.9rem; margin-top: 10px; letter-spacing: 1px; }
@@ -342,13 +341,12 @@
         /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 768px) {
             
-            /* KEY FIX: Scale down the container to fit screen */
             .screen.active {
-                transform: scale(0.85); /* Scales the whole UI down to 85% */
+                transform: scale(0.85);
                 transform-origin: center center;
                 height: 100%;
                 width: 100%;
-                overflow: hidden; /* Prevent internal scrollbars */
+                overflow: hidden; 
             }
 
             /* Adjust Menu Button for mobile */
@@ -358,7 +356,6 @@
             }
 
             .cyber-card, .panel-card {
-                /* ensure these don't overflow the scaled container */
                 max-height: 100vh;
                 overflow-y: hidden; 
             }
@@ -444,6 +441,9 @@
                 <div class="flex gap-2 relative z-10">
                     <button class="btn btn-icon" onclick="goHome()" title="Home"><i class="fa-solid fa-house"></i></button>
                     <button class="btn btn-icon" onclick="toggleMute()" title="Mute"><i class="fa-solid fa-volume-high" id="game-mute-icon"></i></button>
+                    
+                    <button class="btn btn-icon" onclick="showHelp()" title="How to Play" style="background: rgba(6, 182, 212, 0.2); border-color: var(--primary); color: white;"><i class="fa-solid fa-question"></i></button>
+                    
                     <button class="btn btn-icon text-rose-400 border-rose-400/30 hover:bg-rose-400/10" onclick="resetLevel()" title="Redo Level">
                         <i class="fa-solid fa-rotate-left"></i>
                     </button>
@@ -554,15 +554,49 @@
         </div>
     </div>
 
-    <script>
-        // --- NUCLEAR SCROLL BLOCKER SCRIPT ---
-        document.addEventListener('touchmove', function(e) {
-            // allows scrolling only inside specific elements if needed, otherwise blocks all
-            if (!e.target.closest('.modal-box')) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+    <div id="help-modal" class="modal" style="pointer-events: auto; cursor: default;">
+        <div class="modal-box help-box" style="pointer-events: auto;">
+            <div class="flex justify-center items-center gap-3 mb-2">
+                <i class="fa-solid fa-gamepad text-cyan-400 text-2xl"></i>
+                <h2 class="text-2xl font-bold text-cyan-400" style="font-family: 'Titan One'; margin:0;">HOW TO PLAY</h2>
+            </div>
+            
+            <div class="w-full h-1 bg-cyan-500/30 rounded mb-4"></div>
 
+            
+
+[Image of chemical equation balancing diagram]
+
+            
+            <div class="info-list">
+                <div class="info-item">
+                    <i class="fa-solid fa-hashtag info-icon" style="color:var(--primary)"></i>
+                    <div class="info-text">
+                        <h4>Adjust Numbers</h4>
+                        <p>Click the big numbers (coefficients) to change the amount of each molecule.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fa-solid fa-equals info-icon" style="color:var(--primary)"></i>
+                    <div class="info-text">
+                        <h4>Balance Atoms</h4>
+                        <p>Make sure the number of atoms on the Left matches the Right.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fa-solid fa-check-circle info-icon" style="color:var(--primary)"></i>
+                    <div class="info-text">
+                        <h4>Submit</h4>
+                        <p>When the stability meter hits 100%, click BALANCE!</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-full" onclick="closeHelp()">START LAB</button>
+        </div>
+    </div>
+
+    <script>
         /* --- AUDIO --- */
         const AudioSys = {
             ctx: new (window.AudioContext || window.webkitAudioContext)(),
@@ -643,6 +677,10 @@
 
         function showInfo() { AudioSys.click(); document.getElementById('info-modal').style.display = 'flex'; }
         function closeInfo() { AudioSys.click(); document.getElementById('info-modal').style.display = 'none'; }
+        
+        function showHelp() { AudioSys.click(); document.getElementById('help-modal').style.display = 'flex'; }
+        function closeHelp() { AudioSys.click(); document.getElementById('help-modal').style.display = 'none'; }
+        
         function toggleMute() {
             AudioSys.muted = !AudioSys.muted;
             document.getElementById('game-mute-icon').className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
@@ -696,9 +734,6 @@
                 updateRealTimeCounts(gameLevels[levelIdx]); 
                 renderCompoundVisuals(wrap, comp, val);
             };
-            
-            // Fix for mobile: prevent scroll on input touch
-            inp.addEventListener('touchmove', (e) => { e.stopPropagation(); });
 
             const label = document.createElement('span');
             label.className = 'comp-label';
