@@ -43,19 +43,21 @@
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
-            width: 100%; 
-            /* FIXED: Use min-height 100vh to cover full mobile screen */
-            min-height: 100vh;
-            /* FIXED: Prevent "bouncing" the page on mobile which cuts off background */
-            overscroll-behavior: none;
-            position: fixed; 
+            
+            /* FIXED: Changed min-height back to height: 100% and added position: fixed */
+            /* This forces the container to be exactly the screen size, creating a "box" for the content to center in */
+            width: 100%;
+            height: 100%; 
+            position: fixed;
+            
             overflow: hidden;
+            overscroll-behavior: none;
+            
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
             background-attachment: scroll; 
-            /* FIXED: Ensure pattern repeats everywhere */
             background-repeat: no-repeat, repeat;
             background-size: cover, auto;
             animation: bgScroll 3s linear infinite;
@@ -68,6 +70,8 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 15px; z-index: 1000; pointer-events: none;
+            /* Safe area for notched phones */
+            padding-top: env(safe-area-inset-top);
         }
         
         .menu-btn-rainbow {
@@ -81,7 +85,6 @@
         }
         @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* FIXED: Moved specific positioning here for when it's inside game screen */
         .nav-group-right { 
             pointer-events: auto; 
             display: flex; gap: 10px; 
@@ -89,6 +92,8 @@
             top: 15px;
             right: 15px;
             z-index: 1001;
+            /* Safe area for notched phones */
+            top: max(15px, env(safe-area-inset-top));
         }
 
         .nav-btn {
@@ -99,9 +104,13 @@
 
         /* --- SCREENS --- */
         .screen {
-            width: 100%; height: 100%; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-            /* Added relative here so the buttons can position absolute relative to this */
+            width: 100%; 
+            height: 100%; 
+            display: none;
+            flex-direction: column; 
+            align-items: center; 
+            /* This is the magic line that centers it vertically */
+            justify-content: center; 
             position: relative; 
         }
         .screen.active { display: flex; }
@@ -125,10 +134,13 @@
         /* --- GAME LAYOUT --- */
         .game-wrapper {
             width: 100%; height: 100%;
-            padding-top: 70px; 
-            padding-bottom: 10px;
+            /* Adjusted padding to center better on small screens */
+            padding-top: 60px; 
+            padding-bottom: 20px;
             display: flex; flex-direction: column;
             gap: 10px;
+            /* Ensure the game wrapper itself tries to center content */
+            justify-content: center;
         }
 
         /* TOP: TICKET + TERMINAL */
