@@ -35,7 +35,7 @@
             -webkit-user-select: none;
         }
 
-        /* FIX 2: Custom Scrollbar for Terminal (Webkit only) */
+        /* Custom Scrollbar for Terminal (Webkit only) */
         .terminal::-webkit-scrollbar {
             width: 5px;
         }
@@ -53,6 +53,19 @@
             100% { background-position: center center, 56.6px 0; }
         }
 
+        /* FIX 1: Apply background to HTML element for better full-viewport coverage */
+        html {
+            /* Keep background properties here for tiling */
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
+                repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
+            background-attachment: fixed; /* Use fixed attachment on HTML/Body */
+            background-repeat: no-repeat, repeat;
+            background-size: cover, auto; /* Keep auto here for repeating pattern */
+            animation: bgScroll 3s linear infinite;
+        }
+
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
@@ -64,18 +77,12 @@
             overflow: hidden;
             overscroll-behavior: none;
             
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
-                /* FIX 1: Ensure background pattern repeats across the viewport */
-                repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            background-attachment: scroll; 
+            /* Remove background from body; inherited from HTML */
+            /* background-color: var(--bg-color); */
+            /* background-image: ... */
+            /* background-attachment: scroll; */
+            /* animation: bgScroll 3s linear infinite; */
             
-            /* FIX 1: Adjusted background-size for better mobile coverage */
-            background-repeat: no-repeat, repeat;
-            background-size: cover, 100% 100%; /* Changed auto to 100% 100% for pattern */
-            
-            animation: bgScroll 3s linear infinite;
             color: var(--text-main);
             touch-action: none; 
         }
