@@ -35,6 +35,19 @@
             -webkit-user-select: none;
         }
 
+        /* FIX 2: Custom Scrollbar for Terminal (Webkit only) */
+        .terminal::-webkit-scrollbar {
+            width: 5px;
+        }
+        .terminal::-webkit-scrollbar-thumb {
+            background-color: #485460;
+            border-radius: 10px;
+        }
+        .terminal::-webkit-scrollbar-track {
+            background-color: #1e272e;
+        }
+
+
         @keyframes bgScroll {
             0% { background-position: center center, 0 0; }
             100% { background-position: center center, 56.6px 0; }
@@ -44,10 +57,9 @@
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
             
-            /* FIXED: Anchor to all 4 corners to prevent cutoff */
+            width: 100%;
+            height: 100%; 
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%; 
             
             overflow: hidden;
             overscroll-behavior: none;
@@ -55,10 +67,14 @@
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
+                /* FIX 1: Ensure background pattern repeats across the viewport */
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
             background-attachment: scroll; 
+            
+            /* FIX 1: Adjusted background-size for better mobile coverage */
             background-repeat: no-repeat, repeat;
-            background-size: cover, auto;
+            background-size: cover, 100% 100%; /* Changed auto to 100% 100% for pattern */
+            
             animation: bgScroll 3s linear infinite;
             color: var(--text-main);
             touch-action: none; 
@@ -69,7 +85,6 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 15px; z-index: 1000; pointer-events: none;
-            /* Safe area for notched phones */
             padding-top: env(safe-area-inset-top);
         }
         
@@ -91,7 +106,6 @@
             top: 15px;
             right: 15px;
             z-index: 1001;
-            /* Safe area for notched phones */
             top: max(15px, env(safe-area-inset-top));
         }
 
@@ -161,17 +175,7 @@
             border: 2px solid #485460;
             overflow-y: auto;
             touch-action: pan-y;
-            
-            /* ADDED: Smooth scrolling */
-            scroll-behavior: smooth;
         }
-        
-        /* ADDED: Custom Scroller for Terminal */
-        .terminal::-webkit-scrollbar { width: 6px; }
-        .terminal::-webkit-scrollbar-track { background: transparent; }
-        .terminal::-webkit-scrollbar-thumb { background: #485460; border-radius: 10px; }
-        .terminal::-webkit-scrollbar-thumb:hover { background: #00cec9; }
-
         .log-line { margin-bottom: 4px; border-bottom: 1px solid #485460; padding-bottom: 2px; }
 
         /* MIDDLE: PLATE */
