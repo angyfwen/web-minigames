@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Evo Lab </title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Kalam:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* THEME VARIABLES */
+            --sky-top: #81ecec; --sky-bot: #74b9ff;
+            --sun: #ffeaa7; --mtn: #2ecc71;
+            --h3: #27ae60; --h2: #2ecc71; --h1: #55efc4;
+
+            /* UI COLORS */
+            --accent: #ff9f43; --primary: #54a0ff;
+            --success: #00b894; --fail: #ff7675; --text: #2d3436;
+            --card-bg: #ffffff;
+
+            /* ASSETS */
+            --paper-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='0.08' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            /* A heavier texture for the cover */
+            --cover-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='0.15' filter='url(%23n)'/%3E%3C/svg%3E");
+            
+            --shadow-float: 0 20px 50px rgba(0,0,0,0.3);
+            --grid-color: rgba(84, 160, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Outfit', sans-serif; color: var(--text); background: #333; }
+
+        /* --- SCENERY --- */
+        #parallax-world { position: fixed; top: -5vh; left: -5vw; width: 110vw; height: 110vh; pointer-events: none; z-index: 0; }
+        .sky-layer { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, var(--sky-top), var(--sky-bot)); transition: background 1.5s ease; z-index: 0; }
+        .sky-layer::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background-image: var(--paper-texture); opacity: 0.6; }
+        .layer { position: absolute; width: 100%; height: 100%; transition: transform 0.1s ease-out; will-change: transform; }
+
+        /* Z-INDEX STACK */
+        .z-sun { z-index: 1; } .z-sky-decor { z-index: 2; } .z-mtn { z-index: 3; } .z-h3 { z-index: 4; } .z-h2 { z-index: 5; } .z-ground-decor { z-index: 6; } .z-h1 { z-index: 7; } .z-water-decor { z-index: 8; } .z-particles { z-index: 9; }
+
+        /* SCENERY ELEMENTS */
+        .sun { position: absolute; top: 10%; right: 15%; width: 130px; height: 130px; background: var(--sun); border-radius: 50%; border: 6px solid rgba(255,255,255,0.4); box-shadow: 0 0 80px var(--sun); transition: background 1s; animation: pulseSun 8s infinite; }
+        @keyframes pulseSun { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+        .mtn { position: absolute; bottom: 35%; left: -10%; width: 120%; height: 50%; background: var(--mtn); clip-path: polygon(0% 100%, 10% 20%, 25% 60%, 40% 15%, 55% 50%, 70% 25%, 85% 60%, 100% 100%); transition: background 1s; transform-origin: bottom center; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
+        .hill-base { position: absolute; bottom: -10%; width: 140%; height: 40%; transition: background 1s; filter: drop-shadow(0 -5px 5px rgba(0,0,0,0.1)); transform-origin: bottom center; }
+        .h3 { left: -15%; height: 60%; background: var(--h3); clip-path: polygon(0% 100%, 0% 20%, 10% 25%, 20% 18%, 30% 22%, 40% 15%, 50% 25%, 60% 18%, 70% 22%, 80% 15%, 90% 20%, 100% 15%, 100% 100%); }
+        .h2 { right: -15%; height: 45%; background: var(--h2); clip-path: polygon(0% 100%, 0% 30%, 15% 25%, 25% 35%, 35% 28%, 50% 32%, 65% 25%, 80% 30%, 90% 25%, 100% 30%, 100% 100%); }
+        .h1 { left: -20%; height: 30%; background: var(--h1); clip-path: polygon(0% 100%, 0% 25%, 20% 30%, 40% 25%, 60% 30%, 80% 25%, 100% 30%, 100% 100%); }
+        .popup-anim { animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+        /* DECOR */
+        .decor-item { position: absolute; font-size: 4rem; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); will-change: transform; }
+        .anim-swim { animation: swim 3s ease-in-out infinite alternate; }
+        @keyframes swim { 0% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } 100% { transform: translateX(0) rotate(0deg); } }
+        .anim-fly { animation: fly 20s linear infinite; }
+        @keyframes fly { from{transform:translateX(-120vw);} to{transform:translateX(120vw);} }
+        .anim-hover { animation: hover 4s ease-in-out infinite; }
+        @keyframes hover { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-15px);} }
+
+        /* PARTICLES & START DECOR */
+        #particles { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 5; pointer-events: none; transition: opacity 0.5s; }
+        .particle { position: absolute; border-radius: 50%; }
+        @keyframes fall { to { transform: translateY(110vh); } }
+        @keyframes rise { to { transform: translateY(-120vh) scale(0); opacity: 0; } }
+        @keyframes bubble { 0%{transform:translateY(0);} 100%{transform:translateY(-120vh);} }
+        @keyframes twinkle { 0%,100%{opacity:0.3; transform:scale(0.8);} 50%{opacity:1; transform:scale(1.2);} }
+        .layer-sky-decor { position: absolute; top:0; left:0; width:100%; height:100%; transition: opacity 0.5s; }
+        .rainbow { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); width: 700px; height: 350px; border-radius: 700px 700px 0 0; box-shadow: 0 0 0 30px #e74c3c, 0 0 0 60px #e67e22, 0 0 0 90px #f1c40f, 0 0 0 120px #2ecc71, 0 0 0 150px #3498db, 0 0 0 180px #9b59b6; opacity: 0.6; filter: opacity(0.8); }
+        .start-cloud { position: absolute; opacity: 0.95; animation: drift 50s linear infinite; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.05)); color: #fff;}
+        @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+        /* NEW START-TREE CLASS */
+        .start-tree { position: absolute; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+
+        /* --- UI LAYER --- */
+        #ui-container { position: relative; z-index: 50; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
+        .screen { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.5s ease; }
+        .screen.active { display: flex; opacity: 1; pointer-events: auto; }
+
+        /* --- START SCREEN = JOURNAL COVER --- */
+        .start-card {
+            background-color: #d4c4a8; /* Manila folder brown */
+            background-image: var(--cover-texture);
+            border: 4px solid #c0b298;
+            padding: 50px;
+            position: relative;
+            /* Make it look like a book on a table */
+            transform: rotate(-2deg) !important; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4) !important;
+        }
+
+        /* STICKER STYLES */
+        .sticker {
+            background: white;
+            padding: 10px 25px;
+            border-radius: 12px;
+            border: 3px solid #f0f0f0;
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.2);
+            display: inline-block;
+            position: relative;
+        }
+        /* Slight peeling effect */
+        .sticker::after { content: ''; position: absolute; bottom: 2px; right: 2px; width: 20px; height: 20px; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%); border-radius: 0 0 10px 0; pointer-events: none; }
+
+        .title-sticker { transform: rotate(-4deg); margin-bottom: 20px; }
+        .subtitle-sticker { transform: rotate(3deg); background: #fffae6; font-size: 0.9rem !important; }
+        .deco-sticker { position: absolute; font-size: 4rem; filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2)); }
+
+        /* --- GAME JOURNAL & BINDER --- */
+        .game-card {
+            width: 980px; height: 650px; max-width: 95%; background: #fff;
+            border-radius: 12px; box-shadow: var(--shadow-float);
+            /* UPDATED: Increased middle column to 50px for wider spine */
+            display: grid; grid-template-columns: 360px 50px 1fr; 
+            overflow: hidden; position: relative;
+            transform: rotate(-1deg); border: 2px solid #dcdcdc;
+        }
+
+        /* THE BINDER SPINE (Piercing Paper Style) */
+        .binder-spine {
+            /* Transparent so it looks like a gap between pages */
+            background-color: transparent; 
+            position: relative;
+            /* UPDATED SVG: Wider, hole shadows, solid single-color ring piercing through */
+            background-image: url("data:image/svg+xml,%3Csvg width='50' height='40' viewBox='0 0 50 40' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- Left Hole Shadow --%3E%3Cellipse cx='5' cy='20' rx='4' ry='6' fill='%237f8c8d'/%3E%3C!-- Right Hole Shadow --%3E%3Cellipse cx='45' cy='20' rx='4' ry='6' fill='%237f8c8d'/%3E%3C!-- The Metal Ring (Solid Grey, No Border) --%3E%3Cpath d='M5,20 Q25,0 45,20' stroke='%23bdc3c7' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: repeat-y;
+            background-size: 50px 40px;
+            z-index: 10;
+            /* No border shadows */
+            box-shadow: none;
+        }
+
+        /* Left Page */
+        .panel-left { background: #fdfaf5; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-shadow: inset -5px 0 15px rgba(0,0,0,0.02); }
+        
+        /* Right Page (Graph Paper) */
+        .panel-right { 
+            padding: 40px 50px; display: flex; flex-direction: column; height: 100%;
+            background-color: #fff;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 25px 25px; position: relative;
+        }
+
+        /* Rest of UI (Badges, Grid, Buttons) */
+        .env-badge-wrap { width: 180px; height: 180px; background: white; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; margin-bottom: 25px; transform: rotate(-3deg); }
+        .env-icon { font-size: 6rem; filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.1)); }
+        .env-info h2 { font-family: 'Kalam', cursive; font-size: 2.5rem; margin: 0; color: var(--text); transform: rotate(-2deg); }
+        .env-info p { font-family: 'Outfit', sans-serif; color: #636e72; font-weight: 600; margin-top: 5px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; }
+        .creature-box { margin-top: auto; width: 130px; height: 130px; background: white; border-radius: 12px; border: 8px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; font-size: 4.5rem; transform: rotate(4deg); transition: 0.4s; }
+        .creature-box:hover { transform: scale(1.1) rotate(0deg); }
+        
+        .header { display: flex; align-items: center; justify-content: flex-start; gap: 20px; margin-bottom: 30px; border-bottom: 2px solid var(--text); padding-bottom: 10px; }
+        .header h3 { margin: 0; color: var(--text); font-weight: 900; letter-spacing: 1px; font-size: 1.2rem; text-transform: uppercase; }
+        .lvl-pill { background: var(--text); color: white; padding: 6px 16px; border-radius: 4px; font-weight: 700; font-size: 0.9rem; }
+        .traits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex-grow: 1; margin-bottom: 30px; }
+        .trait-card { background: white; border: 2px solid #2d3436; border-radius: 12px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+        .trait-card:hover { transform: translateY(-3px); box-shadow: 6px 6px 0 rgba(0,0,0,0.15); border-color: var(--primary); }
+        .trait-card.selected { background: #fff9c4; border-color: var(--text); box-shadow: 2px 2px 0 rgba(0,0,0,0.2); transform: rotate(-2deg) scale(1.02); }
+        .trait-icon { font-size: 2.5rem; margin-bottom: 10px; } .trait-name { font-weight: 800; font-size: 0.8rem; color: var(--text); text-transform: uppercase; }
+        .evolve-btn { width: 100%; background: var(--text); color: white; border: none; padding: 20px; font-size: 1.5rem; font-weight: 800; border-radius: 8px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: 0.2s; text-transform: uppercase; letter-spacing: 2px; }
+        .evolve-btn:hover { transform: translateY(-2px); background: var(--primary); } .evolve-btn:active { transform: translateY(2px); }
+
+        /* TOAST & MODALS */
+        #toast-pill { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%); background: white; padding: 12px 30px; border-radius: 50px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border: 2px solid var(--text); display: flex; align-items: center; gap: 15px; z-index: 100; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; opacity: 0; }
+        #toast-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-success { color: var(--success); } .toast-fail { color: var(--fail); }
+        #toast-icon { font-size: 1.5rem; } #toast-msg { font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+        .nav-buttons { position: absolute; top: 25px; right: 30px; display: flex; gap: 12px; z-index: 60; }
+        .nav-btn { width: 40px; height: 40px; border-radius: 50%; background: #2d3436; color: white; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .nav-btn:hover { transform: scale(1.1); background: var(--accent); }
+        .modal-card:not(.start-card) { background: white; padding: 60px; border-radius: 12px; box-shadow: var(--shadow-float); text-align: center; width: 500px; max-width: 90%; position: relative; border: 2px solid var(--text); background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 20px 20px; }
+        /* UPDATED STYLING FOR EDUCATIONAL MODAL */
+        #eduModal .modal-card { 
+            /* Increased width for less compact look */
+            width: 700px; 
+            max-width: 95%; 
+            padding: 40px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+        .edu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .edu-item {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .edu-icon { font-size: 2.5rem; margin-bottom: 10px; color: var(--primary); }
+        .edu-title { font-weight: 900; font-size: 1.1rem; margin: 0 0 5px 0; text-transform: uppercase; }
+        .edu-desc { font-size: 0.9rem; color: #636e72; line-height: 1.4; }
+        /* END NEW STYLING */
+        .big-btn { width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 700; border-radius: 8px; border: 2px solid var(--text); cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; font-family: 'Outfit'; }
+        .btn-primary { background: var(--success); color: white; border-color: var(--success); } .btn-secondary { background: white; color: var(--text); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .close-icon { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--text); cursor: pointer; }
+        .scroll-content { max-height: 300px; overflow-y: auto; text-align: left; padding: 10px; color: #636e72; line-height: 1.6; }
+
+        /* States & Mobile */
+        body.start-mode .layer-sky-decor, body.start-mode .layer-tree-decor { opacity: 1; }
+        body.game-mode .layer-sky-decor, body.game-mode .layer-tree-decor { opacity: 0; }
+        body.game-mode #particles, body.game-mode #sunEl { opacity: 1; }
+        /* NEW: We now control .start-tree inside the h1-wrapper layer */
+        body.start-mode .start-tree { opacity: 1; }
+        body.game-mode .start-tree { opacity: 0; }
+        
+        @media (max-width: 900px) {
+            /* Stack columns on mobile, hide binder spine */
+            .game-card { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; transform: scale(0.9); }
+            .binder-spine { display: none; } 
+            .panel-left { flex-direction: row; gap: 20px; padding: 25px; border-right: none; border-bottom: 2px solid #ddd; }
+            .env-badge-wrap { width: 90px; height: 90px; margin: 0; } .env-icon { font-size: 3rem; } .creature-box { width: 80px; height: 80px; font-size: 3rem; margin: 0; }
+            .panel-right { padding: 25px; } .traits-grid { gap: 10px; }
+            /* Mobile edu grid stack */
+            .edu-grid { grid-template-columns: 1fr; }
+            /* Adjusted padding for mobile edu modal */
+            #eduModal .modal-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body class="start-mode">
+
+    <div id="parallax-world">
+        <div class="sky-layer"></div>
+        <div class="layer sun-wrapper z-sun" data-speed="0.01" id="sunEl"><div class="sun"></div></div>
+        <div class="layer layer-sky-decor z-sky-decor" data-speed="0.01">
+            <div class="rainbow"></div>
+            <div class="start-cloud" style="top: 5%; left: 5%; font-size: 12rem;">☁️</div>
+            <div class="start-cloud" style="top: 20%; left: 55%; font-size: 10rem;">☁️</div>
+            <div class="start-cloud" style="top: 2%; left: 85%; font-size: 14rem;">☁️</div>
+            <div class="start-cloud" style="top: 35%; left: -5%; font-size: 16rem;">☁️</div>
+        </div>
+        <div class="layer decor-container z-sky-decor" id="decor-sky" data-speed="0.02"></div>
+        <div class="layer mtn-wrapper z-mtn" data-speed="0.03"><div class="mtn popup-anim"></div></div>
+        <div class="layer h3-wrapper z-h3" data-speed="0.04"><div class="hill-base h3 popup-anim"></div></div>
+        <div class="layer h2-wrapper z-h2" data-speed="0.06"><div class="hill-base h2 popup-anim"></div></div>
+        <div class="layer decor-container z-ground-decor" id="decor-ground" data-speed="0.07"></div>
+        <div class="layer h1-wrapper z-h1" data-speed="0.08">
+            <div class="hill-base h1 popup-anim"></div>
+            <div class="start-tree" style="left: 10%; bottom: 25%; font-size: 4rem;">🌲</div>
+            <div class="start-tree" style="left: 22%; bottom: 29%; transform: scale(0.9); font-size: 3.5rem;">🌲</div>
+            <div class="start-tree" style="left: 75%; bottom: 27%; font-size: 4.5rem;">🌲</div>
+            <div class="start-tree" style="left: 85%; bottom: 32%; transform: scale(0.8); font-size: 4rem;">🌲</div>
+            <div class="start-tree" style="left: 60%; bottom: 22%; transform: scale(1.1); font-size: 3.8rem;">🌲</div>
+        </div>
+        <div class="layer decor-container z-water-decor" id="decor-water" data-speed="0.09"></div>
+        <div id="particles" class="z-particles"></div>
+    </div>
+
+    <div id="ui-container">
+        
+        <div id="toast-pill">
+            <i id="toast-icon" class="fa-solid fa-check"></i>
+            <span id="toast-msg">SUCCESS!</span>
+        </div>
+
+        <div class="screen active" id="startScreen">
+            <div class="modal-card start-card">
+                <div class="deco-sticker" style="top: -20px; left: -20px; transform: rotate(-15deg);">☣️</div>
+                <div class="deco-sticker" style="bottom: -20px; right: -10px; transform: rotate(10deg); font-size: 5rem;">🦕</div>
+                
+                <div class="sticker title-sticker">
+                    <h1 style="font-size: 4rem; margin: 0; color: var(--text); line-height:1; font-family:'Kalam', cursive;">Evo-Lab</h1>
+                </div>
+                <br>
+                <div class="sticker subtitle-sticker">
+                    <p style="color:#636e72; font-weight:800; margin:0; letter-spacing: 2px;">FIELD JOURNAL EDITION</p>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                    <button class="big-btn btn-primary" onclick="startGame()"><i class="fa-solid fa-play"></i> START JOURNEY</button>
+                    <button class="big-btn btn-secondary" onclick="openModal('eduModal')">
+                        <i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="gameScreen">
+            <div class="game-card">
+                <div class="nav-buttons">
+                    <div class="nav-btn" onclick="openModal('helpModal')"><i class="fa-solid fa-question"></i></div>
+                    <div class="nav-btn" onclick="goHome()"><i class="fa-solid fa-house"></i></div>
+                </div>
+                
+                <div class="panel-left">
+                    <div class="env-badge-wrap"><div class="env-icon" id="envIcon">❄️</div></div>
+                    <div class="env-info"><h2 id="envName">Ice Age</h2><p id="envDesc">-50°C</p></div>
+                    <div class="creature-box" id="creatureIcon">🥚</div>
+                </div>
+                
+                <div class="binder-spine"></div>
+
+                <div class="panel-right">
+                    <div class="header"><h3>Genetics Lab</h3><div class="lvl-pill" id="lvlTag">LEVEL 1</div></div>
+                    <div class="traits-grid" id="traitGrid"></div>
+                    <button class="evolve-btn" onclick="evolve()">EVOLVE!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="eduModal">
+        <div class="modal-card">
+            <div class="close-icon" onclick="closeModal('eduModal')"><i class="fa-solid fa-xmark"></i></div>
+            <div style="font-size: 2rem; margin-bottom: 20px; color: var(--primary); font-weight: 900;">
+                <i class="fa-solid fa-brain"></i> HOW IS THIS EDUCATIONAL?
+            </div>
+            
+            <div class="edu-grid">
+                <div class="edu-item">
+                    <div class="edu-icon">🌱</div>
+                    <p class="edu-title">Natural Selection</p>
+                    <p class="edu-desc">Teaches that environment dictates which traits are advantageous for survival.</p>
+                </div>
+                <div class="edu-item">
+                    <div class="edu-icon">🧬</div>
+                    <p class="edu-title">Genetic Adaptation</p>
+                    <p class="edu-desc">Understanding how species evolve over generations by passing on beneficial genes.</p>
+                </div>
+                <div class="edu-item">
+                    <div class="edu-icon">🌡️</div>
+                    <p class="edu-title">Ecosystem Logic</p>
+                    <p class="edu-desc">Forces critical thinking about environmental pressures (temp, poison, water).</p>
+                </div>
+            </div>
+
+            <button class="big-btn btn-primary" onclick="closeModal('eduModal')" style="margin-top: 30px; width: 250px;">GOT IT!</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal-card">
+            <div class="close-icon" onclick="closeModal('helpModal')"><i class="fa-solid fa-xmark"></i></div>
+            <h2 style="margin-top:0;">How to Play</h2>
+            <p style="color:#636e72; line-height:1.6; text-align: left; margin-bottom: 25px;">
+                1. <strong>Observe</strong> the environment.<br>2. <strong>Select</strong> a trait.<br>3. <strong>Evolve</strong>!
+            </p>
+            <button class="big-btn btn-primary" onclick="closeModal('helpModal')">OKAY</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="finalModal">
+        <div class="modal-card" style="width: 600px;">
+            <div style="font-size: 5rem; margin-bottom: 10px;">🏆</div>
+            <h2 style="margin-top:0; color: #f1c40f;">Ultimate Survivor!</h2>
+            <div class="scroll-content">
+                <p>Congratulations, Grand Architect of Life!</p>
+                <p>You have guided your species through the freezing winds of the Cryo-Era, shielding them from the bitter cold. You navigated the scorching magma flows of the Volcanic Age, finding a path through the fire.</p>
+                <p>Because of your choices, life did not flicker out in the darkness. Instead, it adapted, evolved, and thrived against all odds. The genetic legacy of your creature will echo through eternity.</p>
+                <p><strong>Well done!</strong></p>
+            </div>
+            <button class="big-btn btn-primary" onclick="goHome(); closeModal('finalModal')">RETURN HOME</button>
+        </div>
+    </div>
+
+    <script>
+        // --- PERFORMANCE OPTIMIZED JS ---
+        let mouseX = 0, mouseY = 0;
+        function handleMove(x, y) { mouseX = x - window.innerWidth / 2; mouseY = y - window.innerHeight / 2; }
+        document.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY));
+        document.addEventListener("touchmove", (e) => { if(e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY); });
+
+        function animateParallax() {
+            const layers = document.querySelectorAll(".layer");
+            layers.forEach(layer => {
+                const speed = parseFloat(layer.getAttribute('data-speed')) || 0.05;
+                layer.style.transform = `translate(${mouseX * speed}px, ${mouseY * speed}px)`;
+            });
+            requestAnimationFrame(animateParallax);
+        }
+        requestAnimationFrame(animateParallax);
+
+        // --- GAME DATA ---
+        const masterLevels = [
+            { name: "Cryo-Era", icon: "❄️", desc: "Temp: -50°C. Freeze.", req: "fur", mode: "GROUND", emojis: ["🌲", "🌲", "🧊", "🏔️"], skyT: "#81ecec", skyB: "#74b9ff", sun: "#dfe6e9", mtn: "#b2bec3", h1: "#ffffff", h2: "#dfe6e9", h3: "#b2bec3", particles: "snow" },
+            { name: "Volcanic Age", icon: "🌋", desc: "Magma Active.", req: "scales", mode: "GROUND", emojis: ["🌋", "🪨", "🔥", "🦴"], skyT: "#ff7675", skyB: "#d63031", sun: "#ff9f43", mtn: "#636e72", h1: "#2d3436", h2: "#636e72", h3: "#b2bec3", particles: "ash" },
+            { name: "Oceanic World", icon: "🌊", desc: "Landmass Submerged.", req: "fins", mode: "WATER", emojis: ["🐠", "🐟", "🐡", "🦈"], skyT: "#00cec9", skyB: "#0984e3", sun: "#81ecec", mtn: "#0984e3", h1: "#74b9ff", h2: "#0984e3", h3: "#00cec9", particles: "bubble" },
+            { name: "Industrial Smog", icon: "🌫️", desc: "Pollution Critical.", req: "wings", mode: "GROUND", emojis: ["🏭", "🏢", "🛢️", "☠️"], skyT: "#7f8c8d", skyB: "#bdc3c7", sun: "#fab1a0", mtn: "#424242", h1: "#3e2723", h2: "#795548", h3: "#8d6e63", particles: "smog" },
+            { name: "Cosmic Storm", icon: "☢️", desc: "Radiation Critical.", req: "lead", mode: "SKY", emojis: ["🛸", "🪐", "🚀", "🛰️"], skyT: "#000000", skyB: "#2c3e50", sun: "transparent", mtn: "#2c3e50", h1: "#34495e", h2: "#2c3e50", h3: "#2c3e50", particles: "star" }
+        ];
+
+        const traits = [{id:"fur",name:"Thick Fur",icon:"🧶"},{id:"scales",name:"Heat Scales",icon:"🛡️"},{id:"fins",name:"Gills",icon:"🐟"},{id:"wings",name:"Wings",icon:"🦅"},{id:"lead",name:"Lead Skin",icon:"🤖"},{id:"eyes",name:"Night Vis",icon:"👁️"}];
+        const creatures = {"default":"🥚","fur":"🦣","scales":"🦖","fins":"🦈","wings":"🦅","lead":"🤖","eyes":"👽"};
+        let gameLevels=[], currIdx=0, selectedTrait=null, particleInterval=null, toastTimer=null;
+
+        function initDecorPool() {
+            ['decor-ground', 'decor-water', 'decor-sky'].forEach(id => {
+                const con = document.getElementById(id); con.innerHTML = ""; 
+                for(let i=0; i<6; i++) { let el = document.createElement('div'); el.className = 'decor-item'; con.appendChild(el); }
+            });
+        }
+
+        function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
+
+        function startGame() {
+            document.body.classList.remove('start-mode'); document.body.classList.add('game-mode');
+            gameLevels = [...masterLevels]; shuffle(gameLevels); currIdx = 0;
+            document.getElementById('startScreen').classList.remove('active'); document.getElementById('gameScreen').classList.add('active');
+            loadLevel(0);
+        }
+
+        function goHome() {
+            document.body.classList.add('start-mode'); document.body.classList.remove('game-mode');
+            document.getElementById('gameScreen').classList.remove('active'); document.getElementById('startScreen').classList.add('active');
+            applyStartTheme(); stopParticles();
+        }
+
+        function loadLevel(idx) {
+            const lvl = gameLevels[idx]; applyTheme(lvl);
+            document.getElementById('envIcon').innerText = lvl.icon; document.getElementById('envName').innerText = lvl.name;
+            document.getElementById('envDesc').innerText = lvl.desc; document.getElementById('lvlTag').innerText = "LEVEL "+(idx+1);
+            document.getElementById('creatureIcon').innerText = creatures['default'];
+            
+            const grid = document.getElementById('traitGrid'); grid.innerHTML = '';
+            traits.forEach(t => {
+                let div = document.createElement('div'); div.className = 'trait-card'; div.id = 't-'+t.id;
+                div.onclick = () => selectTrait(t.id);
+                div.innerHTML = `<div class="trait-icon">${t.icon}</div><div class="trait-name">${t.name}</div>`;
+                grid.appendChild(div);
+            });
+            selectedTrait = null;
+            document.querySelectorAll('.popup-anim').forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = 'popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'; });
+        }
+
+        function applyTheme(lvl) {
+            const r = document.documentElement.style;
+            r.setProperty('--sky-top', lvl.skyT); r.setProperty('--sky-bot', lvl.skyB);
+            r.setProperty('--sun', lvl.sun); r.setProperty('--mtn', lvl.mtn);
+            r.setProperty('--h1', lvl.h1); r.setProperty('--h2', lvl.h2); r.setProperty('--h3', lvl.h3);
+            document.getElementById('sunEl').style.opacity = (lvl.mode === 'SKY') ? '0' : '1';
+            updateDecor(lvl); startParticles(lvl.particles);
+        }
+
+        function applyStartTheme() {
+            const r = document.documentElement.style;
+            r.setProperty('--sky-top', '#81ecec'); r.setProperty('--sky-bot', '#a2d9ff');
+            r.setProperty('--sun', '#ffeaa7'); 
+            r.setProperty('--mtn', '#2ecc71'); r.setProperty('--h3', '#27ae60'); r.setProperty('--h2', '#43a047'); r.setProperty('--h1', '#4fc3f7');
+        }
+
+        function updateDecor(lvl) {
+            ['decor-ground', 'decor-water', 'decor-sky'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+            let activeId = '';
+            if (lvl.mode === 'GROUND') activeId = 'decor-ground';
+            if (lvl.mode === 'WATER') activeId = 'decor-water';
+            if (lvl.mode === 'SKY') activeId = 'decor-sky';
+            
+            const container = document.getElementById(activeId); container.style.display = 'block';
+            const items = container.children;
+            const slots = [10, 25, 40, 55, 70, 85];
+            for (let i = slots.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [slots[i], slots[j]] = [slots[j], slots[i]]; }
+
+            for(let i=0; i<items.length; i++) {
+                let el = items[i]; el.innerText = lvl.emojis[i % lvl.emojis.length];
+                el.style.fontSize = (Math.random()*2+3)+'rem'; el.style.left = (slots[i] + (Math.random()*5 - 2.5)) + '%'; 
+                el.className = 'decor-item'; 
+                if (lvl.mode === 'GROUND') { el.style.bottom = (Math.random()*10+15)+'%'; el.style.top = 'auto'; el.classList.add('anim-hover'); } 
+                else if (lvl.mode === 'WATER') { el.style.top = (Math.random()*50+20)+'%'; el.style.bottom = 'auto'; el.classList.add('anim-swim'); } 
+                else if (lvl.mode === 'SKY') { el.style.top = (Math.random()*30+5)+'%'; el.style.bottom = 'auto'; el.classList.add('anim-fly'); }
+            }
+        }
+
+        function startParticles(type) {
+            stopParticles(); const con = document.getElementById('particles');
+            particleInterval = setInterval(() => {
+                let p = document.createElement('div'); p.className = 'particle'; p.style.left = Math.random()*100+'vw';
+                if(type==='snow'){ p.style.background='white'; p.style.width=Math.random()*8+4+'px'; p.style.height=p.style.width; p.style.top='-10px'; p.style.animation=`fall ${Math.random()*3+3}s linear`; }
+                if(type==='bubble'){ p.style.border='2px solid rgba(255,255,255,0.6)'; p.style.width=Math.random()*15+5+'px'; p.style.height=p.style.width; p.style.bottom='-20px'; p.style.animation=`bubble ${Math.random()*5+5}s linear`; }
+                if(type==='ash'){ p.style.background='#e17055'; p.style.width='8px'; p.style.height='8px'; p.style.bottom='-10px'; p.style.animation=`rise 4s ease-out`; }
+                if(type==='star'){ p.style.background='white'; p.style.width='4px'; p.style.height='4px'; p.style.top=Math.random()*100+'vh'; p.style.animation='twinkle 2s infinite'; }
+                if(type==='smog'){ p.style.background='rgba(50,50,50,0.2)'; p.style.width='40px'; p.style.height='20px'; p.style.bottom='10%'; p.style.borderRadius='50%'; p.style.animation=`rise 8s linear`; }
+                con.appendChild(p); setTimeout(()=>p.remove(),6000);
+            }, type==='star'?0:200);
+            if(type==='star') { for(let i=0; i<30; i++) { let p=document.createElement('div'); p.className='particle'; p.style.background='white'; p.style.width='3px'; p.style.height='3px'; p.style.left=Math.random()*100+'vw'; p.style.top=Math.random()*100+'vh'; p.style.animation='twinkle 3s infinite'; con.appendChild(p); } }
+        }
+        function stopParticles(){ clearInterval(particleInterval); document.getElementById('particles').innerHTML=''; }
+
+        function selectTrait(id) {
+            selectedTrait = id; document.querySelectorAll('.trait-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('t-'+id).classList.add('selected');
+            const cIcon = document.getElementById('creatureIcon'); cIcon.style.transform = "rotate(20deg) scale(0.5)";
+            setTimeout(() => { cIcon.innerText = creatures[id]; cIcon.style.transform = "rotate(-5deg) scale(1)"; }, 150);
+        }
+
+        function showToast(msg, success) {
+            const t = document.getElementById('toast-pill'); const txt = document.getElementById('toast-msg'); const icon = document.getElementById('toast-icon');
+            if(toastTimer) clearTimeout(toastTimer);
+            t.className = success ? 'toast-success' : 'toast-fail'; txt.innerText = msg; icon.className = success ? "fa-solid fa-check" : "fa-solid fa-xmark";
+            t.classList.add('show'); toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2000);
+        }
+
+        function evolve() {
+            if(!selectedTrait) return; const lvl = gameLevels[currIdx];
+            if(selectedTrait === lvl.req) { showToast("SURVIVAL SUCCESSFUL!", true); setTimeout(nextLevel, 2000); } 
+            else { showToast("EXTINCTION EVENT...", false); }
+        }
+
+        function nextLevel() { if(currIdx < gameLevels.length - 1) { currIdx++; loadLevel(currIdx); } else { openModal('finalModal'); } }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        initDecorPool(); applyStartTheme();
+    </script>
+</body>
+</html>
