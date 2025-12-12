@@ -35,7 +35,7 @@
             -webkit-user-select: none;
         }
 
-        /* Custom Scrollbar for Terminal (Webkit only) */
+        /* FIX 2: Custom Scrollbar for Terminal (Webkit only) */
         .terminal::-webkit-scrollbar {
             width: 5px;
         }
@@ -53,19 +53,6 @@
             100% { background-position: center center, 56.6px 0; }
         }
 
-        /* FIX 1: Apply background to HTML element for better full-viewport coverage */
-        html {
-            /* Keep background properties here for tiling */
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
-                repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
-            background-attachment: fixed; /* Use fixed attachment on HTML/Body */
-            background-repeat: no-repeat, repeat;
-            background-size: cover, auto; /* Keep auto here for repeating pattern */
-            animation: bgScroll 3s linear infinite;
-        }
-
         html, body {
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
@@ -77,12 +64,18 @@
             overflow: hidden;
             overscroll-behavior: none;
             
-            /* Remove background from body; inherited from HTML */
-            /* background-color: var(--bg-color); */
-            /* background-image: ... */
-            /* background-attachment: scroll; */
-            /* animation: bgScroll 3s linear infinite; */
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
+                repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
+            /* FIX 1: Changed attachment to fixed to stop the pattern from shifting when the body tries to 'scroll' on mobile */
+            background-attachment: fixed; 
             
+            /* FIX 1: Ensured the background covers the entire viewport explicitly */
+            background-repeat: no-repeat, repeat;
+            background-size: cover, 100vw 100vh; /* Using vw/vh for max coverage */
+            
+            animation: bgScroll 3s linear infinite;
             color: var(--text-main);
             touch-action: none; 
         }
