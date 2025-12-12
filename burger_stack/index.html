@@ -44,11 +44,10 @@
             font-family: 'Nunito', sans-serif;
             margin: 0; padding: 0;
             
-            /* FIXED: Changed min-height back to height: 100% and added position: fixed */
-            /* This forces the container to be exactly the screen size, creating a "box" for the content to center in */
-            width: 100%;
-            height: 100%; 
+            /* FIXED: Anchor to all 4 corners to prevent cutoff */
             position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%; 
             
             overflow: hidden;
             overscroll-behavior: none;
@@ -109,7 +108,6 @@
             display: none;
             flex-direction: column; 
             align-items: center; 
-            /* This is the magic line that centers it vertically */
             justify-content: center; 
             position: relative; 
         }
@@ -134,12 +132,10 @@
         /* --- GAME LAYOUT --- */
         .game-wrapper {
             width: 100%; height: 100%;
-            /* Adjusted padding to center better on small screens */
             padding-top: 60px; 
             padding-bottom: 20px;
             display: flex; flex-direction: column;
             gap: 10px;
-            /* Ensure the game wrapper itself tries to center content */
             justify-content: center;
         }
 
@@ -165,7 +161,17 @@
             border: 2px solid #485460;
             overflow-y: auto;
             touch-action: pan-y;
+            
+            /* ADDED: Smooth scrolling */
+            scroll-behavior: smooth;
         }
+        
+        /* ADDED: Custom Scroller for Terminal */
+        .terminal::-webkit-scrollbar { width: 6px; }
+        .terminal::-webkit-scrollbar-track { background: transparent; }
+        .terminal::-webkit-scrollbar-thumb { background: #485460; border-radius: 10px; }
+        .terminal::-webkit-scrollbar-thumb:hover { background: #00cec9; }
+
         .log-line { margin-bottom: 4px; border-bottom: 1px solid #485460; padding-bottom: 2px; }
 
         /* MIDDLE: PLATE */
