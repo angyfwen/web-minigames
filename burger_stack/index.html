@@ -50,7 +50,8 @@
 
         @keyframes bgScroll {
             0% { background-position: center center, 0 0; }
-            100% { background-position: center center, 56.6px 0; }
+            /* FIXED: Changed 56.6px to -56.6px. Moving left prevents the left-edge cutoff bug on mobiles. */
+            100% { background-position: center center, -56.6px 0; }
         }
 
         html, body {
@@ -67,6 +68,7 @@
             background-color: var(--bg-color);
             background-image: 
                 radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%),
+                /* FIX 1: Ensure background pattern repeats across the viewport */
                 repeating-linear-gradient(45deg, var(--bg-pattern) 0, var(--bg-pattern) 20px, var(--bg-color) 20px, var(--bg-color) 40px);
             /* FIX 1: Changed attachment to fixed to stop the pattern from shifting when the body tries to 'scroll' on mobile */
             background-attachment: fixed; 
