@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+  /* === GLOBAL SETUP === */
+  body {
+    margin: 0; padding: 0;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    font-family: 'Fredoka', sans-serif;
+    user-select: none;
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* === ✨ START SCREEN ✨ === */
+  #startScreen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(41, 182, 246, 0.4); 
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    z-index: 9000;
+    display: flex; justify-content: center; align-items: center;
+    transition: opacity 0.5s, visibility 0.5s;
+    overflow: hidden; perspective: 1000px;
+  }
+
+  .bg-icon {
+    position: absolute; color: rgba(255, 255, 255, 0.2); font-size: 40px; top: 110%;
+    transform: translate3d(0,0,0); animation: floatUp linear infinite;
+    z-index: -1; pointer-events: none;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; top: 110%; }
+    10% { opacity: 1; } 90% { opacity: 1; }
+    100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; top: 110%; }
+  }
+
+  /* === 🔮 GLASS CARDS === */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    width: 480px; padding: 50px 40px; border-radius: 50px;
+    border: 5px solid transparent;
+    background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), linear-gradient(to right, #11998e, #38ef7d);
+    background-origin: border-box; background-clip: padding-box, border-box;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    text-align: center; display: flex; flex-direction: column; align-items: center;
+    position: relative; z-index: 10; transform-style: preserve-3d; will-change: transform;
+  }
+
+  .deco-leaf { position: absolute; color: #66BB6A; font-size: 40px; transform: translateZ(5px); }
+  .leaf-tl { top: -20px; left: -20px; transform: rotate(-45deg) translateZ(5px); }
+  .leaf-tr { top: -20px; right: -20px; transform: rotate(45deg) translateZ(5px); }
+  .leaf-bl { bottom: -20px; left: -20px; transform: rotate(-135deg) translateZ(5px); }
+  .leaf-br { bottom: -20px; right: -20px; transform: rotate(135deg) translateZ(5px); }
+
+  .logo-icon { font-size: 80px; color: #00E676; margin-bottom: 15px; filter: drop-shadow(0 5px 0 #00C853); animation: pulseIcon 2s infinite; transform: translateZ(30px); }
+  @keyframes pulseIcon { 0%, 100% { transform: scale(1) translateZ(30px); } 50% { transform: scale(1.1) translateZ(30px); } }
+
+  .logo-title { font-size: 70px; color: #0277BD; margin: 0; line-height: 1; letter-spacing: 3px; text-shadow: 4px 4px 0px #fff; transform: translateZ(20px); }
+  .subtitle { font-size: 22px; color: #546E7A; margin-top: 15px; margin-bottom: 45px; font-weight: 600; transform: translateZ(15px); }
+
+  .action-btn {
+    width: 100%; padding: 20px; font-size: 24px; font-weight: 800;
+    border: none; border-radius: 30px; cursor: pointer; font-family: 'Fredoka', sans-serif;
+    display: flex; justify-content: center; align-items: center; gap: 15px;
+    transform: translateZ(20px); transition: transform 0.1s, box-shadow 0.1s; margin-bottom: 15px;
+  }
+  .action-btn:hover { transform: translateY(-3px) translateZ(20px); }
+  .action-btn:active { transform: translateY(2px) translateZ(20px); }
+  .btn-green { background: linear-gradient(to right, #11998e, #38ef7d); color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+  .btn-outline { background: white; color: #FF9800; border: 3px solid #FF9800; box-shadow: 0 5px #f0f0f0; }
+  .btn-outline:hover { background: #FF9800; color: white; }
+
+  /* === POP UP MODALS === */
+  .modal-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000;
+    display: flex; justify-content: center; align-items: center;
+    opacity: 0; visibility: hidden; transition: all 0.3s;
+  }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+
+  .modal-content {
+    background: rgba(255, 255, 255, 0.95); width: 85%; max-width: 500px; padding: 40px;
+    border-radius: 35px; text-align: center; transform: translateY(50px) scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4); border: 4px solid transparent;
+    background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), linear-gradient(to right, #FF9800, #FF5722);
+    background-origin: border-box; background-clip: padding-box, border-box;
+    position: relative; overflow: hidden;
+  }
+  .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+
+  .icon-wrapper { width: 100px; height: 100px; background: #FFF3E0; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto; color: #EF6C00; font-size: 50px; }
+  .modal-title { color: #E65100; font-size: 32px; margin: 0 0 20px 0; }
+  .modal-text { text-align: left; color: #546E7A; font-size: 18px; line-height: 1.6; background: #F5F5F5; padding: 25px; border-radius: 20px; margin-bottom: 30px; border-left: 5px solid #FF9800; }
+  .modal-text p { margin: 10px 0; display: flex; align-items: flex-start; gap: 10px; }
+  
+  .close-btn { background: #ECEFF1; color: #455A64; padding: 15px 40px; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; font-family: 'Fredoka', sans-serif; }
+  .close-btn:hover { background: #CFD8DC; color: #263238; }
+  .hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  
+  /* === GAME SCENE === */
+  .scene { position: relative; width: 100%; height: 100%; background: linear-gradient(to bottom, #4FC3F7 0%, #B3E5FC 60%); transform: translateZ(0); overflow: hidden; }
+
+  /* === UI BAR === */
+  .ui-bar {
+      position: absolute; top: 20px; left: 20px; right: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 200; pointer-events: none;
+  }
+  .ui-group { display: flex; gap: 15px; pointer-events: auto; }
+  .ui-badge {
+      background: white; height: 60px; padding: 0 25px;
+      border-radius: 30px; font-size: 24px; font-weight: 700; color: #333;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      border: none; cursor: default; font-family: 'Fredoka', sans-serif;
+      min-width: 60px; transition: transform 0.1s, background 0.2s;
+  }
+  button.ui-badge { cursor: pointer; color: #546E7A; }
+  button.ui-badge:hover { background: #ECEFF1; transform: translateY(-2px); }
+  button.ui-badge:active { transform: translateY(2px); }
+  .score-val { color: #00E676; } .timer-val { color: #FF9800; min-width: 35px; text-align: right; }
+
+  /* === ENVIRONMENT === */
+  .cloud { position: absolute; background: #fff; border-radius: 50%; box-shadow: #fff 25px -15px 0 -5px, #fff 50px -5px 0 2px, #fff 75px 5px 0 -5px; opacity: 0.9; z-index: 1; will-change: transform; animation: floatClouds linear infinite; }
+  @keyframes floatClouds { 0% { transform: translateX(120vw); } 100% { transform: translateX(-150vw); } }
+  .c1 { top: 10vh; animation-duration: 65s; animation-delay: -5s; width: 60px; height: 60px; }
+  .c2 { top: 18vh; opacity: 0.7; animation-duration: 85s; animation-delay: -35s; width: 80px; height: 80px; }
+  .c3 { top: 12vh; animation-duration: 55s; animation-delay: -20s; width: 50px; height: 50px; }
+
+  .ground-back { position: absolute; bottom: 50vh; width: 200vw; left: -50vw; height: 25vh; background-color: #8BC34A; border-radius: 50% 50% 0 0; z-index: 1; }
+  .ground-front { position: absolute; bottom: 48vh; width: 100%; height: 10vh; background-color: #AED581; z-index: 2; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.02) 10px, rgba(0,0,0,0.02) 20px); }
+
+  .bush-container { position: absolute; bottom: 60vh; left: 50%; transform: translateX(-50%); width: 45vh; height: 5vh; z-index: 4; display: flex; justify-content: space-between;}
+  .bush { width: 6vh; height: 5vh; background: #388E3C; border-radius: 50% 50% 0 0; position: relative; box-shadow: 2vh 1vh 0 #2E7D32, -2vh 1vh 0 #4CAF50;}
+  .bush::after { content:'🌸'; position: absolute; top: 5px; left: 10px; font-size: 12px; }
+  .bush:nth-child(2)::after { content:'🌼'; left: 15px; }
+  .bush-group-left { position: absolute; bottom: 60vh; left: 5vw; z-index: 4; display: flex; gap: 2vh; }
+  .bush-group-far-left { position: absolute; bottom: 65vh; left: -5vw; z-index: 3; display: flex; gap: 4vh; transform: scale(0.8); }
+  .bush-group-right { position: absolute; bottom: 60vh; right: 5vw; z-index: 4; display: flex; gap: 2vh; }
+
+  /* HOUSE */
+  .house-group { position: absolute; bottom: 53vh; left: 50%; transform: translateX(-50%) scale(1.1); display: flex; align-items: flex-end; z-index: 5; }
+  .siding { background-color: #CFD8DC; background-image: repeating-linear-gradient(to bottom, transparent, transparent 1.8vh, rgba(0,0,0,0.1) 1.9vh, rgba(0,0,0,0.1) 2vh); border-bottom: 1vh solid #546E7A; }
+  
+  .main-structure { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+  .roof-texture { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px); }
+  .main-roof { width: 0; height: 0; border-left: 20vh solid transparent; border-right: 20vh solid transparent; border-bottom: 16vh solid #263238; position: relative; z-index: 5; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+  .attic-vent { position: absolute; top: 8vh; left: -2.5vh; width: 5vh; height: 5vh; background: #455A64; border: 0.4vh solid white; border-radius: 50%; }
+  .main-walls { width: 32vh; height: 26vh; display: flex; flex-direction: column; justify-content: space-between; padding: 2vh 1.5vh; box-sizing: border-box; position: relative; z-index: 4; }
+  
+  .garage-structure { position: relative; display: flex; flex-direction: column; justify-content: flex-end; margin-left: -4vh; z-index: 1; }
+  .garage-roof { width: 22vh; height: 0; border-left: 0 solid transparent; border-right: 4vh solid transparent; border-bottom: 8vh solid #263238; margin-left: -2vh; margin-bottom: -0.5vh; position: relative; z-index: 10; }
+  .garage-walls { width: 20vh; height: 16vh; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 0; position: relative; z-index: 1; }
+  .garage-door { width: 16vh; height: 13vh; background-color: white; border: 1px solid #B0BEC5; border-bottom: none; background-image: repeating-linear-gradient(to bottom, #ECEFF1 0, #ECEFF1 1.5vh, #CFD8DC 1.5vh, #CFD8DC 1.6vh); }
+  
+  .window { width: 6vh; height: 8vh; background: #4FC3F7; border: 0.5vh solid white; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; background-color: white; }
+  .window-row { display: flex; justify-content: space-between; width: 100%; padding: 0 1vh; box-sizing: border-box;}
+  .pane { background: #81D4FA; width: 100%; height: 100%; }
+  .window-sill { position: absolute; bottom: -0.8vh; left: -10%; width: 120%; height: 0.8vh; background: white; border-radius: 2px; box-shadow: 0 2px 2px rgba(0,0,0,0.2); }
+  
+  .door-frame { width: 7vh; height: 11vh; background: white; display: flex; justify-content: center; align-items: flex-end; border-radius: 2px 2px 0 0; border: 1px solid #ddd; }
+  .door { width: 5.5vh; height: 10vh; background: #795548; position: relative; border: 1px solid #5D4037; }
+  .door::after { content:''; position: absolute; top: 50%; right: 0.6vh; width: 0.8vh; height: 0.8vh; background: gold; border-radius: 50%; box-shadow: 1px 1px 1px rgba(0,0,0,0.3); border: 1px solid #B7950B; }
+  .steps { position: absolute; bottom: -2vh; left: 50%; transform: translateX(-50%); width: 9vh; height: 2vh; background: #B0BEC5; border-radius: 2px; border: 1px solid #78909C; }
+  .chimney { position: absolute; top: 12vh; right: 6vh; width: 4vh; height: 8vh; z-index: 1; background: #5D4037; border-top: 0.8vh solid #3E2723; }
+  
+  .tree { position: absolute; bottom: 70vh; right: 80vw; z-index: 4; display: flex; flex-direction: column; align-items: center; } 
+  .tree-right { position: absolute; bottom: 70vh; right: 15vw; z-index: 4; display: flex; flex-direction: column; align-items: center; } 
+  .leaves { width: 15vh; height: 15vh; background: #4CAF50; border-radius: 50%; position: relative; bottom: -2vh; box-shadow: -5vh 2vh 0 -1vh #388E3C, 5vh 1vh 0 -2vh #2E7D32, 0vh -4vh 0 -1vh #4CAF50, -2vh -6vh 0 -2vh #388E3C; }
+  .trunk { width: 3vh; height: 4vh; background: #795548; background-image: repeating-linear-gradient(to right, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 6px); }
+  .sun { position: absolute; top: 5vh; right: 5vw; width: 8vh; height: 8vh; background: #FFD600; border-radius: 50%; box-shadow: 0 0 4vh #FFD600, 0 0 0 1vh rgba(255, 214, 0, 0.3); }
+
+  .fence-container { position: absolute; bottom: 50vh; width: 120vw; left: -10vw; height: 8vh; z-index: 12; }
+  .picket-fence { width: 100%; height: 100%; background-image: repeating-linear-gradient(90deg, #f0f0f0 0px, #f0f0f0 1.5vw, transparent 1.5vw, transparent 4vw), repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 5px); position: relative; }
+  .fence-rail { position: absolute; width: 100%; height: 0.8vh; background: #e0e0e0; }
+  .rail-top { top: 2vh; } .rail-bottom { bottom: 2vh; }
+
+  .sidewalk { position: absolute; bottom: 35vh; width: 100%; height: 15vh; background-color: #CFD8DC; border-top: 1vh solid #B0BEC5; z-index: 15; display: flex; box-shadow: 0 10px 20px rgba(0,0,0,0.3); background-image: radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 10px 10px; }
+  .sidewalk-tile { flex: 1; height: 100%; border-right: 2px solid #B0BEC5; position: relative; }
+  .street { position: absolute; bottom: 0; width: 100%; height: 35vh; background-color: #455A64; z-index: 10; border-top: 1vh solid #37474F; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 5px 5px, 7px 7px; }
+  .street::after { content: ''; position: absolute; top: 50%; width: 100%; height: 2vh; background: repeating-linear-gradient(90deg, #FFEB3B 0, #FFEB3B 50px, transparent 50px, transparent 150px); opacity: 0.8; }
+
+  /* === STREET LAMP === */
+  .street-lamp { position: absolute; bottom: 35vh; right: 5vw; z-index: 25; display: flex; flex-direction: column; align-items: center; }
+  .lamp-pole { width: 1.5vh; height: 38vh; background: #263238; border-radius: 2px; position: relative; background-image: linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 50%, transparent); }
+  .lamp-base { width: 5vh; height: 6vh; background: #263238; border-radius: 5px 5px 0 0; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); }
+  .lamp-curve { width: 8vh; height: 8vh; border-top: 1.5vh solid #263238; border-right: 1.5vh solid #263238; border-radius: 0 100% 0 0; position: absolute; top: -1.5vh; right: 0.7vh; }
+  .lamp-head { width: 8vh; height: 5vh; background: #37474F; position: absolute; top: -1.5vh; right: 7.5vh; clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); z-index: 2; }
+  .lamp-bulb { width: 3vh; height: 2vh; background: #ECEFF1; border-radius: 0 0 10px 10px; position: absolute; top: 3.5vh; right: 10vh; z-index: 1; opacity: 0.6; transition: 0.5s; }
+  .lamp-light { position: absolute; top: 5vh; right: -8vh; width: 40vh; height: 50vh; background: radial-gradient(ellipse at top, rgba(255, 235, 59, 0.6), transparent 70%); clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%); opacity: 0; transition: opacity 0.5s; pointer-events: none; mix-blend-mode: screen; z-index: 100; }
+  .scene.night .lamp-light { opacity: 1; }
+  .scene.night .lamp-bulb { background: #FFEB3B; box-shadow: 0 0 25px #FFEB3B; opacity: 1; }
+
+  /* === ✨ THE FIX: VICTORIAN PARK BENCH ✨ === */
+  .bench { position: absolute; bottom: 45vh; left: 15vw; z-index: 20; width: 24vh; height: 12vh; }
+  
+  /* Iron Legs (Frames) */
+  .bench-leg-shape { 
+      position: absolute; bottom: 0; width: 3vh; height: 9vh; 
+      border: 2px solid #263238; border-radius: 15px 15px 0 0; 
+      background: transparent; box-shadow: inset 0 0 0 4px #263238; 
+      z-index: 1;
+  }
+  .leg-left { left: 0; } .leg-right { right: 0; }
+  
+  /* Wood Slats (Back) */
+  .bench-back { 
+      position: absolute; top: 0; left: -1vh; width: 26vh; height: 5vh; 
+      background: #8D6E63; border-radius: 5px; border: 2px solid #5D4037; z-index: 2;
+      background-image: repeating-linear-gradient(to bottom, transparent, transparent 1.2vh, rgba(0,0,0,0.3) 1.2vh, rgba(0,0,0,0.3) 1.4vh);
+  }
+  
+  /* Wood Slats (Seat) */
+  .bench-seat { 
+      position: absolute; top: 5.5vh; left: -1vh; width: 26vh; height: 2.5vh; 
+      background: #795548; border-radius: 3px; border: 2px solid #4E342E; z-index: 3;
+  }
+  
+  .bench-shadow {
+      position: absolute; bottom: -1vh; left: -2vh; width: 28vh; height: 2vh;
+      background: rgba(0,0,0,0.2); border-radius: 50%; z-index: 0;
+  }
+
+  /* === TRASH & BINS === */
+  .trash-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; pointer-events: none; }
+  .trash-item { 
+    position: absolute; pointer-events: auto; cursor: grab; 
+    font-size: 60px; line-height: 1; user-select: none;
+    will-change: transform; transition: transform 0.1s; 
+    display: flex; justify-content: center; align-items: center; 
+    backface-visibility: hidden; 
+  }
+  .trash-item:active { cursor: grabbing; z-index: 1000 !important; transition: none; }
+
+  .trash-zone { position: absolute; bottom: 40vh; left: 50%; transform: translateX(-50%) scale(0.7); transform-origin: bottom center; z-index: 50; display: flex; gap: 80px; }
+  .bin-container { position: relative; width: 150px; height: 240px; display: flex; flex-direction: column; align-items: center; transition: transform 0.1s;}
+  .lid-top { width: 160px; height: 15px; border-radius: 10px 10px 0 0; position: relative; }
+  .lid-rim { width: 170px; height: 25px; border-radius: 8px; margin-top: -2px; position: relative; }
+  .body-main { width: 150px; height: 180px; margin-top: -5px; border-radius: 0 0 20px 20px; position: relative; display: flex; justify-content: center; align-items: center; }
+  .front-panel { width: 110px; height: 130px; background-color: rgba(0,0,0,0.2); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+  .recycle-icon-symbol { font-size: 45px; line-height: 1; color: rgba(255,255,255,0.7); }
+  .label-text-box { color: #fff; font-size: 16px; font-weight: 700; border: 3px solid rgba(255,255,255,0.8); padding: 6px 12px; background-color: rgba(0,0,0,0.2); border-radius: 12px; }
+  .wheel { position: absolute; bottom: -15px; width: 40px; height: 40px; background-color: #2c3e50; border-radius: 50%; border: 6px solid #1a252f; z-index: 0; }
+  .wheel::after { content: ''; position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background-color: #7f8c8d; border-radius: 50%; transform: translate(-50%, -50%); }
+  .wheel.left { left: -10px; } .wheel.right { right: -10px; }
+  .bin-paper .lid-top, .bin-paper .lid-rim, .bin-paper .body-main { background-color: #29B6F6; }
+  .bin-plastic .lid-top, .bin-plastic .lid-rim, .bin-plastic .body-main { background-color: #FFCA28; }
+  .bin-aluminum .lid-top, .bin-aluminum .lid-rim, .bin-aluminum .body-main { background-color: #FF4081; }
+  .bin-shake { animation: shake 0.3s ease-in-out; }
+  @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px) rotate(-2deg);} 75% {transform: translateX(5px) rotate(2deg);} }
+  
+  .scene.night { background: linear-gradient(to bottom, #311B92 0%, #673AB7 60%); }
+  .scene.night .street { background-color: #263238; }
+  .scene.night .sidewalk { background-color: #546E7A; border-color: #455A64; }
+  .scene.night .ground-back { background-color: #558B2F; }
+  .scene.night .ground-front { background-color: #7CB342; }
+  .scene.night .bin-container { filter: brightness(0.8); }
+  .scene.night .trash-item { filter: brightness(0.7); }
+  .scene.night .cloud { opacity: 0.3; background: #B39DDB; }
+</style>
+</head>
+<body>
+
+  <div id="startScreen">
+      <div class="glass-card" id="tiltCard">
+          <i class="fas fa-leaf deco-leaf leaf-tl"></i><i class="fas fa-leaf deco-leaf leaf-tr"></i>
+          <i class="fas fa-leaf deco-leaf leaf-bl"></i><i class="fas fa-leaf deco-leaf leaf-br"></i>
+          <i class="fas fa-recycle logo-icon"></i>
+          <h1 class="logo-title">ECO+SORT</h1>
+          <p class="subtitle">Clean up the world!</p>
+          <button class="action-btn btn-green" onclick="startGame()">
+              <i class="fas fa-play"></i> START GAME
+          </button>
+          <button class="action-btn btn-outline" onclick="showEdu()">
+            <i class="fas fa-graduation-cap"></i> Educational Value
+          </button>
+      </div>
+  </div>
+
+  <div id="eduModal" class="modal-overlay">
+      <div class="modal-content">
+          <div class="icon-wrapper"><i class="fas fa-brain"></i></div>
+          <h2 class="modal-title">Educational Value</h2>
+          <div class="modal-text">
+             <p><i class="fas fa-check-circle"></i> <b>Sorting Skills:</b> Helps identify materials like paper, plastic, and metal.</p>
+             <p><i class="fas fa-check-circle"></i> <b>Environment:</b> Teaches that recycling helps keep our planet clean.</p>
+             <p><i class="fas fa-check-circle"></i> <b>Reaction Time:</b> Improves decision making speed!</p>
+          </div>
+          <button class="close-btn" onclick="hideEdu()">Got it!</button>
+      </div>
+  </div>
+
+  <div id="helpModal" class="modal-overlay">
+      <div class="modal-content">
+          <div class="icon-wrapper" style="color: #00E676; background: #E8F5E9;">
+              <i class="fas fa-question"></i>
+          </div>
+          <h2 class="modal-title" style="color: #00E676;">How to Play</h2>
+          <div class="modal-text" style="border-left-color: #00E676;">
+             <p><i class="fas fa-hand-pointer"></i> <b>Drag & Drop:</b> Pick up trash from the street and drop it into the correct bin.</p>
+             <p><i class="fas fa-exclamation-triangle"></i> <b>Be Careful:</b> Wrong items will be rejected!</p>
+             <p><i class="fas fa-stopwatch"></i> <b>Time Limit:</b> Sort all 40 items before the 60s timer runs out!</p>
+          </div>
+          <button class="close-btn" onclick="hideHelp()">Resume</button>
+      </div>
+  </div>
+
+  <div id="endModal" class="modal-overlay">
+      <div class="glass-card" style="width: 400px; padding: 40px;">
+          <div id="endContent"></div>
+          <button class="action-btn btn-green" onclick="goHome()">
+              <i class="fas fa-home"></i> GO HOME
+          </button>
+      </div>
+  </div>
+
+  <div class="scene" id="canvas">
+    
+    <div class="ui-bar">
+        <div class="ui-group">
+            <button class="ui-badge" onclick="goHome()" title="Home"><i class="fas fa-home"></i></button>
+            <button class="ui-badge" onclick="restartGame()" title="Restart"><i class="fas fa-redo"></i></button>
+            <button class="ui-badge" onclick="showHelp()" title="How to Play"><i class="fas fa-question"></i></button>
+            <button class="ui-badge" onclick="document.getElementById('canvas').classList.toggle('night')" title="Night Mode"><i class="fas fa-moon"></i></button>
+        </div>
+        <div class="ui-group">
+            <div class="ui-badge">
+              <span>Score:</span> <span class="score-val" id="score">0</span>
+            </div>
+            <div class="ui-badge">
+              <i class="fas fa-stopwatch"></i> <span class="timer-val" id="timer">60</span>s
+            </div>
+        </div>
+    </div>
+    
+    <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+    <div class="sun"></div>
+    
+    <div class="house-group">
+      <div class="main-structure">
+          <div class="chimney"></div>
+          <div class="main-roof roof-texture"><div class="attic-vent"></div></div>
+          <div class="main-walls siding">
+            <div class="window-row">
+                <div class="window"><div class="window-sill"></div><div class="pane"></div><div class="pane"></div><div class="pane"></div><div class="pane"></div></div>
+                <div class="window"><div class="window-sill"></div><div class="pane"></div><div class="pane"></div><div class="pane"></div><div class="pane"></div></div>
+            </div>
+            <div class="window-row downstairs">
+                <div class="window"><div class="window-sill"></div><div class="pane"></div><div class="pane"></div><div class="pane"></div><div class="pane"></div></div>
+                <div class="door-frame">
+                    <div class="door"></div>
+                    <div class="steps"></div>
+                </div>
+            </div>
+          </div>
+      </div>
+      <div class="garage-structure">
+          <div class="garage-roof roof-texture"></div>
+          <div class="garage-walls siding"><div class="garage-door"></div></div>
+      </div>
+    </div>
+
+    <div class="street-lamp">
+        <div class="lamp-light"></div>
+        <div class="lamp-head"></div>
+        <div class="lamp-bulb"></div>
+        <div class="lamp-curve"></div>
+        <div class="lamp-pole"><div class="lamp-base"></div></div>
+    </div>
+
+    <div class="bench">
+        <div class="bench-back"></div>
+        <div class="bench-seat"></div>
+        <div class="bench-leg-shape leg-left"></div>
+        <div class="bench-leg-shape leg-right"></div>
+        <div class="bench-shadow"></div>
+    </div>
+
+    <div class="bush-container"><div class="bush"></div><div class="bush"></div><div class="bush"></div></div>
+    <div class="bush-group-left"><div class="bush"></div><div class="bush"></div></div>
+    <div class="bush-group-far-left"><div class="bush"></div><div class="bush"></div></div>
+    <div class="bush-group-right"><div class="bush"></div><div class="bush"></div></div>
+
+    <div class="tree"><div class="leaves"></div><div class="trunk"></div></div>
+    <div class="tree-right"><div class="leaves"></div><div class="trunk"></div></div>
+    <div class="fence-container"><div class="picket-fence"><div class="fence-rail rail-top"></div><div class="fence-rail rail-bottom"></div></div></div>
+    <div class="ground-back"></div><div class="ground-front"></div>
+    <div class="sidewalk"><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div><div class="sidewalk-tile"></div></div>
+    <div class="street"></div>
+
+    <div class="trash-layer" id="trashLayer"></div>
+
+    <div class="trash-zone">
+      <div class="bin-container bin-paper" id="bin-paper" data-accept="paper">
+        <div class="lid-top"></div><div class="lid-rim"></div>
+        <div class="body-main"><div class="front-panel"><div class="recycle-icon-symbol">♻</div><div class="label-text-box">PAPER</div></div></div>
+        <div class="wheel left"></div><div class="wheel right"></div>
+      </div>
+      <div class="bin-container bin-plastic" id="bin-plastic" data-accept="plastic">
+        <div class="lid-top"></div><div class="lid-rim"></div>
+        <div class="body-main"><div class="front-panel"><div class="recycle-icon-symbol">♻</div><div class="label-text-box">PLASTIC</div></div></div>
+        <div class="wheel left"></div><div class="wheel right"></div>
+      </div>
+      <div class="bin-container bin-aluminum" id="bin-aluminum" data-accept="aluminum">
+        <div class="lid-top"></div><div class="lid-rim"></div>
+        <div class="body-main"><div class="front-panel"><div class="recycle-icon-symbol">♻</div><div class="label-text-box">ALUMINUM</div></div></div>
+        <div class="wheel left"></div><div class="wheel right"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const trashLayer = document.getElementById('trashLayer');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    let score = 0;
+    let timeLeft = 60;
+    let timerInterval = null;
+    let totalItems = 40;
+    let itemsSorted = 0;
+    let isPaused = false;
+
+    // AUDIO
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+
+        if (type === 'pop') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'success') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        } else if (type === 'error') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'win') {
+            playNote(440, 0, 0.5); playNote(554, 0.1, 0.5); playNote(659, 0.2, 0.5);
+        } else if (type === 'lose') {
+            playNote(300, 0, 0.5); playNote(250, 0.3, 0.5);
+        }
+    }
+    function playNote(freq, delay, duration) {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+        gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + delay + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration);
+        osc.start(audioCtx.currentTime + delay);
+        osc.stop(audioCtx.currentTime + delay + duration);
+    }
+
+    // BACKGROUND ANIMATION
+    function createBackgroundEffect() {
+        const icons = ['fa-leaf', 'fa-recycle', 'fa-wind', 'fa-seedling', 'fa-tree'];
+        const container = document.getElementById('startScreen');
+        for(let i=0; i<15; i++) {
+            const el = document.createElement('i');
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            el.className = `fas ${randomIcon} bg-icon`;
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = (Math.random() * 30 + 20) + 'px';
+            el.style.animationDuration = (Math.random() * 10 + 5) + 's';
+            el.style.animationDelay = (Math.random() * 5) + 's';
+            container.appendChild(el);
+        }
+    }
+    createBackgroundEffect();
+
+    document.addEventListener('mousemove', (e) => {
+        const card = document.getElementById('tiltCard');
+        if(!card || startScreen.classList.contains('hidden')) return;
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    });
+
+    const trashData = [
+       { emoji: '🧾', category: 'paper' }, { emoji: '🧻', category: 'paper' },
+       { emoji: '📰', category: 'paper' }, { emoji: '🧃', category: 'paper' },
+       { emoji: '🥡', category: 'paper' }, { emoji: '📦', category: 'paper' },
+       { emoji: '🍬', category: 'plastic' }, { emoji: '💳', category: 'plastic' },
+       { emoji: '🥽', category: 'plastic' }, { emoji: '🪣', category: 'plastic' },
+       { emoji: '💿', category: 'plastic' }, { emoji: '🪥', category: 'plastic' },
+       { emoji: '🥫', category: 'aluminum' }, { emoji: '🔧', category: 'aluminum' },
+       { emoji: '📎', category: 'aluminum' }, { emoji: '🔩', category: 'aluminum' },
+       { emoji: '🪙', category: 'aluminum' }, { emoji: '🍴', category: 'aluminum' }
+    ];
+
+    function startGame() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playSound('win');
+        
+        score = 0; scoreDisplay.innerText = 0;
+        timeLeft = 60; timerDisplay.innerText = 60;
+        itemsSorted = 0; isPaused = false;
+        trashLayer.innerHTML = ''; 
+        
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('endModal').classList.remove('active');
+        
+        setTimeout(() => { spawnTrash(totalItems); }, 300);
+        
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if(!isPaused) {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+                if(timeLeft <= 0) endGame(false);
+            }
+        }, 1000);
+    }
+    
+    function restartGame() {
+        startGame(); 
+    }
+    
+    function endGame(isWin) {
+        clearInterval(timerInterval);
+        const endModal = document.getElementById('endModal');
+        const content = document.getElementById('endContent');
+        
+        if (isWin) {
+            playSound('win');
+            content.innerHTML = `<div class="icon-wrapper" style="color: #FFD700; background: #FFF9C4;"><i class="fas fa-trophy"></i></div><h2 class="modal-title">YOU WIN!</h2><p style="color: #546E7A; font-size: 20px;">You cleaned the neighborhood!</p><h3 style="color: #00E676; font-size: 40px; margin: 10px 0;">Score: ${score}</h3>`;
+        } else {
+            playSound('lose');
+            content.innerHTML = `<div class="icon-wrapper" style="color: #FF5252; background: #FFEBEE;"><i class="fas fa-times-circle"></i></div><h2 class="modal-title" style="color: #FF5252;">TIME'S UP!</h2><p style="color: #546E7A; font-size: 20px;">Don't give up, try again!</p><h3 style="color: #546E7A; font-size: 30px; margin: 10px 0;">Score: ${score}</h3>`;
+        }
+        endModal.classList.add('active');
+    }
+    
+    function goHome() {
+        clearInterval(timerInterval);
+        document.getElementById('endModal').classList.remove('active');
+        document.getElementById('startScreen').classList.remove('hidden');
+        trashLayer.innerHTML = '';
+    }
+    
+    function showEdu() { document.getElementById('eduModal').classList.add('active'); playSound('pop'); }
+    function hideEdu() { document.getElementById('eduModal').classList.remove('active'); }
+    
+    function showHelp() { 
+        isPaused = true;
+        document.getElementById('helpModal').classList.add('active'); 
+        playSound('pop'); 
+    }
+    function hideHelp() { 
+        isPaused = false;
+        document.getElementById('helpModal').classList.remove('active'); 
+    }
+
+    function spawnTrash(amount) {
+        for(let i=0; i<amount; i++) {
+            const el = document.createElement('div');
+            const item = trashData[Math.floor(Math.random() * trashData.length)];
+            el.innerText = item.emoji;
+            el.classList.add('trash-item');
+            el.dataset.category = item.category;
+
+            const randomTop = Math.floor(Math.random() * 35) + 55; 
+            const randomLeft = Math.floor(Math.random() * 94) + 1; 
+            const randomRot = Math.floor(Math.random() * 360);
+
+            el.style.top = randomTop + 'vh'; el.style.left = randomLeft + 'vw';
+            el.dataset.origTop = randomTop + 'vh'; el.dataset.origLeft = randomLeft + 'vw';
+            el.dataset.origRot = randomRot;
+            el.style.transform = `rotate(${randomRot}deg)`;
+
+            el.addEventListener('mousedown', dragStart);
+            trashLayer.appendChild(el);
+        }
+    }
+
+    let activeItem = null;
+    let startX, startY;
+    let currentX = 0;
+    let currentY = 0;
+    const bins = document.querySelectorAll('.bin-container');
+
+    window.addEventListener('mouseup', dragEnd);
+    window.addEventListener('mousemove', drag);
+
+    function dragStart(e) {
+      if(e.button !== 0 || isPaused) return; 
+      activeItem = e.target.closest('.trash-item');
+      if (!activeItem) return;
+      
+      playSound('pop');
+      e.preventDefault();
+      startX = e.clientX; startY = e.clientY;
+      currentX = 0; currentY = 0;
+      activeItem.style.transition = 'none';
+      activeItem.style.transform = `translate(0px, 0px) scale(1.5) rotate(0deg)`;
+      activeItem.style.zIndex = 1000;
+    }
+
+    function drag(e) {
+      if (!activeItem) return;
+      e.preventDefault();
+      currentX = e.clientX - startX; currentY = e.clientY - startY;
+      activeItem.style.transform = `translate(${currentX}px, ${currentY}px) scale(1.5) rotate(0deg)`;
+    }
+
+    function dragEnd() {
+      if (!activeItem) return;
+      let droppedInBin = false;
+      const trashRect = activeItem.getBoundingClientRect();
+      const trashCenterX = trashRect.left + trashRect.width / 2;
+      const trashCenterY = trashRect.top + trashRect.height / 2;
+
+      bins.forEach(bin => {
+        const binRect = bin.getBoundingClientRect();
+        if (trashCenterX >= binRect.left && trashCenterX <= binRect.right &&
+            trashCenterY >= binRect.top && trashCenterY <= binRect.bottom) {
+            droppedInBin = true;
+            checkSort(activeItem, bin);
+        }
+      });
+
+      if (!droppedInBin) { returnToStreet(activeItem); }
+      activeItem = null;
+    }
+
+    function returnToStreet(item) {
+        playSound('pop');
+        item.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        item.style.transform = `translate(0px, 0px) scale(1) rotate(${item.dataset.origRot}deg)`;
+        item.style.zIndex = 1000; 
+        setTimeout(() => { if(item) item.style.zIndex = 60; }, 500);
+    }
+
+    function checkSort(item, bin) {
+        const itemType = item.dataset.category;
+        const binType = bin.dataset.accept;
+
+        if (itemType === binType) {
+            score += 10; itemsSorted++;
+            scoreDisplay.innerText = score;
+            playSound('success');
+            
+            item.style.transition = 'all 0.3s ease';
+            item.style.transform = `translate(${currentX}px, ${currentY}px) scale(0) rotate(180deg)`;
+            item.style.opacity = '0';
+            setTimeout(() => item.remove(), 300);
+
+            if(itemsSorted >= totalItems) endGame(true);
+        } else {
+            // ❌ WRONG
+            score -= 5;
+            if (score < 0) score = 0;
+            scoreDisplay.innerText = score;
+
+            bin.classList.add('bin-shake');
+            setTimeout(() => bin.classList.remove('bin-shake'), 300);
+            playSound('error');
+            returnToStreet(item);
+        }
+    }
+  </script>
+
+</body>
+</html>
