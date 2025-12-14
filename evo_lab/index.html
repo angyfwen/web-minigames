@@ -79,14 +79,49 @@
         .screen { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.5s ease; }
         .screen.active { display: flex; opacity: 1; pointer-events: auto; }
 
-        /* THE BINDER SPINE STYLE (Used on both screens) */
+        /* --- MENU BUTTON (NEW) --- */
+        .menu-btn-rainbow {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 24px;
+            border-radius: 20px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            text-decoration: none;
+            text-transform: lowercase;
+            cursor: pointer;
+            z-index: 3000; /* Highest z-index */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%; 
+            animation: gradientMove 4s ease infinite; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+        .menu-btn-rainbow:active { transform: scale(0.95); }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- BINDER SPINE STYLE --- */
+        /* Updated to be clean, wire-o style that pierces paper */
         .binder-spine {
             background-color: transparent; 
             position: relative;
-            /* UPDATED SVG: Matte Grey, No Shine, Holes Layered on Top */
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='45' viewBox='0 0 60 45' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- Ring (Bottom Layer) --%3E%3Cpath d='M6,22 C18,5 42,5 54,22' stroke='%2395a5a6' stroke-width='7' fill='none' stroke-linecap='butt' /%3E%3C!-- Left Hole (Top) --%3E%3Cellipse cx='6' cy='22' rx='5' ry='7' fill='%232c3e50'/%3E%3C!-- Right Hole (Top) --%3E%3Cellipse cx='54' cy='22' rx='5' ry='7' fill='%232c3e50'/%3E%3C/svg%3E");
+            /* BETTER SVG: Dark Grey Wire-O Style */
+            background-image: url("data:image/svg+xml,%3Csvg width='50' height='30' viewBox='0 0 50 30' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- The Wire Arc --%3E%3Cpath d='M8,15 Q25,-5 42,15' stroke='%23555' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C!-- Left Hole --%3E%3Ccircle cx='8' cy='15' r='3' fill='%23333'/%3E%3C!-- Right Hole --%3E%3Ccircle cx='42' cy='15' r='3' fill='%23333'/%3E%3C/svg%3E");
             background-repeat: repeat-y;
-            background-size: 60px 45px;
+            background-size: 50px 30px;
             z-index: 10;
         }
 
@@ -96,8 +131,6 @@
             background-image: var(--cover-texture);
             border: 4px solid #c0b298;
             padding: 50px;
-            /* Added padding left to accommodate the spine */
-            padding-left: 90px;
             position: relative;
             /* Make it look like a book on a table */
             transform: rotate(-2deg) !important; 
@@ -106,15 +139,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        /* New class to position binder on start cover */
-        .start-spine {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 15px; /* Positioned on the left edge */
-            width: 60px;
         }
 
         /* STICKER STYLES */
@@ -139,7 +163,7 @@
             width: 980px; height: 650px; max-width: 95%; background: #fff;
             border-radius: 12px; box-shadow: var(--shadow-float);
             /* THREE COLUMNS: Left Page | Binder | Right Page */
-            display: grid; grid-template-columns: 360px 60px 1fr; 
+            display: grid; grid-template-columns: 360px 50px 1fr; 
             overflow: hidden; position: relative;
             transform: rotate(-1deg); border: 2px solid #dcdcdc;
         }
@@ -256,10 +280,12 @@
                 overflow-y: auto;
             }
             .binder-spine { display: none; } 
+            
+            /* FIXED OVERLAP: Added padding-right so nav buttons don't cover content */
             .panel-left { 
                 flex-direction: row; 
                 gap: 20px; 
-                padding: 15px; /* Reduced padding */
+                padding: 15px 70px 15px 15px; /* Right padding clears nav buttons */
                 border-right: none; 
                 border-bottom: 2px solid #ddd; 
                 min-height: auto;
@@ -278,10 +304,21 @@
             /* Allow text wrapping in env info for mobile */
             .env-info p { white-space: normal; font-size: 0.8rem; max-width: 180px; text-align: left; }
             .env-info h2 { font-size: 1.5rem; }
+
+            /* Mobile menu button tweak */
+            .menu-btn-rainbow {
+                top: 15px; left: 15px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body class="start-mode">
+
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+        <i class="fa-solid fa-gamepad"></i> menu
+    </a>
 
     <div id="parallax-world">
         <div class="sky-layer"></div>
@@ -319,8 +356,6 @@
 
         <div class="screen active" id="startScreen">
             <div class="modal-card start-card">
-                <div class="binder-spine start-spine"></div>
-                
                 <div class="deco-sticker" style="top: -20px; left: -20px; transform: rotate(-15deg);">☣️</div>
                 <div class="deco-sticker" style="bottom: -20px; right: -10px; transform: rotate(10deg); font-size: 5rem;">🦕</div>
                 
@@ -436,6 +471,37 @@
         }
         requestAnimationFrame(animateParallax);
 
+        // --- AUDIO SYSTEM (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration, delay=0) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = freq;
+            osc.type = type;
+            osc.start(audioCtx.currentTime + delay);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + delay + duration);
+            osc.stop(audioCtx.currentTime + delay + duration);
+        }
+        function playClick() { if(audioCtx.state==='suspended')audioCtx.resume(); playTone(800, 'sine', 0.1); }
+        function playSuccess() { 
+            if(audioCtx.state==='suspended')audioCtx.resume();
+            playTone(523.25, 'sine', 0.1, 0); // C
+            playTone(659.25, 'sine', 0.1, 0.1); // E
+            playTone(783.99, 'sine', 0.2, 0.2); // G
+        }
+        function playFail() {
+            if(audioCtx.state==='suspended')audioCtx.resume();
+            playTone(150, 'sawtooth', 0.3);
+            playTone(100, 'sawtooth', 0.3, 0.2);
+        }
+        function playWin() {
+            if(audioCtx.state==='suspended')audioCtx.resume();
+            [523, 659, 783, 1046, 783, 1046].forEach((f, i) => playTone(f, 'square', 0.2, i*0.15));
+        }
+
         // --- GAME DATA UPDATED WITH SHORT STORIES ---
         const masterLevels = [
             { name: "Cryo-Era", icon: "❄️", desc: "A sudden ice age has frozen the world. Temperatures have plummeted to -50°C.", req: "fur", mode: "GROUND", emojis: ["🌲", "🌲", "🧊", "🏔️"], skyT: "#81ecec", skyB: "#74b9ff", sun: "#dfe6e9", mtn: "#b2bec3", h1: "#ffffff", h2: "#dfe6e9", h3: "#b2bec3", particles: "snow" },
@@ -459,6 +525,8 @@
         function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
 
         function startGame() {
+            if(audioCtx.state==='suspended') audioCtx.resume();
+            playClick();
             document.body.classList.remove('start-mode'); document.body.classList.add('game-mode');
             gameLevels = [...masterLevels]; shuffle(gameLevels); currIdx = 0;
             document.getElementById('startScreen').classList.remove('active'); document.getElementById('gameScreen').classList.add('active');
@@ -466,6 +534,7 @@
         }
 
         function goHome() {
+            playClick();
             document.body.classList.add('start-mode'); document.body.classList.remove('game-mode');
             document.getElementById('gameScreen').classList.remove('active'); document.getElementById('startScreen').classList.add('active');
             
@@ -546,6 +615,7 @@
         function stopParticles(){ clearInterval(particleInterval); document.getElementById('particles').innerHTML=''; }
 
         function selectTrait(id) {
+            playClick();
             selectedTrait = id; document.querySelectorAll('.trait-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('t-'+id).classList.add('selected');
             const cIcon = document.getElementById('creatureIcon'); cIcon.style.transform = "rotate(20deg) scale(0.5)";
@@ -561,13 +631,13 @@
 
         function evolve() {
             if(!selectedTrait) return; const lvl = gameLevels[currIdx];
-            if(selectedTrait === lvl.req) { showToast("SURVIVAL SUCCESSFUL!", true); setTimeout(nextLevel, 2000); } 
-            else { showToast("EXTINCTION EVENT...", false); }
+            if(selectedTrait === lvl.req) { playSuccess(); showToast("SURVIVAL SUCCESSFUL!", true); setTimeout(nextLevel, 2000); } 
+            else { playFail(); showToast("EXTINCTION EVENT...", false); }
         }
 
-        function nextLevel() { if(currIdx < gameLevels.length - 1) { currIdx++; loadLevel(currIdx); } else { openModal('finalModal'); } }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function nextLevel() { if(currIdx < gameLevels.length - 1) { currIdx++; loadLevel(currIdx); } else { playWin(); openModal('finalModal'); } }
+        function openModal(id) { playClick(); document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { playClick(); document.getElementById(id).classList.remove('active'); }
 
         initDecorPool(); applyStartTheme();
     </script>
