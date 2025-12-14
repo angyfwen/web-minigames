@@ -75,7 +75,7 @@
             text-decoration: none;
             text-transform: lowercase;
             cursor: pointer;
-            z-index: 2000;
+            z-index: 3000; /* Highest priority */
             display: flex;
             align-items: center;
             gap: 8px;
@@ -323,47 +323,6 @@
         <i class="fa-solid fa-gamepad"></i> menu
     </a>
 
-    <div class="nav-group-right">
-        <button class="icon-btn nav-btn" onclick="goToMenu()" title="Home"><i class="fa-solid fa-house"></i></button>
-        <button class="icon-btn nav-btn" id="mute-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high"></i></button>
-        <button class="icon-btn nav-btn" onclick="showHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
-    </div>
-
-    <div id="info-modal" class="modal-overlay">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeInfo()"><i class="fa-solid fa-xmark"></i></button>
-            
-
-
-            <h2><i class="fa-solid fa-brain"></i> How is this educational?</h2>
-            <p>This game is a fun visualization of computer science <strong>Sorting Algorithms</strong>.</p>
-            <ul>
-                <li>The <strong><span class="highlight" style="color:var(--btn-blue-top)">SWAP</span></strong> action teaches the core concept of <strong>Bubble Sort</strong>, where adjacent items are compared and swapped if they are in the wrong order.</li>
-                <li>The <strong><span class="highlight" style="color:var(--btn-pink-top)">INSERT</span></strong> action mimics <strong>Insertion Sort</strong>, picking an item and placing it directly into its correct relative position among the sorted items.</li>
-            </ul>
-            <p><strong>Challenge Mode:</strong> You have limited fuel (moves). Think like a computer—optimize your steps!</p>
-        </div>
-    </div>
-
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeHelp()"><i class="fa-solid fa-xmark"></i></button>
-            <h2><i class="fa-solid fa-gamepad"></i> How to Play</h2>
-            <p><strong>Goal:</strong> Sort the orbs from <strong>Lowest</strong> to <strong>Highest</strong> number.</p>
-            <ul>
-                <li><strong>Select:</strong> Tap an orb to select it. Tap another to select a pair.</li>
-                <li><strong>Swap:</strong> Switches the positions of two selected orbs.</li>
-                <li><strong>Insert:</strong> Moves the first selected orb to sit *before* the second one.</li>
-            </ul>
-            <p style="text-align: center; color: var(--accent-gold); font-weight: bold;">Watch your Fuel! Every move costs energy.</p>
-        </div>
-    </div>
-
-    <div id="level-notification" class="notification-popup" aria-hidden="true">
-        <span id="notify-icon"><i class="fa-solid fa-trophy"></i></span> 
-        <span id="notify-text">Level Complete!</span>
-    </div>
-
     <div id="start-screen" class="screen active">
         <div class="title-box">
             <img src="https://cdn-icons-png.flaticon.com/512/1356/1356479.png" alt="Rocket" class="title-rocket-img">
@@ -381,6 +340,13 @@
     </div>
 
     <div id="game-screen" class="screen">
+        
+        <div class="nav-group-right">
+            <button class="icon-btn nav-btn" onclick="goToMenu()" title="Home"><i class="fa-solid fa-house"></i></button>
+            <button class="icon-btn nav-btn" id="mute-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high"></i></button>
+            <button class="icon-btn nav-btn" onclick="showHelp()" title="How to Play"><i class="fa-solid fa-question"></i></button>
+        </div>
+
         <div class="game-board" id="game-board">
             <div class="dashboard">
                 <div class="card">
@@ -420,6 +386,39 @@
 
             <div id="status-bar">Select 2 Orbs...</div>
         </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeInfo()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <h2><i class="fa-solid fa-brain"></i> How is this educational?</h2>
+            <p>This game is a fun visualization of computer science <strong>Sorting Algorithms</strong>.</p>
+            <ul>
+                <li>The <strong><span class="highlight" style="color:var(--btn-blue-top)">SWAP</span></strong> action teaches the core concept of <strong>Bubble Sort</strong>, where adjacent items are compared and swapped if they are in the wrong order.</li>
+                <li>The <strong><span class="highlight" style="color:var(--btn-pink-top)">INSERT</span></strong> action mimics <strong>Insertion Sort</strong>, picking an item and placing it directly into its correct relative position among the sorted items.</li>
+            </ul>
+            <p><strong>Challenge Mode:</strong> You have limited fuel (moves). Think like a computer—optimize your steps!</p>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeHelp()"><i class="fa-solid fa-xmark"></i></button>
+            <h2><i class="fa-solid fa-gamepad"></i> How to Play</h2>
+            <p><strong>Goal:</strong> Sort the orbs from <strong>Lowest</strong> to <strong>Highest</strong> number.</p>
+            <ul>
+                <li><strong>Select:</strong> Tap an orb to select it. Tap another to select a pair.</li>
+                <li><strong>Swap:</strong> Switches the positions of two selected orbs.</li>
+                <li><strong>Insert:</strong> Moves the first selected orb to sit *before* the second one.</li>
+            </ul>
+            <p style="text-align: center; color: var(--accent-gold); font-weight: bold;">Watch your Fuel! Every move costs energy.</p>
+        </div>
+    </div>
+
+    <div id="level-notification" class="notification-popup" aria-hidden="true">
+        <span id="notify-icon"><i class="fa-solid fa-trophy"></i></span> 
+        <span id="notify-text">Level Complete!</span>
     </div>
 
     <script>
