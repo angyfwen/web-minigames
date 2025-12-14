@@ -31,40 +31,6 @@
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Outfit', sans-serif; color: var(--text); background: #333; }
 
-        /* --- RAINBOW MENU BUTTON --- */
-        .menu-btn-rainbow {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px 24px;
-            border-radius: 20px;
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900;
-            text-decoration: none;
-            text-transform: lowercase;
-            cursor: pointer;
-            z-index: 2000; /* Highest priority */
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
-            background-size: 300% 100%; 
-            animation: gradientMove 4s ease infinite; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255,255,255,0.2);
-            transition: transform 0.2s;
-        }
-        .menu-btn-rainbow:hover { transform: scale(1.05); }
-        .menu-btn-rainbow:active { transform: scale(0.95); }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         /* --- SCENERY --- */
         #parallax-world { position: fixed; top: -5vh; left: -5vw; width: 110vw; height: 110vh; pointer-events: none; z-index: 0; }
         .sky-layer { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, var(--sky-top), var(--sky-bot)); transition: background 1.5s ease; z-index: 0; }
@@ -113,16 +79,42 @@
         .screen { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.5s ease; }
         .screen.active { display: flex; opacity: 1; pointer-events: auto; }
 
+        /* THE BINDER SPINE STYLE (Used on both screens) */
+        .binder-spine {
+            background-color: transparent; 
+            position: relative;
+            /* UPDATED SVG: Matte Grey, No Shine, Holes Layered on Top */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='45' viewBox='0 0 60 45' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- Ring (Bottom Layer) --%3E%3Cpath d='M6,22 C18,5 42,5 54,22' stroke='%2395a5a6' stroke-width='7' fill='none' stroke-linecap='butt' /%3E%3C!-- Left Hole (Top) --%3E%3Cellipse cx='6' cy='22' rx='5' ry='7' fill='%232c3e50'/%3E%3C!-- Right Hole (Top) --%3E%3Cellipse cx='54' cy='22' rx='5' ry='7' fill='%232c3e50'/%3E%3C/svg%3E");
+            background-repeat: repeat-y;
+            background-size: 60px 45px;
+            z-index: 10;
+        }
+
         /* --- START SCREEN = JOURNAL COVER --- */
         .start-card {
             background-color: #d4c4a8; /* Manila folder brown */
             background-image: var(--cover-texture);
             border: 4px solid #c0b298;
             padding: 50px;
+            /* Added padding left to accommodate the spine */
+            padding-left: 90px;
             position: relative;
             /* Make it look like a book on a table */
             transform: rotate(-2deg) !important; 
             box-shadow: 0 25px 50px rgba(0,0,0,0.4) !important;
+            /* Flex to center content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* New class to position binder on start cover */
+        .start-spine {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 15px; /* Positioned on the left edge */
+            width: 60px;
         }
 
         /* STICKER STYLES */
@@ -152,17 +144,6 @@
             transform: rotate(-1deg); border: 2px solid #dcdcdc;
         }
 
-        /* THE BINDER SPINE (Piercing Effect) */
-        .binder-spine {
-            background-color: transparent; 
-            position: relative;
-            /* UPDATED SVG: Draw RING first, then HOLES on top to clip the ends */
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='45' viewBox='0 0 60 45' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='rG' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237f8c8d'/%3E%3Cstop offset='50%25' stop-color='%23ecf0f1'/%3E%3Cstop offset='100%25' stop-color='%237f8c8d'/%3E%3C/linearGradient%3E%3C/defs%3E%3C!-- The Metal Ring (Bottom Layer) --%3E%3Cpath d='M6,22 C18,5 42,5 54,22' stroke='url(%23rG)' stroke-width='7' fill='none' stroke-linecap='butt' /%3E%3C!-- Left Hole (Top Layer - Covers Ring Start) --%3E%3Cellipse cx='6' cy='22' rx='5' ry='7' fill='%232c3e50'/%3E%3C!-- Right Hole (Top Layer - Covers Ring End) --%3E%3Cellipse cx='54' cy='22' rx='5' ry='7' fill='%232c3e50'/%3E%3C/svg%3E");
-            background-repeat: repeat-y;
-            background-size: 60px 45px;
-            z-index: 10;
-        }
-
         /* Left Page */
         .panel-left { background: #fdfaf5; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-shadow: inset -5px 0 15px rgba(0,0,0,0.02); }
         
@@ -179,6 +160,7 @@
         .env-icon { font-size: 6rem; filter: drop-shadow(2px 4px 0 rgba(0,0,0,0.1)); }
         .env-info h2 { font-family: 'Kalam', cursive; font-size: 2.5rem; margin: 0; color: var(--text); transform: rotate(-2deg); }
         
+        /* UPDATED STORY TEXT STYLE: Smaller, Normal Case */
         .env-info p { 
             font-family: 'Outfit', sans-serif; 
             color: #636e72; 
@@ -188,7 +170,7 @@
             text-transform: none; 
             line-height: 1.3;
             text-align: center;
-            padding: 0 15px; 
+            padding: 0 15px;
         }
         
         .creature-box { margin-top: auto; width: 130px; height: 130px; background: white; border-radius: 12px; border: 8px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; font-size: 4.5rem; transform: rotate(4deg); transition: 0.4s; }
@@ -214,8 +196,9 @@
         .nav-btn { width: 40px; height: 40px; border-radius: 50%; background: #2d3436; color: white; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
         .nav-btn:hover { transform: scale(1.1); background: var(--accent); }
         .modal-card:not(.start-card) { background: white; padding: 60px; border-radius: 12px; box-shadow: var(--shadow-float); text-align: center; width: 500px; max-width: 90%; position: relative; border: 2px solid var(--text); background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 20px 20px; }
-        
+        /* UPDATED STYLING FOR EDUCATIONAL MODAL */
         #eduModal .modal-card { 
+            /* Increased width for less compact look */
             width: 700px; 
             max-width: 95%; 
             padding: 40px; 
@@ -244,6 +227,7 @@
         .edu-icon { font-size: 2.5rem; margin-bottom: 10px; color: var(--primary); }
         .edu-title { font-weight: 900; font-size: 1.1rem; margin: 0 0 5px 0; text-transform: uppercase; }
         .edu-desc { font-size: 0.9rem; color: #636e72; line-height: 1.4; }
+        /* END NEW STYLING */
         .big-btn { width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 700; border-radius: 8px; border: 2px solid var(--text); cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; font-family: 'Outfit'; }
         .btn-primary { background: var(--success); color: white; border-color: var(--success); } .btn-secondary { background: white; color: var(--text); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -255,46 +239,49 @@
         body.start-mode .layer-sky-decor, body.start-mode .layer-tree-decor { opacity: 1; }
         body.game-mode .layer-sky-decor, body.game-mode .layer-tree-decor { opacity: 0; }
         body.game-mode #particles, body.game-mode #sunEl { opacity: 1; }
+        /* NEW: We now control .start-tree inside the h1-wrapper layer */
         body.start-mode .start-tree { opacity: 1; }
         body.game-mode .start-tree { opacity: 0; }
         
         @media (max-width: 900px) {
-            /* Compact Mobile Layout */
-            .game-card { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; transform: none; width: 92%; margin-top: 2vh; border: 2px solid #ccc; }
+            /* SHORTER MOBILE VIEW */
+            .game-card { 
+                grid-template-columns: 1fr; 
+                height: auto; 
+                display: flex; 
+                flex-direction: column; 
+                transform: scale(0.95); 
+                /* Reduced vertical padding/height constraints */
+                max-height: 85vh;
+                overflow-y: auto;
+            }
             .binder-spine { display: none; } 
-            
-            /* Smaller Left Panel with Horizontal Layout */
-            .panel-left { flex-direction: row; gap: 15px; padding: 15px; border-right: none; border-bottom: 2px solid #ddd; justify-content: space-evenly; }
-            .env-badge-wrap { width: 70px; height: 70px; margin: 0; border-width: 3px; } 
+            .panel-left { 
+                flex-direction: row; 
+                gap: 20px; 
+                padding: 15px; /* Reduced padding */
+                border-right: none; 
+                border-bottom: 2px solid #ddd; 
+                min-height: auto;
+            }
+            .env-badge-wrap { width: 70px; height: 70px; margin: 0; } 
             .env-icon { font-size: 2.5rem; } 
-            .creature-box { width: 70px; height: 70px; font-size: 2.5rem; margin: 0; border-width: 4px; }
+            .creature-box { width: 70px; height: 70px; font-size: 2.5rem; margin: 0; }
+            .panel-right { padding: 20px; } 
+            .traits-grid { gap: 10px; }
             
-            /* Text adjustments for mobile */
-            .env-info h2 { font-size: 1.4rem; }
-            .env-info p { font-size: 0.8rem; max-width: 150px; padding: 0; }
-
-            /* Right Panel Compression */
-            .panel-right { padding: 15px; } 
-            .traits-grid { gap: 8px; margin-bottom: 15px; }
-            .trait-card { padding: 10px; }
-            .trait-icon { font-size: 2rem; margin-bottom: 5px; }
-            .trait-name { font-size: 0.7rem; }
-            
-            .header { margin-bottom: 15px; }
-            .header h3 { font-size: 1rem; }
-            .evolve-btn { padding: 15px; font-size: 1.2rem; }
-            
-            /* Edu Modal Mobile */
+            /* Mobile edu grid stack */
             .edu-grid { grid-template-columns: 1fr; }
-            #eduModal .modal-card { padding: 20px; }
+            /* Adjusted padding for mobile edu modal */
+            #eduModal .modal-card { padding: 20px; width: 90%; }
+            
+            /* Allow text wrapping in env info for mobile */
+            .env-info p { white-space: normal; font-size: 0.8rem; max-width: 180px; text-align: left; }
+            .env-info h2 { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body class="start-mode">
-
-    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
-        <i class="fa-solid fa-gamepad"></i> menu
-    </a>
 
     <div id="parallax-world">
         <div class="sky-layer"></div>
@@ -332,6 +319,8 @@
 
         <div class="screen active" id="startScreen">
             <div class="modal-card start-card">
+                <div class="binder-spine start-spine"></div>
+                
                 <div class="deco-sticker" style="top: -20px; left: -20px; transform: rotate(-15deg);">☣️</div>
                 <div class="deco-sticker" style="bottom: -20px; right: -10px; transform: rotate(10deg); font-size: 5rem;">🦕</div>
                 
@@ -361,7 +350,7 @@
                 
                 <div class="panel-left">
                     <div class="env-badge-wrap"><div class="env-icon" id="envIcon">❄️</div></div>
-                    <div class="env-info"><h2 id="envName">Ice Age</h2><p id="envDesc" style="text-align:center; max-width: 250px; line-height: 1.4;">-50°C</p></div>
+                    <div class="env-info"><h2 id="envName">Ice Age</h2><p id="envDesc">-50°C</p></div>
                     <div class="creature-box" id="creatureIcon">🥚</div>
                 </div>
                 
@@ -479,8 +468,10 @@
         function goHome() {
             document.body.classList.add('start-mode'); document.body.classList.remove('game-mode');
             document.getElementById('gameScreen').classList.remove('active'); document.getElementById('startScreen').classList.add('active');
-            // FIX: Force hide the game decor layers to prevent ghost emojis
+            
+            // CLEANUP: Hide all game decor containers
             ['decor-ground', 'decor-water', 'decor-sky'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+            
             applyStartTheme(); stopParticles();
         }
 
