@@ -1,0 +1,611 @@
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+
+// --- game configuration ---
+const LEVELS = [
+  {
+    id: 1,
+    title: "the first spark",
+    concept: "closed circuit",
+    hint: "electricity needs a path from start to finish. tap the gap! 🌿",
+    instruction: "the moon-flower is sleeping. bridge the gap to let the life-sap flow!",
+    nodes: [
+      { id: 'source', type: 'source', x: 15, y: 50 },
+      { id: 'gap1', type: 'gap', x: 50, y: 50 },
+      { id: 'sink', type: 'sink', x: 85, y: 50 }
+    ],
+    connections: [
+      { from: 'source', to: 'gap1' },
+      { from: 'gap1', to: 'sink' }
+    ]
+  },
+  {
+    id: 2,
+    title: "the twin vines",
+    concept: "series path",
+    hint: "both gaps must be bridged for the power to reach the end! 🌱🌱",
+    instruction: "electricity needs a complete loop. connect all the gaps in the vine!",
+    nodes: [
+      { id: 'source', type: 'source', x: 15, y: 50 },
+      { id: 'gap1', type: 'gap', x: 38, y: 50 },
+      { id: 'gap2', type: 'gap', x: 62, y: 50 },
+      { id: 'sink', type: 'sink', x: 85, y: 50 }
+    ],
+    connections: [
+      { from: 'source', to: 'gap1' },
+      { from: 'gap1', to: 'gap2' },
+      { from: 'gap2', to: 'sink' }
+    ]
+  },
+  {
+    id: 3,
+    title: "the elder beetle",
+    concept: "switches",
+    hint: "beetles block power when they sleep. tap them to wake them up! 🪲",
+    instruction: "beetles can stop the flow! connect the vine, then tap the beetle to let sap pass.",
+    nodes: [
+      { id: 'source', type: 'source', x: 15, y: 50 },
+      { id: 'gap1', type: 'gap', x: 35, y: 50 },
+      { id: 'switch1', type: 'switch', x: 55, y: 50 },
+      { id: 'sink', type: 'sink', x: 85, y: 50 }
+    ],
+    connections: [
+      { from: 'source', to: 'gap1' },
+      { from: 'gap1', to: 'switch1' },
+      { from: 'switch1', to: 'sink' }
+    ]
+  },
+  {
+    id: 4,
+    title: "the mossy sponge",
+    concept: "resistance",
+    hint: "careful! connecting directly will pop the flower. add moss first! 🧽",
+    instruction: "this flower is delicate! use the glowing moss to soften the energy surge.",
+    nodes: [
+      { id: 'source', type: 'source', x: 15, y: 50 },
+      { id: 'gap1', type: 'gap', x: 40, y: 50 },
+      { id: 'resistor1', type: 'resistor', x: 65, y: 50 },
+      { id: 'sink', type: 'sink', x: 85, y: 50, delicate: true }
+    ],
+    connections: [
+      { from: 'source', to: 'gap1' },
+      { from: 'gap1', to: 'resistor1' },
+      { from: 'resistor1', to: 'sink' },
+      { from: 'gap1', to: 'sink', hidden: true }
+    ]
+  },
+  {
+    id: 5,
+    title: "the parallel grove",
+    concept: "parallel circuits",
+    hint: "power can travel multiple ways! branch out to light both flowers! 🌿✨",
+    instruction: "to light the whole tree, branch out the paths so every flower gets power!",
+    nodes: [
+      { id: 'source', type: 'source', x: 15, y: 50 },
+      { id: 'branch', type: 'hub', x: 40, y: 50 },
+      { id: 'gap1', type: 'gap', x: 65, y: 30 },
+      { id: 'gap2', type: 'gap', x: 65, y: 70 },
+      { id: 'sink1', type: 'sink', x: 85, y: 30 },
+      { id: 'sink2', type: 'sink', x: 85, y: 70 }
+    ],
+    connections: [
+      { from: 'source', to: 'branch' },
+      { from: 'branch', to: 'gap1' },
+      { from: 'branch', to: 'gap2' },
+      { from: 'gap1', to: 'sink1' },
+      { from: 'gap2', to: 'sink2' }
+    ]
+  }
+];
+
+// --- sound manager ---
+const createSoundManager = () => {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return null;
+  const ctx = new AudioContext();
+  let masterGain = ctx.createGain();
+  masterGain.connect(ctx.destination);
+  masterGain.gain.value = 0.3;
+
+  const play = (freq, type, duration, volume = 1) => {
+    if (ctx.state === 'suspended') ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  };
+
+  return {
+    click: () => play(800, 'sine', 0.1, 0.2),
+    toggle: (on) => play(on ? 1200 : 600, 'sine', 0.15, 0.1),
+    reset: () => play(400, 'sine', 0.2, 0.1),
+    success: () => {
+      [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+        setTimeout(() => play(f, 'triangle', 0.5, 0.1), i * 100);
+      });
+    },
+    pop: () => {
+      const noise = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1000, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.2);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      noise.start();
+    },
+    setMute: (mute) => { masterGain.gain.setTargetAtTime(mute ? 0 : 0.3, ctx.currentTime, 0.05); }
+  };
+};
+
+// --- decorative components ---
+const Background = () => {
+  const spores = useMemo(() => [...Array(20)].map((_, i) => ({
+    id: i, x: Math.random() * 100, y: Math.random() * 100, s: Math.random() * 3 + 2, d: Math.random() * 20 + 10, delay: Math.random() * 10
+  })), []);
+
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css';
+    document.head.appendChild(link);
+  }, []);
+
+  return (
+    <div className="bg-background">
+      <div className="glow-orb top-orb" />
+      <div className="glow-orb bottom-orb" />
+      {spores.map(s => (
+        <div key={s.id} className="spore"
+          style={{ 
+            left: `${s.x}%`, 
+            top: `${s.y}%`, 
+            width: `${s.s}px`, 
+            height: `${s.s}px`, 
+            animation: `float ${s.d}s infinite ease-in-out ${s.delay}s` 
+          }} />
+      ))}
+    </div>
+  );
+};
+
+const SunStone = ({ large = false }) => (
+  <div className={`sun-stone-container ${large ? 'large' : ''}`}>
+    <div className="sun-glow-layer animate-pulse" />
+    <svg viewBox="0 0 100 100" className="sun-svg">
+      <defs><radialGradient id="sunGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#fff" /><stop offset="20%" stopColor="#ffea00" /><stop offset="100%" stopColor="#ff7b00" /></radialGradient></defs>
+      <circle cx="50" cy="50" r="38" fill="url(#sunGrad)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+      <g className="sun-rotating-ring"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,170,0,0.2)" strokeWidth="1" strokeDasharray="10 20" /></g>
+      <path d="M50 20 L50 10 M80 50 L90 50 M50 80 L50 90 M20 50 L10 50" stroke="#fff" strokeWidth="4" strokeLinecap="round" opacity="0.6" />
+    </svg>
+    {!large && <div className="component-label">energy source</div>}
+  </div>
+);
+
+const MoonFlower = ({ lit, popped, delicate }) => (
+  <div className={`flower-container ${lit && !popped ? 'is-lit' : ''}`}>
+    {lit && !popped && <div className="flower-glow-layer animate-pulse" />}
+    <svg viewBox="0 0 100 100" className="flower-svg">
+      {popped ? (<text x="50" y="65" fontSize="50" textAnchor="middle" className="animate-bounce">💨</text>) : (
+        <g>
+          <path d="M50 90 C 50 70, 20 60, 20 45 C 20 25, 40 10, 50 10 C 60 10, 80 25, 80 45 C 80 60, 50 70, 50 90" fill={lit ? "url(#flowerGrad)" : "#222"} className="flower-path" />
+          <circle cx="50" cy="42" r="10" fill={lit ? "#fff" : "#111"} />
+          <defs><linearGradient id="flowerGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#fff" /><stop offset="50%" stopColor="#00f2ff" /><stop offset="100%" stopColor="#0066ff" /></linearGradient></defs>
+        </g>
+      )}
+    </svg>
+    <div className="component-label label-cyan">{popped ? 'overload' : 'moon flower'}</div>
+  </div>
+);
+
+// --- main application ---
+export default function App() {
+  const [screen, setScreen] = useState('start');
+  const [levelIdx, setLevelIdx] = useState(0);
+  const [gameState, setGameState] = useState({});
+  const [feedback, setFeedback] = useState(null);
+  const [isPopped, setIsPopped] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showEduPopup, setShowEduPopup] = useState(false);
+  const [isWon, setIsWon] = useState(false); 
+  const [isMobile, setIsMobile] = useState(false);
+
+  const sound = useMemo(() => createSoundManager(), []);
+  const level = LEVELS[levelIdx];
+
+  const resetCurrentLevel = useCallback(() => {
+    if (sound) sound.reset();
+    const initialState = {};
+    level.nodes.forEach(n => { if (['gap', 'switch', 'resistor'].includes(n.type)) initialState[n.id] = false; });
+    setGameState(initialState);
+    setFeedback(null);
+    setIsPopped(false);
+    setShowHint(false);
+    setIsWon(false);
+  }, [level, sound]);
+
+  useEffect(() => {
+    if (sound) sound.setMute(isMuted);
+  }, [isMuted, sound]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (screen !== 'game') return;
+    resetCurrentLevel();
+  }, [levelIdx, screen, resetCurrentLevel]);
+
+  const isPowered = useCallback((nodeId, visited = new Set()) => {
+    if (visited.has(nodeId)) return false;
+    visited.add(nodeId);
+    const node = level.nodes.find(n => n.id === nodeId);
+    if (!node) return false;
+    if (node.type === 'source') return true;
+    const incoming = level.connections.filter(c => c.to === nodeId && !c.hidden);
+    return incoming.some(conn => {
+      const fromNode = level.nodes.find(n => n.id === conn.from);
+      if (!fromNode || (fromNode.type === 'gap' && !gameState[fromNode.id]) || (fromNode.type === 'switch' && !gameState[fromNode.id])) return false;
+      return isPowered(conn.from, visited);
+    });
+  }, [level, gameState]);
+
+  useEffect(() => {
+    if (isPopped || screen !== 'game' || feedback?.type === 'success') return;
+
+    let winTimer;
+
+    const handleSuccess = (msg) => {
+      setIsWon(true);
+      winTimer = setTimeout(() => {
+        if (sound) sound.success();
+        setFeedback({ type: 'success', msg });
+      }, 2000); 
+    };
+
+    if (level.id === 4) {
+      const powered = isPowered('sink'), buffered = gameState['resistor1'];
+      if (powered && !buffered) {
+        setIsPopped(true);
+        if (sound) sound.pop();
+        setFeedback({ type: 'error', msg: "zap! the energy surge was too much for the flower. use the moss to buffer it! (｡>﹏<)" });
+        setTimeout(() => { setGameState(prev => ({ ...prev, gap1: false })); setIsPopped(false); setFeedback(null); setIsWon(false); }, 3000);
+      } else if (powered && buffered) {
+        handleSuccess("perfect! the moss kept the flow gentle. (˶˃ ᵕ ˂˶)");
+      }
+    } else if (level.id === 5) {
+      if (isPowered('sink1') && isPowered('sink2')) {
+        handleSuccess("amazing! the whole grove is glowing beautifully! ✧");
+      }
+    } else if (isPowered('sink')) {
+      handleSuccess("you did it! the circuit is complete! (๑ > ᴗ < ๑)");
+    }
+
+    return () => clearTimeout(winTimer);
+  }, [gameState, isPowered, level, isPopped, screen, sound, feedback]);
+
+  const toggle = (id, type) => {
+    if (isPopped || feedback?.type === 'success') return;
+    if (sound) {
+      if (type === 'switch') sound.toggle(!gameState[id]);
+      else sound.click();
+    }
+    setGameState(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleLevelComplete = () => {
+    if (sound) sound.click();
+    if (levelIdx < LEVELS.length - 1) {
+      setLevelIdx(l => l + 1);
+    } else {
+      setScreen('start');
+      setLevelIdx(0);
+    }
+  };
+
+  return (
+    <div className="app-viewport">
+      <Background />
+      
+      {screen === 'start' ? (
+        <div className="screen-container start-screen animate-fade-in">
+          {showEduPopup && (
+            <div className="popup-overlay animate-fade-in">
+              <div className="popup-card">
+                <button onClick={() => { if(sound) sound.click(); setShowEduPopup(false); }} className="popup-close-btn">
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+                
+                <div className="popup-content">
+                  <div className="popup-icon-wrap">
+                    <i className="fa-solid fa-brain"></i>
+                  </div>
+                  <h2 className="popup-title">how is this educational?</h2>
+                  <div className="popup-text">
+                    <p className="text-center">lumina forest turns complex electronics into magic! (˶˃ ᵕ ˂˶)</p>
+                    <div className="edu-list">
+                      <div className="edu-item"><span>✧</span> learn continuity: electricity needs a full loop to flow through the vines.</div>
+                      <div className="edu-item"><span>✧</span> control with switches: see how beetles manage the flow of magic energy.</div>
+                      <div className="edu-item"><span>✧</span> safety with resistance: use moss to protect delicate flowers from surges.</div>
+                      <div className="edu-item"><span>✧</span> explore parallel paths: light multiple flowers at once with branching circuits.</div>
+                    </div>
+                  </div>
+                  <button onClick={() => { if(sound) sound.click(); setShowEduPopup(false); }} className="popup-ok-btn">
+                    got it! (｡˃ ᵕ ˂ )⸝
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <SunStone large={true} />
+          <h1 className="title-text main-title">lumina forest</h1>
+          <p className="description-text">the ancient forest of light has gone dark... <br className="hidden-mobile"/>become a lumina keeper and restore the magic. 🌿✧</p>
+          
+          <div className="start-btn-group">
+            <button onClick={() => { if (sound) sound.click(); setScreen('game'); }} className="btn-primary">
+              <div className="btn-overlay" />
+              <div className="btn-content">begin journey</div>
+            </button>
+
+            <button onClick={() => { if (sound) sound.click(); setShowEduPopup(true); }} className="btn-secondary">
+              <i className="fa-solid fa-graduation-cap"></i>
+              <span>educational value</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="screen-container game-screen animate-fade-in">
+          <div className="game-header">
+            <div className="header-top">
+               <h1 className="title-text game-title">lumina forest</h1>
+               <div className="header-controls">
+                 <button onClick={() => { if (sound) sound.click(); setScreen('start'); }} className="icon-btn" title="home"><i className="fa-solid fa-house"></i></button>
+                 <button onClick={resetCurrentLevel} className="icon-btn" title="reset"><i className="fa-solid fa-arrow-rotate-left"></i></button>
+                 <button onClick={() => setShowHint(!showHint)} className={`icon-btn ${showHint ? 'active' : ''}`} title="hint"><i className="fa-solid fa-lightbulb"></i></button>
+                 <button onClick={() => setIsMuted(!isMuted)} className="icon-btn" title="mute"><i className={`fa-solid ${isMuted ? 'fa-volume-xmark' : 'fa-volume-high'}`}></i></button>
+               </div>
+            </div>
+
+            {!feedback && (
+              <div className="instruction-box animate-fade-in">
+                <div className="instruction-info">
+                  <div className="level-badge">{level.id}</div>
+                  <div>
+                    <h2 className="level-title">{level.title}</h2>
+                    <p className="level-concept">{level.concept}</p>
+                  </div>
+                </div>
+                <p className="level-instruction">"{level.instruction}"</p>
+                {showHint && <div className="hint-box animate-slide-down"><p>{level.hint}</p></div>}
+              </div>
+            )}
+          </div>
+
+          <div className="game-stage">
+            <svg className="vines-layer" preserveAspectRatio="none">
+              {level.connections.map((conn, i) => {
+                const from = level.nodes.find(n => n.id === conn.from), to = level.nodes.find(n => n.id === conn.to);
+                if (conn.hidden) return null;
+                const active = isPowered(from.id), blocked = (from.type === 'gap' && !gameState[from.id]) || (from.type === 'switch' && !gameState[from.id]);
+                return (
+                  <g key={i}>
+                    <line x1={`${from.x}%`} y1={`${from.y}%`} x2={`${to.x}%`} y2={`${to.y}%`} className="vine-base" strokeWidth={isMobile ? 8 : 12} />
+                    <line x1={`${from.x}%`} y1={`${from.y}%`} x2={`${to.x}%`} y2={`${to.y}%`} className={`vine-sap ${active && !blocked ? 'active' : ''}`} strokeWidth={isMobile ? 3 : 5} />
+                    {active && !blocked && <line x1={`${from.x}%`} y1={`${from.y}%`} x2={`${to.x}%`} y2={`${to.y}%`} className="vine-flow" strokeWidth="1.5" strokeDasharray="4 16" />}
+                  </g>
+                );
+              })}
+            </svg>
+            {level.nodes.map(node => (
+              <div key={node.id} className="game-node" style={{ left: `${node.x}%`, top: `${node.y}%` }}>
+                {node.type === 'source' && <SunStone />}
+                {node.type === 'sink' && <MoonFlower lit={isPowered(node.id)} popped={isPopped && node.delicate} delicate={node.delicate} />}
+                {node.type === 'gap' && (
+                  <button onClick={() => toggle(node.id, 'gap')} className={`gap-btn ${gameState[node.id] ? 'is-bridged' : ''}`}>
+                    <div className="gap-content">{gameState[node.id] ? '🌿' : '🌱'}</div>
+                  </button>
+                )}
+                {node.type === 'switch' && (
+                  <button onClick={() => toggle(node.id, 'switch')} className={`switch-btn ${gameState[node.id] ? 'is-on' : ''}`}>
+                    <div className="switch-icon">🪲</div>
+                    <div className="switch-label">{gameState[node.id] ? 'active' : 'dormant'}</div>
+                  </button>
+                )}
+                {node.type === 'resistor' && (
+                  <button onClick={() => toggle(node.id, 'resistor')} className={`resistor-btn ${gameState[node.id] ? 'is-active' : ''}`}>
+                    {gameState[node.id] && <div className="resistor-glow animate-pulse" />}
+                    <div className="resistor-icon">🧽</div>
+                    <div className="resistor-label">moss</div>
+                  </button>
+                )}
+                {node.type === 'hub' && <div className="node-hub" />}
+              </div>
+            ))}
+            {feedback && (
+              <div className={`feedback-overlay animate-zoom-in ${feedback.type === 'success' ? 'success-theme' : 'error-theme'}`}>
+                <div className="feedback-emoji animate-bounce">{feedback.type === 'success' ? '✨' : '⚡'}</div>
+                <p className="feedback-msg">{feedback.msg}</p>
+                {feedback.type === 'success' && (
+                  <button onClick={handleLevelComplete} className="next-level-btn">
+                    <div className="btn-overlay" />
+                    <div className="btn-content">{levelIdx < LEVELS.length - 1 ? "next clearing" : "back to home"}</div>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="game-footer">
+            <div className="level-nav">
+              {LEVELS.map((l, i) => (
+                <button key={l.id} onClick={() => { if (sound) sound.click(); setLevelIdx(i); }} className={`nav-btn ${i === levelIdx ? 'active' : ''}`}>{l.id}</button>
+              ))}
+            </div>
+            <p className="status-text">forest status: connected</p>
+          </div>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        /* --- Base & Resets --- */
+        .app-viewport {
+          height: 100vh; width: 100vw; font-family: sans-serif; overflow: hidden; 
+          background-color: #020410; color: white; user-select: none;
+        }
+        .screen-container { height: 100%; width: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; }
+        .hidden-mobile { display: none; }
+        @media (min-width: 768px) { .hidden-mobile { display: block; } }
+
+        /* --- Decorative Background --- */
+        .bg-background { position: fixed; inset: 0; overflow: hidden; z-index: -10; }
+        .glow-orb { position: absolute; border-radius: 50%; filter: blur(150px); opacity: 0.2; }
+        .top-orb { top: -10%; left: -10%; width: 50%; height: 50%; background-color: #1e3a8a; }
+        .bottom-orb { bottom: -10%; right: -10%; width: 60%; height: 60%; background-color: #064e3b; }
+        .spore { position: absolute; background-color: rgba(34, 211, 238, 0.3); border-radius: 50%; filter: blur(2px); }
+
+        /* --- Animations --- */
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(10px, -20px); } }
+        @keyframes flow { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-bounce { animation: bounce 1s infinite; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-zoom-in { animation: zoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .animate-slide-down { animation: slideDown 0.3s ease-out; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(-10%); } 50% { transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Start Screen --- */
+        .start-screen { justify-content: center; padding: 1.5rem; text-align: center; }
+        .main-title { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.05em; background: linear-gradient(to bottom, #fff, #64748b); -webkit-background-clip: text; color: transparent; text-transform: lowercase; margin-top: 2rem; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
+        @media (min-width: 768px) { .main-title { font-size: 4.5rem; } }
+        .description-text { margin-top: 1rem; color: #94a3b8; font-style: italic; text-transform: lowercase; line-height: 1.6; max-width: 32rem; padding: 0 1rem; }
+        .start-btn-group { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2.5rem; width: 100%; max-width: 280px; }
+        @media (min-width: 768px) { .start-btn-group { flex-direction: row; max-width: none; justify-content: center; } }
+
+        /* --- Buttons --- */
+        .btn-primary, .btn-secondary { position: relative; padding: 0.85rem 1.75rem; border-radius: 1.5rem; font-weight: 900; text-transform: lowercase; overflow: hidden; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .btn-primary { background: white; color: black; }
+        .btn-primary:hover { transform: scale(1.05); background: #22d3ee; }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
+
+        /* --- Game Screen --- */
+        .game-screen { justify-content: space-between; padding: 0.75rem; }
+        @media (min-width: 768px) { .game-screen { padding: 1.5rem; } }
+        .game-header { width: 100%; max-width: 80rem; display: flex; flex-direction: column; gap: 0.75rem; }
+        .header-top { display: flex; align-items: center; justify-content: center; width: 100%; position: relative; min-height: 40px; }
+        .game-title { font-size: 1.25rem; font-weight: 900; background: linear-gradient(to bottom, #fff, #64748b); -webkit-background-clip: text; color: transparent; text-transform: lowercase; }
+        @media (min-width: 768px) { .game-title { font-size: 1.875rem; } }
+        .header-controls { position: absolute; right: 0; display: flex; gap: 0.25rem; align-items: center; transform: scale(0.85); transform-origin: right; }
+        @media (min-width: 768px) { .header-controls { gap: 0.5rem; transform: scale(1); } }
+        .icon-btn { width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; color: #94a3b8; cursor: pointer; transition: all 0.2s; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .icon-btn.active { background: rgba(34, 211, 238, 0.2); border-color: #22d3ee; color: #22d3ee; }
+
+        /* --- Instruction Box --- */
+        .instruction-box { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.25rem; padding: 0.75rem; backdrop-filter: blur(12px); }
+        .instruction-info { display: flex; align-items: center; gap: 0.5rem; }
+        .level-badge { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.4); display: flex; align-items: center; justify-content: center; color: #22d3ee; font-weight: 900; font-size: 0.5rem; }
+        .level-title { font-size: 0.8rem; font-weight: 700; color: white; text-transform: lowercase; margin: 0; line-height: 1; }
+        .level-concept { font-size: 0.45rem; font-weight: 900; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; margin-top: 0.1rem; }
+        .level-instruction { font-size: 0.65rem; color: #94a3b8; font-style: italic; text-transform: lowercase; margin-top: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 0 0.25rem; }
+        .hint-box { margin-top: 0.5rem; background: rgba(8, 47, 73, 0.2); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 0.75rem; padding: 0.5rem; font-size: 0.6rem; color: rgba(103, 232, 249, 0.8); font-style: italic; text-align: center; }
+
+        /* --- Game Stage --- */
+        .game-stage { position: relative; width: 100%; max-width: 80rem; flex: 1; max-height: 450px; background: linear-gradient(to bottom right, rgba(255,255,255,0.06), transparent); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.6); margin: 0.5rem 0; }
+        .vines-layer { position: absolute; inset: 0; width: 100%; height: 100%; padding: 1rem; pointer-events: none; }
+        .vine-base { stroke: #161b2e; stroke-linecap: round; }
+        .vine-sap { stroke: #0a0d1a; stroke-linecap: round; transition: all 0.7s; }
+        .vine-sap.active { stroke: #00ffcc; filter: drop-shadow(0 0 10px #00ffcc); }
+        .vine-flow { stroke: white; animation: flow 1.5s linear infinite; }
+
+        /* --- Nodes --- */
+        .game-node { position: absolute; transform: translate(-50%, -50%); }
+        .component-label { position: absolute; top: 100%; margin-top: 0.5rem; white-space: nowrap; font-size: 0.45rem; font-weight: 900; color: rgba(234, 179, 8, 0.8); text-transform: uppercase; letter-spacing: 0.2em; pointer-events: none; }
+        .label-cyan { color: rgba(34, 211, 238, 0.8); }
+        .node-hub { width: 1rem; height: 1rem; background: #0f172a; border: 2px solid rgba(34, 211, 238, 0.4); border-radius: 50%; }
+
+        /* --- Components styling --- */
+        .sun-stone-container, .flower-container { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .sun-stone-container.large { transform: scale(1.5); }
+        .sun-glow-layer { position: absolute; inset: 0; background: rgba(250, 204, 21, 0.3); border-radius: 50%; filter: blur(24px); }
+        .sun-svg { width: 4rem; height: 4rem; position: relative; z-index: 10; filter: drop-shadow(0 0 15px rgba(255,200,0,0.8)); }
+        .sun-rotating-ring { animation: rotate 10s linear infinite; transform-origin: center; }
+        
+        .flower-glow-layer { position: absolute; inset: 0; background: rgba(34, 211, 238, 0.4); border-radius: 50%; filter: blur(40px); }
+        .flower-svg { width: 5rem; height: 5rem; transition: all 1s; opacity: 0.2; transform: scale(0.95); grayscale: 1; }
+        .is-lit .flower-svg { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 25px rgba(0,242,255,0.7)); grayscale: 0; }
+
+        /* --- Interactive Components --- */
+        .gap-btn { width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; border: 2px dashed rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s; }
+        .gap-btn.is-bridged { background: rgba(16, 185, 129, 0.2); border-color: #10b981; transform: scale(1.1); box-shadow: 0 0 20px rgba(16,185,129,0.2); }
+        .gap-content { font-size: 1.25rem; }
+        
+        .switch-btn { width: 3rem; height: 3rem; border-radius: 50%; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s; opacity: 0.3; grayscale: 1; position: relative; }
+        .switch-btn.is-on { opacity: 1; grayscale: 0; transform: scale(1.2); }
+        .switch-icon { font-size: 2rem; }
+        .switch-label { position: absolute; top: 100%; font-size: 0.45rem; font-weight: 900; text-transform: uppercase; color: #94a3b8; margin-top: 0.1rem; }
+        .is-on .switch-label { color: #22d3ee; }
+
+        .resistor-btn { width: 4rem; height: 4rem; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.5s; opacity: 0.2; grayscale: 1; position: relative; }
+        .resistor-btn.is-active { opacity: 1; grayscale: 0; transform: scale(1.2); }
+        .resistor-glow { position: absolute; inset: 0; background: rgba(16, 185, 129, 0.2); border-radius: 50%; filter: blur(32px); transform: scale(1.5); }
+        .resistor-icon { font-size: 2.5rem; position: relative; z-index: 10; }
+        .resistor-label { position: absolute; top: 100%; font-size: 0.45rem; font-weight: 900; text-transform: uppercase; color: #10b981; letter-spacing: 0.1em; }
+
+        /* --- Educational Popup --- */
+        .popup-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
+        .popup-card { position: relative; width: 100%; max-width: 32rem; background: #0a0a20; border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 2rem; padding: 1.5rem; box-shadow: 0 0 50px rgba(6, 182, 212, 0.2); }
+        .popup-close-btn { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer; padding: 0.5rem; }
+        .popup-content { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .popup-icon-wrap { width: 3.5rem; height: 3.5rem; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: #22d3ee; font-size: 1.5rem; }
+        .popup-title { font-size: 1.25rem; font-weight: 900; color: white; text-transform: lowercase; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .popup-text { font-size: 0.8rem; color: #94a3b8; text-transform: lowercase; font-style: italic; text-align: left; }
+        .edu-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+        .edu-item { display: flex; gap: 0.5rem; line-height: 1.4; }
+        .edu-item span { color: #22d3ee; font-weight: 900; }
+        .popup-ok-btn { margin-top: 1.5rem; padding: 0.5rem 1.5rem; background: #22d3ee; color: black; border: none; border-radius: 0.75rem; font-weight: 900; text-transform: lowercase; cursor: pointer; font-size: 0.75rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* --- Footer --- */
+        .game-footer { width: 100%; max-width: 32rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding-bottom: 0.5rem; }
+        .level-nav { display: flex; gap: 0.5rem; padding: 0.4rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.25rem; backdrop-filter: blur(12px); box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .nav-btn { width: 1.75rem; height: 1.75rem; border-radius: 0.6rem; border: none; background: transparent; color: #475569; font-weight: 900; font-size: 0.6rem; cursor: pointer; transition: all 0.3s; }
+        .nav-btn:hover { color: #cbd5e1; background: rgba(255,255,255,0.05); }
+        .nav-btn.active { background: white; color: black; transform: scale(1.1); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+        .status-text { font-size: 0.45rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4em; color: #334155; margin: 0; }
+
+        /* --- Feedback Overlay --- */
+        .feedback-overlay { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; backdrop-filter: blur(24px); }
+        .success-theme { background: rgba(2, 4, 16, 0.9); }
+        .error-theme { background: rgba(69, 10, 10, 0.6); }
+        .feedback-emoji { font-size: 3.5rem; margin-bottom: 1rem; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
+        .feedback-msg { font-size: 1.15rem; font-weight: 900; text-transform: lowercase; margin-bottom: 2rem; color: white; line-height: 1.5; max-width: 20rem; }
+        .next-level-btn { position: relative; padding: 0.85rem 2.25rem; background: white; color: black; border: none; border-radius: 1.5rem; font-weight: 900; text-transform: lowercase; cursor: pointer; font-size: 0.85rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .next-level-btn:hover { background: #22d3ee; }
+      `}} />
+    </div>
+  );
+}
