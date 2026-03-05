@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>traffic light logic game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- background css --- */
+        body { 
+            margin: 0; 
+            height: 120vh; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            font-family: 'Fredoka', sans-serif; 
+            background: #0f172a; 
+            /* prevent blue flash on taps for mobile */
+            -webkit-tap-highlight-color: transparent; 
+            /* disable pulling to refresh on mobile */
+            overscroll-behavior-y: contain;
+        }
+
+        .sky {
+            background: linear-gradient(#1e3a8a, #4c1d95 85%);
+            overflow: hidden; 
+            position: relative;
+            height: 60%; 
+        }
+
+        .aurora {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            top: -20%;
+            left: -50%;
+            background: radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.15), transparent 70%);
+            filter: blur(60px);
+            z-index: 1;
+            animation: aurora-wave 10s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes aurora-wave {
+            0% { transform: skewX(-10deg) translateX(0); opacity: 0.3; }
+            100% { transform: skewX(10deg) translateX(5vw); opacity: 0.6; }
+        }
+
+        .sky::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, transparent, rgba(0,0,0,0.3));
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .mountains { 
+            padding: 0 10%; 
+            position: absolute; 
+            bottom: -5%; 
+            width: 100%;
+            z-index: 6;
+        }
+
+        .mountains .mountain {
+            -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+            display: inline-block;
+            vertical-align: middle;
+            border-radius: 3%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mountains .range:nth-child(1) .mountain { margin-top: 6%; margin-bottom: -15%; margin-left: -8%; }
+        .mountains .range:nth-child(1) .mountain:nth-child(1) { padding: 9%; background: linear-gradient(23deg, #2d5a27 70%, #1e3d1a 70%); margin-left: 12%; }
+        .mountains .range:nth-child(1) .mountain:nth-child(2) { padding: 13%; background: linear-gradient(25deg, #2d5a27 68%, #1e3d1a 68%); }
+        .mountains .range:nth-child(1) .mountain:nth-child(3) { padding: 12%; background: linear-gradient(-17deg, #2d5a27 90%, transparent 80%), linear-gradient(25deg, #2d5a27 68%, #1e3d1a 68%); }
+        .mountains .range:nth-child(1) .mountain:nth-child(4) { padding: 13.5%; background: linear-gradient(75deg, transparent 50%, #1e3d1a 50%), linear-gradient(14deg, #2d5a27 80%, #1e3d1a 80%); }
+
+        .mountains .range:nth-child(2) { margin-top: -17%; }
+        .mountains .range:nth-child(2) .mountain { margin-top: 6%; margin-bottom: -11.5%; margin-left: -4%; }
+        .mountains .range:nth-child(2) .mountain:nth-child(1) { padding: 6.3%; background: linear-gradient(13deg, #4a6741 80%, #354a2e 80%); margin-left: 8%; }
+        .mountains .range:nth-child(2) .mountain:nth-child(2) { padding: 10%; background: linear-gradient(0deg, #4a6741 88%, transparent 80%), linear-gradient(37.5deg, #4a6741 56.5%, #354a2e 56.5%); margin-left: -3%; }
+        .mountains .range:nth-child(2) .mountain:nth-child(3) { padding: 11.5%; background: linear-gradient(10deg, #4a6741 85%, #354a2e 85%); margin-left: -7%; }
+        .mountains .range:nth-child(2) .mountain:nth-child(4) { padding: 10%; background: linear-gradient(-10deg, #4a6741 80%, transparent 80%), linear-gradient(25deg, #4a6741 68%, #354a2e 68%); }
+        .mountains .range:nth-child(2) .mountain:nth-child(5) { padding: 5.7%; background: linear-gradient(13deg, #4a6741 80%, #354a2e 80%); }
+        .mountains .range:nth-child(2) .mountain:nth-child(6) { padding: 7.3%; background: linear-gradient(13deg, #4a6741 80%, #354a2e 80%); }
+
+        .moon {
+            margin: 2%; padding: 7%; width: 0; background-color: #F0F3D9; border-radius: 100%; display: inline-block; z-index: 10; position: relative;
+            animation: moon-pulse 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes moon-pulse {
+            0% { box-shadow: inset -1.2vw -1.2vw rgba(220, 225, 172, 0.50), inset .5vw .5vw 5vw #a5a5a5, 0 0 30px rgba(219, 221, 198, 0.4); }
+            100% { box-shadow: inset -1.2vw -1.2vw rgba(220, 225, 172, 0.50), inset .5vw .5vw 5vw #a5a5a5, 0 0 60px rgba(219, 221, 198, 0.8); }
+        }
+
+        .star {
+            width: 4px; height: 4px; border-radius: 100%; position: absolute; background-color: #d2d0cc; box-shadow: 0 0 .125em .125em rgba(161, 169, 176, 0.50); z-index: 2;
+        }
+        .star:nth-child(2) { left: 22%; top: 49%; }
+        .star:nth-child(3) { left: 29%; top: 29%; }
+        .star:nth-child(4) { left: 35%; top: 35%; }
+        .star:nth-child(5) { left: 37%; top: 7%; }
+        .star:nth-child(6) { left: 45%; top: 15%; }
+        .star:nth-child(7) { left: 50%; top: 37%; }
+        .star:nth-child(8) { left: 56%; top: 13%; }
+        .star:nth-child(9) { left: 63%; top: 22%; }
+        .star:nth-child(10) { left: 60%; top: 47%; }
+        .star:nth-child(11) { left: 67%; top: 47%; }
+        .star:nth-child(12) { left: 72%; top: 38%; }
+        .star:nth-child(13) { left: 72%; top: 9%; }
+        .star:nth-child(14) { left: 49%; top: 28%; }
+        .star:nth-child(15) { left: 76%; top: 55%; }
+
+        @keyframes glow {
+            0% { background-color: #d2d0cc; box-shadow: 0 0 .125em .125em rgba(161, 169, 176, 0.50); }
+            100% { background-color: whitesmoke; box-shadow: 0 0 .5em .125em #ECECEC; }
+        }
+        .star:nth-child(odd) { animation: glow 2s infinite alternate; }
+        .star:nth-child(even) { animation: glow 2s infinite alternate; animation-delay: 2s; }
+        .star:nth-child(4n) { animation: glow 2s infinite alternate; animation-delay: 1s; }
+
+        .cloud {
+            position: absolute; background: rgba(255, 255, 255, 0.15); border-radius: 100px; filter: blur(20px); z-index: 3; pointer-events: none; animation: drift linear infinite;
+        }
+        .cloud-1 { width: 300px; height: 60px; top: 15%; left: -20%; animation-duration: 45s; }
+        .cloud-2 { width: 200px; height: 40px; top: 35%; left: -15%; animation-duration: 75s; opacity: 0.1; }
+        .cloud-3 { width: 400px; height: 80px; top: 45%; left: -30%; animation-duration: 55s; opacity: 0.12; }
+        .cloud-4 { width: 250px; height: 50px; top: 8%; left: -25%; animation-duration: 90s; opacity: 0.1; }
+        .cloud-5 { width: 180px; height: 35px; top: 25%; left: -10%; animation-duration: 35s; opacity: 0.15; }
+
+        @keyframes drift { from { transform: translateX(-400px); } to { transform: translateX(calc(100vw + 400px)); } }
+
+        .shooting-star {
+            position: absolute; top: 0; left: 50%; width: 100px; height: 2px;
+            background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.8));
+            transform: rotate(-45deg); z-index: 2; opacity: 0; animation: shoot 15s infinite;
+        }
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 0; }
+            10% { transform: translateX(-100px) translateY(100px) rotate(-45deg); opacity: 1; }
+            20% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        .firefly {
+            position: absolute; width: 4px; height: 4px; background: #fde047; border-radius: 50%; box-shadow: 0 0 10px #fde047;
+            animation: firefly-float 6s infinite ease-in-out; opacity: 0; z-index: 8; pointer-events: none;
+        }
+        @keyframes firefly-float {
+            0%, 100% { transform: translate(0, 0); opacity: 0; }
+            30% { opacity: 0.8; }
+            50% { transform: translate(30px, -40px); }
+            70% { opacity: 0.8; }
+        }
+
+        .desert { position: relative; overflow: hidden; height: 40%; }
+        .desert .perspective {
+            -webkit-perspective: 1.7em; perspective: 1.7em; background: linear-gradient(#2d5a27 50%, #3e7a33);
+            overflow: hidden; position: relative; z-index: -2; margin-top: -11.5em;
+        }
+
+        .desert .perspective .road {
+            width: 12%; margin: 0 auto; background-color: #3c3c3c; -webkit-transform: rotateX(20deg); transform: rotateX(20deg); height: 30em;
+            border-right: 1.5vw solid; border-left: 1.5vw solid; border-color: #888888;
+            background-image: 
+                linear-gradient(to right, #3c3c3c 48%, transparent 48%, transparent 52%, #3c3c3c 52%), 
+                linear-gradient(#3c3c3c 30%, #d7d325 30%, #d7d325 60%, #3c3c3c 60%);
+            background-size: 100% 100%, 100% 5%; background-repeat: no-repeat, repeat; animation: drive 3s linear infinite;
+        }
+        @keyframes drive { from { background-position: 0 0, 0 0; } to { background-position: 0 0, 0 21%; } }
+
+        .cactus { position: absolute; width: 25%; display: inline-block; z-index: 9; }
+        .cactus .center, .cactus .arm { float: left; }
+        .cactus .center {
+            padding: 65% 20%;
+            background: linear-gradient(to right, #38823D 16%, #306f34 16%, #306f34 20%, #38823D 20%, #38823D 38%, #306f34 38%, #306f34 42%, #38823D 42%, #38823D 60%, #306f34 60%, #306f34 64%, #38823D 64%, #38823D 82%, #306f34 82%, #306f34 86%, #38823D 86%);
+            border-top-left-radius: 45% 15%; border-top-right-radius: 45% 15%;
+        }
+        .cactus .arm {
+            background: radial-gradient(transparent 40%, #38823D 41%, #38823D 48%, #306f34 48%, #306f34 51%, #38823D 51%, #38823D 61%, #306f34 61%, #306f34 64%, #38823D 64%);
+            padding: 15%; background-size: 200% 200%;
+        }
+        .cactus .arm::before { content: ''; background: radial-gradient(#38823D 23%, #306f34 23%, #306f34 37%, #38823D 37%); z-index: -1; padding: 6.5%; position: absolute; border-radius: 50%; margin-top: -21%; }
+        .cactus .arm.left { border-radius: 0 0 0 100%; background-position: 0% 100%; margin-top: 20%; }
+        .cactus .arm.left::before { margin-left: -15%; }
+        .cactus .arm.right { border-radius: 0 0 100% 0; background-position: 100% 100%; margin-top: 50%; }
+        .cactus .arm.right::before { margin-left: 2.25%; }
+
+        .cactus-l { left: 0%; animation: left_cactus 10s ease-in infinite; }
+        .cactus-r { left: 75%; width: 0%; animation: right_cactus 10s ease-in infinite; animation-delay: 4s; }
+        @keyframes left_cactus { 0% { width: 0%; top: 5%; left: 40%; } 100% { width: 35%; top: 100%; left: -80%; } }
+        @keyframes right_cactus { 0% { width: 0%; top: 5%; left: 65%; } 100% { width: 35%; top: 80%; left: 165%; } }
+
+        /* --- UPDATED MENU BUTTON ON THE RIGHT SIDE --- */
+        .menu-btn-rainbow {
+            position: fixed; bottom: 15px; right: 15px; padding: 8px 16px; border-radius: 20px; color: white;
+            font-weight: 700; text-decoration: none; text-transform: lowercase; cursor: pointer; z-index: 2000; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa); background-size: 300% 100%; animation: gradientMove 4s ease infinite; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); transition: transform 0.2s; border: 2px solid rgba(255,255,255,0.2); pointer-events: auto;
+        }
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* --- UI STYLES --- */
+        #game-ui-container { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+        #game-ui-container * { pointer-events: auto; }
+
+        .top-btn-bar {
+            position: fixed; top: 10px; right: 10px; z-index: 1000; 
+            display: none; gap: 10px; pointer-events: auto;
+        }
+
+        .ui-btn {
+            background: rgba(15, 23, 42, 0.8) !important; color: white; border-radius: 50%; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        .ui-btn:hover { background: rgba(15, 23, 42, 1) !important; transform: scale(1.1); border-color: rgba(255,255,255,0.3); }
+
+        #orientation-warning { display: none; position: fixed; inset: 0; background: #0f172a; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
+        @media (orientation: portrait) { #orientation-warning { display: flex; } }
+        
+        #start-page { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: transparent; }
+        .modal-card { background: rgba(15, 23, 42, 0.95); backdrop-blur: 20px; padding: 3rem; border-radius: 2.5rem; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 50px 100px rgba(0,0,0,0.8); text-align: center; max-width: 500px; width: 90%; }
+        
+        #game-content { display: none; }
+
+        .traffic-light { 
+            position: relative; background: #2a2a2a; border-radius: 18px; padding: 16px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.05); width: fit-content; z-index: 1; border: 2px solid #3d3d3d; 
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .light-red, .light-yellow, .light-green { 
+            position: relative; margin: 0; width: 60px; height: 60px; border-radius: 50%; 
+            background: repeating-linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6) 4px); border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        @media (min-height: 500px) { .light-red, .light-yellow, .light-green { width: 75px; height: 75px; } }
+        
+        .light-red.active { background: radial-gradient(circle at 30% 30%, #ff4d4d, #880000); box-shadow: 0 0 50px #ff0000; z-index: 2; }
+        .light-yellow.active { background: radial-gradient(circle at 30% 30%, #ffeb3b, #a58b00); box-shadow: 0 0 50px #ffcc00; z-index: 2; }
+        .light-green.active { background: radial-gradient(circle at 30% 30%, #4caf50, #0d3d10); box-shadow: 0 0 50px #00ff00; z-index: 2; }
+        .blink { animation: blinker 0.6s step-start infinite; }
+        @keyframes blinker { 50% { opacity: 0.2; box-shadow: none; } }
+        
+        .command-block { 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            touch-action: manipulation; 
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .command-block:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .command-block:active { transform: scale(0.95); }
+        .code-slot { 
+            min-height: 80px; 
+            background: rgba(0, 0, 0, 0.6); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 16px; 
+            overflow-y: auto; 
+            overscroll-behavior: contain; 
+            scroll-indicator-width: thin; 
+            scrollbar-color: rgba(6, 182, 212, 0.4) transparent;
+            -webkit-overflow-scrolling: touch; 
+        }
+        .code-slot::-webkit-scrollbar { width: 6px; }
+        .code-slot::-webkit-scrollbar-track { background: transparent; }
+        .code-slot::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.3); border-radius: 10px; }
+        .code-slot::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.5); }
+        .active-instruction { background: rgba(59, 130, 246, 0.3) !important; border-left: 4px solid #3b82f6 !important; }
+        .animate-pop { animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .feedback-overlay { 
+            position: absolute; inset: 0; background: rgba(15, 23, 42, 0.98); display: none; 
+            flex-direction: column; align-items: center; justify-content: center; z-index: 50; 
+            border-radius: 1.5rem; text-align: center; padding: 20px; backdrop-blur: 10px; 
+        }
+        .code-font { font-family: 'Courier New', Courier, monospace; }
+
+        .game-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2100;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px);
+        }
+        .modal-card-inner {
+            background: rgba(15, 23, 42, 0.9);
+            color: white; padding: 2.5rem; border-radius: 2.5rem; max-width: 500px; width: 90%;
+            border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            /* Added to ensure scrollability on small screens */
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        /* --- MOBILE GENERAL OVERRIDES (Portrait) --- */
+        @media (max-width: 640px) {
+            .modal-card {
+                padding: 1.5rem !important;
+                border-radius: 1.5rem !important;
+            }
+            .modal-card h1 {
+                font-size: 1.75rem !important;
+            }
+            .modal-card .text-7xl {
+                font-size: 3.5rem !important;
+            }
+            .modal-card-inner {
+                padding: 1.5rem !important;
+                border-radius: 1.5rem !important;
+            }
+            .modal-card-inner h2 {
+                font-size: 1.75rem !important;
+            }
+            .modal-card-inner div.space-y-5 {
+                gap: 0.75rem !important;
+                font-size: 0.9rem !important;
+            }
+        }
+
+        /* --- MOBILE FRIENDLY LANDSCAPE OVERRIDES --- */
+        @media (max-height: 500px) and (orientation: landscape) {
+            /* Stretch logic side even more to the right */
+            #game-content > div > div:first-child {
+                width: 78% !important; /* Slightly adjusted to balance bigger light */
+            }
+            /* Shrink light side to take less room */
+            #game-content > div > div:last-child {
+                width: 22% !important;
+            }
+
+            .logic-panel-container {
+                flex-direction: row !important;
+                gap: 0.5rem;
+                flex-grow: 1;
+                overflow: hidden;
+            }
+            .command-palette-sidebar {
+                width: 155px;
+                flex-shrink: 0;
+                overflow-y: auto !important;
+                max-height: 100% !important;
+                margin-bottom: 0 !important;
+            }
+            #program-queue {
+                margin-bottom: 0 !important;
+                flex: 1;
+            }
+
+            /* Fix Start Page and Popups for Mobile Landscape - even smaller! */
+            .modal-card {
+                padding: 1rem !important;
+                max-width: 80% !important;
+                max-height: 90vh;
+                overflow-y: auto;
+                border-radius: 1.25rem !important;
+            }
+            .modal-card h1 {
+                font-size: 1.4rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+            .modal-card p {
+                font-size: 0.75rem !important;
+                margin-bottom: 0.4rem !important;
+            }
+            .modal-card .text-7xl {
+                font-size: 2rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+            .modal-card button {
+                padding: 0.5rem !important;
+                font-size: 0.85rem !important;
+                border-radius: 0.75rem !important;
+            }
+
+            .modal-card-inner {
+                padding: 1rem !important;
+                max-width: 85% !important;
+                max-height: 90vh;
+                overflow-y: auto;
+                border-radius: 1.25rem !important;
+            }
+            .modal-card-inner h2 {
+                font-size: 1.25rem !important;
+                margin-bottom: 0.35rem !important;
+            }
+            .modal-card-inner div.space-y-5 {
+                font-size: 0.75rem !important;
+                margin-bottom: 0.7rem !important;
+                gap: 0.2rem !important;
+            }
+            .modal-card-inner div.space-y-5 p {
+                margin-bottom: 0.1rem !important;
+            }
+            .modal-card-inner button {
+                padding: 0.65rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 0.75rem !important;
+            }
+
+            .traffic-light {
+                scale: 0.65; /* Made slightly bigger as requested */
+                padding: 12px !important;
+                gap: 10px !important;
+            }
+            .light-red, .light-yellow, .light-green {
+                width: 52px !important; /* Made slightly bigger as requested */
+                height: 52px !important;
+            }
+            
+            /* Reduce padding in the main box to maximize code area */
+            .bg-slate-900\/95 {
+                padding: 0.6rem !important;
+            }
+            #level-indicator {
+                font-size: 0.75rem !important;
+            }
+            .top-btn-bar .ui-btn {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+        <i class="fa-solid fa-gamepad"></i> menu
+    </a>
+
+    <!-- Top UI Bar - Order: Home, Info, Mute -->
+    <div id="top-ui-bar" class="top-btn-bar">
+        <div class="ui-btn" onclick="resetToStart()" title="home">
+            <i class="fa-solid fa-house"></i>
+        </div>
+        <div class="ui-btn" onclick="toggleHelp()" title="how to play">
+            <i class="fa-solid fa-question"></i>
+        </div>
+        <div class="ui-btn" onclick="toggleMute()" title="mute/unmute">
+            <i id="mute-icon" class="fa-solid fa-volume-high"></i>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="game-modal">
+        <div class="modal-card-inner text-center">
+            <h2 class="text-4xl font-black mb-6 uppercase tracking-tighter">how to play</h2>
+            <div class="text-slate-200 space-y-5 mb-10 text-base leading-relaxed lowercase font-medium">
+                <p>1. look at the <span class="text-emerald-400 font-bold px-2 py-0.5 bg-emerald-400/10 rounded">goal logic</span> box to see the target sequence.</p>
+                <p>2. click the <span class="text-pink-400 font-bold px-2 py-0.5 bg-pink-400/10 rounded">turn color</span> blocks to choose signals.</p>
+                <p>3. add <span class="text-indigo-400 font-bold px-2 py-0.5 bg-indigo-400/10 rounded">wait</span> blocks to hold the signal state.</p>
+                <p>4. click <span class="bg-white text-slate-900 px-3 py-1 rounded-full font-bold uppercase text-xs">run program</span> to test your logic!</p>
+                <p>5. finish all 5 missions to win! <span class="text-yellow-400 font-bold">(≧◡≦)</span></p>
+            </div>
+            <button onclick="toggleHelp()" class="w-full bg-white text-slate-900 hover:bg-slate-200 py-4 rounded-2xl font-bold transition-all lowercase text-xl shadow-lg">got it!</button>
+        </div>
+    </div>
+
+    <!-- Educational Value Modal -->
+    <div id="education-modal" class="game-modal">
+        <div class="modal-card-inner text-center">
+            <div class="text-6xl mb-4 text-purple-400"><i class="fa-solid fa-brain"></i></div>
+            <h2 class="text-3xl font-black mb-6 uppercase tracking-tighter">how is this educational?</h2>
+            <div class="text-slate-200 space-y-5 mb-10 text-base leading-relaxed lowercase font-medium text-left">
+                <p><span class="text-yellow-400 font-bold">1. sequencing:</span> learn that the order of commands matters to reach a goal!</p>
+                <p><span class="text-emerald-400 font-bold">2. logic building:</span> practice step-by-step thinking to solve complex problems.</p>
+                <p><span class="text-sky-400 font-bold">3. patterns:</span> recognize and recreate signals used in real-world systems.</p>
+                <p><span class="text-pink-400 font-bold">4. computational thinking:</span> break down a cycle into tiny, manageable instructions!</p>
+            </div>
+            <button onclick="toggleEducation()" class="w-full bg-white text-slate-900 hover:bg-slate-200 py-4 rounded-2xl font-bold transition-all lowercase text-xl shadow-lg">cool! (｡◕‿◕｡)</button>
+        </div>
+    </div>
+
+    <div class="sky">
+        <div class="aurora"></div>
+        <div class="shooting-star"></div>
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="cloud cloud-4"></div>
+        <div class="cloud cloud-5"></div>
+        <div class="moon"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="mountains">
+            <div class="range">
+                <div class="mountain"></div><div class="mountain"></div><div class="mountain"></div><div class="mountain"></div>
+            </div>
+            <div class="range">
+                <div class="mountain"></div><div class="mountain"></div><div class="mountain"></div><div class="mountain"></div><div class="mountain"></div><div class="mountain"></div>
+            </div>
+        </div>
+    </div>
+    <div class="desert">
+        <div class="cactus cactus-l">
+            <div class="flower">
+                <div class="pedal"></div><div class="pedal"></div><div class="pedal"></div><div class="pedal"></div>
+            </div>
+            <div class="arm left"></div>
+            <div class="center"></div>
+            <div class="arm right"></div>
+        </div>
+        <div class="cactus cactus-r">
+            <div class="arm left"></div>
+            <div class="center"></div>
+            <div class="arm right"></div>
+        </div>
+
+        <div class="perspective">
+            <div class="road"></div>
+        </div>
+
+        <div class="firefly" style="left: 10%; bottom: 20%; animation-delay: 1s;"></div>
+        <div class="firefly" style="left: 30%; bottom: 40%; animation-delay: 3s;"></div>
+        <div class="firefly" style="left: 60%; bottom: 15%; animation-delay: 2s;"></div>
+        <div class="firefly" style="left: 85%; bottom: 35%; animation-delay: 5s;"></div>
+        <div class="firefly" style="left: 20%; bottom: 10%; animation-delay: 0s;"></div>
+    </div>
+
+    <div id="game-ui-container">
+        <div id="orientation-warning">
+            <div class="mb-6 text-6xl">🔄</div>
+            <h2 class="text-2xl font-bold mb-2 text-white">landscape mode required</h2>
+            <p class="text-slate-400">please rotate your device to landscape mode to play.</p>
+        </div>
+
+        <div id="start-page">
+            <div class="modal-card">
+                <div class="mb-6 text-7xl">🚥</div>
+                <h1 class="text-4xl font-black text-white mb-4 tracking-tighter uppercase">traffic light logic</h1>
+                <p class="text-slate-400 mb-6 text-lg">build the correct logic sequence to pass all 5 missions.</p>
+                <div class="flex flex-col gap-4 mb-4">
+                    <button onclick="startGame()" class="w-full bg-white text-slate-950 py-5 rounded-2xl font-bold text-2xl shadow-xl hover:bg-slate-200 hover:scale-[1.05] transition-all lowercase">start game</button>
+                    <button onclick="toggleEducation()" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold text-lg hover:bg-slate-700 transition-all flex items-center justify-center gap-3 lowercase">
+                        <i class="fa-solid fa-graduation-cap"></i> educational value
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-content" class="flex-1 p-2 md:p-8 gap-4 md:gap-8 h-full overflow-hidden relative z-10">
+            <div class="flex flex-1 gap-4 md:gap-8 h-full">
+                <!-- LOGIC SIDE -->
+                <div class="w-1/2 flex flex-col gap-2 md:gap-4 h-full relative">
+                    <div id="result-overlay" class="feedback-overlay">
+                        <h2 id="result-title" class="text-2xl md:text-4xl font-black text-white mb-2 md:mb-4">title</h2>
+                        <p id="result-text" class="text-slate-400 mb-4 md:mb-8 text-sm md:text-base">text</p>
+                        <button id="result-btn" class="bg-blue-600 text-white px-6 md:px-10 py-2 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg md:text-xl hover:bg-blue-700 transition-all">button</button>
+                    </div>
+
+                    <div class="bg-slate-900/95 backdrop-blur-xl p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl border border-white/10 flex flex-col h-full max-h-screen">
+                        <div class="flex justify-between items-center mb-1 md:mb-2">
+                            <h1 class="text-xl md:text-3xl font-black text-white tracking-tight">traffic light logic</h1>
+                            <div id="level-indicator" class="text-emerald-400 font-bold text-sm md:text-base">level 1/5</div>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 p-2 md:p-4 rounded-xl md:rounded-2xl mb-2 md:mb-6 border border-white/5">
+                            <h3 class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 md:mb-2">goal logic</h3>
+                            <div id="goal-sequence" class="flex flex-col gap-1 code-font"></div>
+                        </div>
+                        
+                        <!-- REORGANIZED CONTAINER FOR MOBILE LANDSCAPE -->
+                        <div class="logic-panel-container flex flex-col flex-grow overflow-hidden mb-2 md:mb-6">
+                            <div class="command-palette-sidebar flex flex-wrap gap-2 mb-2 md:mb-4 shrink-0 overflow-y-auto max-h-32">
+                                <button onclick="addCommand('red', 'turn red')" class="command-block bg-red-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-bold shadow-lg shadow-red-950/50 text-[10px] md:text-sm">turn red</button>
+                                <button onclick="addCommand('yellow', 'turn yellow')" class="command-block bg-amber-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-bold shadow-lg shadow-amber-950/50 text-[10px] md:text-sm">turn yellow</button>
+                                <button onclick="addCommand('green', 'turn green')" class="command-block bg-emerald-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-bold shadow-lg shadow-emerald-950/50 text-[10px] md:text-sm">turn green</button>
+                                <button onclick="addCommand('blink-yellow', 'blink yellow')" class="command-block bg-yellow-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-bold shadow-lg shadow-yellow-950/50 text-[10px] md:text-sm">blink yellow</button>
+                                <button onclick="addCommand('off', 'all off')" class="command-block bg-slate-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-bold shadow-lg shadow-slate-950/50 text-[10px] md:text-sm">all off</button>
+                                <button onclick="addCommand('wait', 'wait')" class="command-block bg-indigo-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-bold shadow-lg shadow-indigo-950/50 text-[10px] md:text-sm">wait</button>
+                            </div>
+
+                            <div id="program-queue" class="code-slot p-3 md:p-5 flex flex-col gap-2 md:gap-3 flex-grow"></div>
+                        </div>
+
+                        <div class="flex gap-2 md:gap-4 shrink-0">
+                            <button onclick="runProgram()" id="run-btn" class="flex-1 bg-white text-slate-950 py-2 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-xl shadow-xl hover:bg-slate-200 transition-all">run program</button>
+                            <button onclick="clearProgram()" class="bg-slate-800 text-slate-300 px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-2xl font-bold hover:bg-slate-700 transition-colors border border-white/10 text-sm md:text-base">clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRAFFIC LIGHT SIDE -->
+                <div class="w-1/2 relative flex flex-col items-center justify-center h-full">
+                    <div class="traffic-light scale-75 md:scale-100">
+                        <div id="red" class="light-red"></div>
+                        <div id="yellow" class="light-yellow"></div>
+                        <div id="green" class="light-green"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /* --- AUDIO SYSTEM --- */
+    const AudioSys = {
+        ctx: null,
+        muted: false,
+        init() { if (!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } },
+        play(freq, type, dur, vol = 0.1) {
+            if (this.muted) return;
+            this.init();
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + dur);
+        },
+        click() { this.play(600, 'sine', 0.1); },
+        lightOn() { this.play(800, 'triangle', 0.15, 0.05); },
+        success() { [440, 554, 659, 880].forEach((f, i) => { setTimeout(() => this.play(f, 'sine', 0.4, 0.1), i * 100); }); },
+        fail() { this.play(150, 'sawtooth', 0.3, 0.1); setTimeout(() => this.play(100, 'sawtooth', 0.3, 0.1), 150); }
+    };
+
+    function toggleMute() {
+        AudioSys.muted = !AudioSys.muted;
+        document.getElementById('mute-icon').className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        AudioSys.click();
+    }
+
+    function toggleHelp() {
+        const modal = document.getElementById('help-modal');
+        const isShowing = modal.style.display === 'flex';
+        modal.style.display = isShowing ? 'none' : 'flex';
+        AudioSys.click();
+    }
+
+    function toggleEducation() {
+        const modal = document.getElementById('education-modal');
+        const isShowing = modal.style.display === 'flex';
+        modal.style.display = isShowing ? 'none' : 'flex';
+        AudioSys.click();
+    }
+
+    const levels = [
+        { id: 1, target: ['red'] },
+        { id: 2, target: ['blink-yellow'] },
+        { id: 3, target: ['red', 'green', 'off'] },
+        { id: 4, target: ['green', 'wait', 'yellow', 'blink-yellow', 'red'] },
+        { id: 5, target: ['off', 'wait', 'blink-yellow', 'wait', 'red'] }
+    ];
+
+    let currentLevelIndex = 0;
+    let program = [];
+    let isRunning = false;
+
+    function startGame() {
+        AudioSys.init();
+        AudioSys.click();
+        document.getElementById('start-page').style.display = 'none';
+        document.getElementById('game-content').style.display = 'flex';
+        document.getElementById('top-ui-bar').style.display = 'flex'; 
+        currentLevelIndex = 0;
+        initLevel();
+    }
+
+    function resetToStart() {
+        AudioSys.click();
+        document.getElementById('result-overlay').style.display = 'none';
+        document.getElementById('start-page').style.display = 'flex';
+        document.getElementById('game-content').style.display = 'none';
+        document.getElementById('top-ui-bar').style.display = 'none'; 
+        currentLevelIndex = 0;
+    }
+
+    function initLevel() {
+        if (currentLevelIndex < 0) currentLevelIndex = 0;
+        if (currentLevelIndex >= levels.length) currentLevelIndex = levels.length - 1;
+        const level = levels[currentLevelIndex];
+        document.getElementById('level-indicator').innerText = `level ${level.id}/5`;
+        const goalContainer = document.getElementById('goal-sequence');
+        goalContainer.innerHTML = '';
+        level.target.forEach(cmd => {
+            const div = document.createElement('div');
+            div.className = 'text-xs md:text-sm font-bold tracking-tight';
+            const dot = '<span class="text-white">.</span>';
+            const openParen = '<span class="text-slate-400">(</span>';
+            const closeParen = '<span class="text-slate-400">)</span>';
+            const semi = '<span class="text-slate-500">;</span>';
+            if (cmd === 'wait') { div.innerHTML = `<span class="text-sky-400">system</span>${dot}<span class="text-fuchsia-400">wait</span>${openParen}<span class="text-orange-400">1s</span>${closeParen}${semi}`; }
+            else if (cmd === 'off') { div.innerHTML = `<span class="text-sky-400">signal</span>${dot}<span class="text-fuchsia-400">allOff</span>${openParen}${closeParen}${semi}`; }
+            else if (cmd.startsWith('blink-')) { const color = cmd.split('-')[1]; div.innerHTML = `<span class="text-sky-400">signal</span>${dot}<span class="text-fuchsia-400">blink</span>${openParen}<span class="text-emerald-400">"${color}"</span>${closeParen}${semi}`; }
+            else { div.innerHTML = `<span class="text-sky-400">signal</span>${dot}<span class="text-fuchsia-400">on</span>${openParen}<span class="text-emerald-400">"${cmd}"</span>${closeParen}${semi}`; }
+            goalContainer.appendChild(div);
+        });
+        clearProgram();
+    }
+
+    function addCommand(type, label) {
+        if (isRunning) return;
+        AudioSys.click();
+        program.push(type);
+        const queue = document.getElementById('program-queue');
+        const block = document.createElement('div');
+        block.className = 'bg-slate-800/60 p-2 md:p-3 rounded-lg md:rounded-xl border border-white/5 flex justify-between items-center animate-pop';
+        block.innerHTML = `<span class="font-semibold text-slate-200 text-xs md:text-sm">${label}</span><button class="text-slate-500 hover:text-red-400 font-bold px-2" onclick="removeCommand(this)">✕</button>`;
+        queue.appendChild(block);
+        queue.scrollTop = queue.scrollHeight;
+    }
+
+    function removeCommand(btn) {
+        if (isRunning) return;
+        AudioSys.click();
+        const block = btn.parentElement;
+        const index = Array.from(block.parentElement.children).indexOf(block);
+        block.remove();
+        program.splice(index, 1);
+    }
+
+    function clearProgram() {
+        if (isRunning) return;
+        AudioSys.click();
+        program = [];
+        document.getElementById('program-queue').innerHTML = '';
+        resetLights();
+    }
+
+    function resetLights() {
+        ['red', 'yellow', 'green'].forEach(c => {
+            const el = document.getElementById(c);
+            if (el) el.classList.remove('active', 'blink');
+        });
+    }
+
+    function showOverlay(title, text, btnText, btnAction) {
+        document.getElementById('result-title').innerText = title;
+        document.getElementById('result-text').innerText = text;
+        const btn = document.getElementById('result-btn');
+        btn.innerText = btnText;
+        btn.onclick = (e) => {
+            e.preventDefault();
+            AudioSys.click();
+            document.getElementById('result-overlay').style.display = 'none';
+            if (typeof btnAction === 'function') btnAction();
+        };
+        if (title.toLowerCase().includes('complete') || title.toLowerCase().includes('job')) { btn.className = "bg-emerald-600 text-white px-6 md:px-10 py-2 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg md:text-xl hover:bg-emerald-700 transition-all"; }
+        else { btn.className = "bg-red-600 text-white px-6 md:px-10 py-2 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg md:text-xl hover:bg-red-700 transition-all"; }
+        document.getElementById('result-overlay').style.display = 'flex';
+    }
+
+    function nextLevel() { currentLevelIndex++; initLevel(); }
+    function retryLevel() { clearProgram(); }
+
+    async function runProgram() {
+        if (isRunning || program.length === 0) return;
+        AudioSys.init();
+        isRunning = true;
+        const runBtn = document.getElementById('run-btn');
+        const originalText = runBtn.innerText;
+        runBtn.innerText = "...";
+        runBtn.disabled = true;
+        runBtn.classList.add('opacity-50');
+        const blocks = document.getElementById('program-queue').children;
+        for (let i = 0; i < program.length; i++) {
+            const cmd = program[i];
+            if(blocks[i]) blocks[i].classList.add('active-instruction');
+            if (cmd === 'wait') { await new Promise(r => setTimeout(r, 1000)); }
+            else if (cmd === 'off') { AudioSys.lightOn(); resetLights(); await new Promise(r => setTimeout(r, 800)); }
+            else if (cmd.startsWith('blink-')) {
+                AudioSys.lightOn();
+                resetLights();
+                const color = cmd.split('-')[1];
+                const el = document.getElementById(color);
+                if (el) el.classList.add('active', 'blink');
+                await new Promise(r => setTimeout(r, 1500));
+            } else {
+                AudioSys.lightOn();
+                resetLights();
+                const light = document.getElementById(cmd);
+                if (light) light.classList.add('active');
+                await new Promise(r => setTimeout(r, 800));
+            }
+            if(blocks[i]) blocks[i].classList.remove('active-instruction');
+        }
+        const target = levels[currentLevelIndex].target;
+        const isCorrect = program.length === target.length && program.every((val, idx) => val === target[idx]);
+        if (isCorrect) {
+            AudioSys.success();
+            if (currentLevelIndex >= levels.length - 1) { showOverlay("missions complete!", "you are a logic master!", "back to home", resetToStart); }
+            else { showOverlay("level complete!", "great job!", "next level", nextLevel); }
+        } else { AudioSys.fail(); showOverlay("try again!", "the logic sequence didn't quite match.", "reset code", retryLevel); }
+        isRunning = false;
+        runBtn.innerText = originalText;
+        runBtn.disabled = false;
+        runBtn.classList.remove('opacity-50');
+    }
+</script>
+</body>
+</html>

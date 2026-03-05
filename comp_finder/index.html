@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comp Finder</title>
+    <!-- Font Awesome for the cool icons! -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* peach parchment background */
+            background: #f5e6d3;
+            background: radial-gradient(circle at center, #fff5e6 0%, #f5d7b5 100%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            font-family: 'Baskerville', 'Georgia', serif;
+            touch-action: none;
+            box-sizing: border-box;
+            padding: 10px 0 20px 0;
+        }
+
+        /* === RAINBOW MENU BUTTON STYLES === */
+        #rainbow-container {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 2500; /* stays above everything */
+        }
+
+        .menu-btn-rainbow {
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 900;
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+            background-size: 300% 100%;
+            animation: gradientMove 4s ease infinite;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255,255,255,0.2);
+            text-transform: lowercase;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn-rainbow:hover { transform: scale(1.05); }
+
+        @keyframes gradientMove { 
+            0% { background-position: 0% 50%; } 
+            50% { background-position: 100% 50%; } 
+            100% { background-position: 0% 50%; } 
+        }
+
+        /* TORN PAPER SYSTEM */
+        .torn-paper {
+            position: relative;
+            background: #fdf5e6; 
+            background-image: 
+                radial-gradient(circle at 50% 50%, transparent 0%, rgba(210, 180, 140, 0.2) 100%),
+                url("https://www.transparenttextures.com/patterns/parchment.png");
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            padding: 45px 30px;
+            margin: 20px auto;
+            -webkit-clip-path: polygon(0% 2%, 5% 0%, 10% 3%, 15% 1%, 20% 4%, 25% 1%, 30% 3%, 35% 0%, 40% 4%, 45% 1%, 50% 3%, 55% 1%, 60% 4%, 65% 1%, 70% 3%, 75% 0%, 80% 4%, 85% 1%, 90% 3%, 95% 0%, 100% 2%, 100% 98%, 95% 100%, 90% 97%, 85% 99%, 80% 96%, 75% 100%, 70% 97%, 65% 99%, 60% 96%, 55% 100%, 50% 97%, 45% 99%, 40% 96%, 35% 100%, 30% 97%, 25% 99%, 20% 96%, 15% 100%, 10% 97%, 5% 99%, 0% 98%);
+            clip-path: polygon(0% 2%, 5% 0%, 10% 3%, 15% 1%, 20% 4%, 25% 1%, 30% 3%, 35% 0%, 40% 4%, 45% 1%, 50% 3%, 55% 1%, 60% 4%, 65% 1%, 70% 3%, 75% 0%, 80% 4%, 85% 1%, 90% 3%, 95% 0%, 100% 2%, 100% 98%, 95% 100%, 90% 97%, 85% 99%, 80% 96%, 75% 100%, 70% 97%, 65% 99%, 60% 96%, 55% 100%, 50% 97%, 45% 99%, 40% 96%, 35% 100%, 30% 97%, 25% 99%, 20% 96%, 15% 100%, 10% 97%, 5% 99%, 0% 98%);
+        }
+
+        /* OVERLAYS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* DARKER FADE BACKGROUND */
+            background: rgba(5, 4, 3, 0.98); 
+            backdrop-filter: blur(12px);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .content-width {
+            width: 85%;
+            max-width: 450px;
+        }
+
+        .torn-paper h1 {
+            font-size: 34px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #4a332a;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .torn-paper p {
+            color: #5c4033;
+            font-size: 17px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* HEADER LINE */
+        #header-line {
+            width: 80%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1500;
+            gap: 10px;
+            background: linear-gradient(to bottom, #4a332a 0%, #2b1d16 100%);
+            padding: 10px 18px;
+            border-radius: 4px;
+            border: 1px solid #5c4033;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        #target-display {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #f5e6d3; 
+            flex: 2;
+            text-align: center;
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+
+        #stats {
+            font-size: 12px;
+            color: #d2b48c;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 10px;
+            border-radius: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        #nav-bar {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: #2b1d16;
+            border: 1px solid #5c4033;
+            border-radius: 3px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover { background: #4a332a; }
+        .icon-btn i { font-size: 16px; color: #d2b48c; }
+
+        /* Compass Container */
+        .compass {
+            position: relative;
+            width: 700px;
+            height: 700px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(0.6);
+            flex-shrink: 0;
+            cursor: grab;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+            margin: -140px 0;
+        }
+
+        /* BOTTOM CONTROLS */
+        #controls { 
+            z-index: 100; 
+            width: 80%; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            gap: 15px;
+        }
+
+        .rusty-btn {
+            background: linear-gradient(to bottom, #5c4033 0%, #2b1d16 100%);
+            color: #f5e6d3; 
+            border: 1px solid #4a332a; 
+            padding: 18px 0; 
+            flex: 1;
+            font-size: 12px; 
+            font-weight: bold; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+            border-radius: 4px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            font-family: inherit; 
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+        }
+
+        .rusty-btn i { margin-right: 8px; }
+        .rusty-btn:hover { filter: brightness(1.1); }
+        .rusty-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
+
+        #horizontal-viewport {
+            flex: 2; 
+            height: 48px;
+            background: #fdf5e6; 
+            border: 2px solid #5c4033; 
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #horizontal-strip {
+            display: flex;
+            position: absolute;
+            height: 100%;
+            top: 0;
+            left: 50%;
+            transition: transform 0.1s ease-out;
+        }
+
+        .tick-mark {
+            width: 80px; 
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #5c4033;
+            font-size: 14px;
+            border-left: 1px solid rgba(0,0,0,0.1);
+        }
+
+        #center-marker {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #d9363b;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* MOBILE OVERRIDES */
+        @media (max-width: 1024px) {
+            #header-line, #controls { width: 80%; }
+            .compass { transform: scale(0.45); margin: -210px 0; }
+            #target-display { font-size: 12px; }
+            #stats { font-size: 10px; }
+            .icon-btn { width: 32px; height: 32px; }
+            #horizontal-viewport { height: 42px; }
+            .tick-mark { width: 60px; font-size: 11px; }
+        }
+
+        /* --- COMPASS DESIGN (UNCHANGED) --- */
+        .body { position: absolute; z-index: 1; width: 650px; height: 650px; border-radius: 50%; pointer-events: none; }
+        .body:after {
+            position: absolute; content: ''; width: 670px; height: 670px; display: block; left: -10px; top: -10px; z-index: -1;
+            border-radius: 50%; background-color: #c8603d; border: 2px solid #763c24; box-shadow: 0 0px 0px 8px #9b472b, 0 10px 0px 8px #743621;
+        }
+        .panel { position: absolute; background-color: #252b29; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; }
+        .take { position: absolute; z-index: -1; top: -20px; width: 120px; height: 40px; left: 50%; margin-left: -60px; background-color: #9b472b; border-radius: 10px 10px 0 0; }
+        .take:before { position: absolute; z-index: 0; content: ''; top: -50px; width: 80px; height: 100px; left: 50%; margin-left: -40px; border-radius: 50%; background-color: #9b472b; }
+        .take:after { position: absolute; top: -50px; width: 35px; background-color: #9b472b; border-radius: 50px 0 0 0; content: ""; height: 100px; left: 55%; margin-left: -40px; }
+        .ring { content: ''; border-radius: 50%; position: absolute; top: -90px; width: 50px; left: 50%; margin-left: -35px; height: 50px; border: solid 10px #743621; }
+        .ring:after { position: absolute; content: ''; z-index: 1; top: 47px; left: 50%; width: 14px; height: 14px; margin-left: -7px; background-color: #4c2214; border-radius: 50%; }
+        .center {
+            position: absolute; z-index: 20; width: 40px; height: 40px; left: 50%; top: 50%; margin: -20px 0 0 -22px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(240,183,161,1) 0%, rgba(140,51,16,1) 50%, rgba(117,34,1,1) 51%, rgba(191,110,78,1) 100%);
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0, .5); pointer-events: none;
+        }
+        .center:before { position: absolute; z-index: 1; content: ''; width: 20px; height: 20px; top: 50%; left: 50%; margin: -10px 0 0 -10px; border-radius: 50%; background-color: #ddd; }
+        .hold-mark { position: absolute; top: 50%; left: 50%; width: 620px; height: 620px; margin: -310px 0 0 -310px; z-index: 0; border-radius: 50%; }
+        .hold-mark > div { border: solid 0 #9a8770; border-width: 15px 0; width: 8px; left: 50%; margin-left: -4px; top: -15px; opacity: 0.3; height: 100%; position: absolute; display: block; }
+        .hold-mark > div > span { width: 1px; background-color: #9a8770; opacity: 0.3; height: 100%; position: absolute; display: block; }
+        .hold-mark > div:nth-child(2) { transform: rotate(30deg); }
+        .hold-mark > div:nth-child(3) { transform: rotate(60deg); }
+        .hold-mark > div:nth-child(4) { transform: rotate(90deg); }
+        .hold-mark > div:nth-child(5) { transform: rotate(120deg); }
+        .hold-mark > div:nth-child(6) { transform: rotate(150deg); }
+        .hold-mark > div > span { transform: rotate(6deg); }
+        .hold-mark > div > span:nth-child(1) { transform: rotate(12deg); }
+        .hold-mark > div > span:nth-child(2) { transform: rotate(18deg); }
+        .hold-mark > div > span:nth-child(3) { transform: rotate(24deg); }
+        .hold-bg { position: absolute; width: 100%; height: 100%; background: linear-gradient(to right, rgba(34,34,34,1) 0%, rgba(0,0,0, 0) 100%); }
+        .glass { position: absolute; width: 100%; height: 100%; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%); pointer-events: none; }
+        .hold-arrows { position: absolute; z-index: 0; width: 420px; height: 420px; left: 50%; top: 50%; margin: -210px 0 0 -210px; pointer-events: none; }
+        .arrow { position: absolute; z-index: 2; width: 0; height: 0; top: 0; left: 42%; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 210px solid #9a8770; transform-origin: 50% 210px; }
+        .arrow:after { position: absolute; z-index: -1; content: ''; top: 30px; left: -15px; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 160px solid #252b29; }
+        .arrow-right { transform: rotate(90deg); }
+        .arrow-down { transform: rotate(180deg); }
+        .arrow-left { transform: rotate(270deg); }
+        .arrow-sub { position: absolute; z-index: 1; top: 60px; left: 42%; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 140px solid #5c4b41; transform-origin: 50% 150px; }
+        .arrow-up-right { transform: rotate(45deg); }
+        .arrow-up-left { transform: rotate(-45deg); }
+        .arrow-down-left { transform: rotate(-135deg); }
+        .arrow-down-right { transform: rotate(135deg); }
+        .hold-directions { position: absolute; width: 600px; height: 600px; left: 50%; top: 50%; margin: -300px 0 0 -300px; pointer-events: none; }
+        .direction { position: absolute; z-index: 2; color: #706257; font-weight: bold; font-family: "Times New Roman", Times, serif; font-size: 96px; text-shadow: 1px 1px 1px #000; }
+        .direction-sub { position: absolute; z-index: 2; color: #706257; font-weight: bold; font-family: "Times New Roman", Times, serif; font-size: 72px; text-shadow: 1px 1px 1px #000; }
+        .direction-n { top: -5px; left: 260px; }
+        .direction-l { right: 10px; top: 245px; transform: rotate(90deg); }
+        .direction-s { bottom: -8px; left: 270px; transform: rotate(180deg); }
+        .direction-o { left: 5px; top: 245px; transform: rotate(270deg); }
+        .direction-ne { top: 110px; right: 100px; transform: rotate(45deg); }
+        .direction-no { top: 110px; left: 100px; transform: rotate(-45deg); }
+        .direction-se { bottom: 110px; right: 100px; transform: rotate(135deg); }
+        .direction-so { bottom: 110px; left: 100px; transform: rotate(-135deg); }
+        .hold-main-arrow { position: absolute; z-index: 15; width: 500px; height: 500px; left: 50%; top: 50%; margin: -250px 0 0 -250px; pointer-events: none; transition: transform 0.1s ease-out; }
+        .main-arrow { position: absolute; width: 0; height: 0; top: -50px; left: 218px; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 300px solid #d7dee3; transform: rotate(-45deg); transform-origin: 50% 300px; }
+        .main-arrow:before { position: absolute; content: ''; left: 0; border-left: 0 solid transparent; border-right: 30px solid transparent; border-bottom: 300px solid #f6f8f9; }
+        .main-arrow:after { position: absolute; top: 0; left: -10px; content: ''; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 90px solid #d9363b; }
+        .main-arrow.down { transform: rotate(135deg); transform-origin: 50% 300px; }
+        .main-arrow.down:after { opacity: 0; }
+
+        #message-box {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 24px; font-weight: bold; color: #4a332a; 
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+            text-align: center; transition: all 0.3s ease; opacity: 0; z-index: 200; pointer-events: none;
+        }
+        #message-box.active { opacity: 1; transform: translate(-50%, -60%); }
+    </style>
+</head>
+<body>
+
+    <!-- RAINBOW MENU BUTTON -->
+    <div id="rainbow-container">
+        <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
+            <i class="fa-solid fa-gamepad"></i> menu
+        </a>
+    </div>
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="modal-overlay">
+        <div class="content-width">
+            <div class="torn-paper">
+                <h1>Wayfinder</h1>
+                <p>Align the needle's Red Tip to the requested heading. Master 5 trials to reveal the relic.</p>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <button id="start-btn" class="rusty-btn" style="padding: 15px 0;">Begin Journey</button>
+                    <button id="edu-open-btn" class="rusty-btn" style="padding: 15px 0; background:none; border-color:rgba(0,0,0,0.1); color:#4a332a; box-shadow:none;">
+                        <!-- GRADUATION CAP ICON -->
+                        <i class="fa-solid fa-graduation-cap"></i> Educational Value
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDUCATIONAL MODAL -->
+    <div id="edu-modal" class="modal-overlay hidden">
+        <div class="content-width">
+            <div class="torn-paper">
+                <!-- BRAIN ICON CENTERED -->
+                <div style="text-align:center; width: 100%;">
+                    <i class="fa-solid fa-brain" style="font-size:60px; color:#4a332a; margin-bottom:15px; display:block; margin-left:auto; margin-right:auto;"></i>
+                </div>
+                <h1>how is this educational?</h1>
+                <p style="text-align:left; font-size: 14px;">This game hones vital cognitive skills:<br><br>
+                • <b>Spatial Mapping:</b> Translating cardinal directions into 360° rotation.<br>
+                • <b>Geometry:</b> Practical understanding of degree increments and angles.<br>
+                • <b>Dexterity:</b> Fine motor control through high-precision tactile interaction.</p>
+                <button id="close-edu" class="rusty-btn" style="padding:15px 0; width:100%;">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VICTORY MODAL -->
+    <div id="victory-modal" class="modal-overlay hidden">
+        <div class="content-width">
+            <div class="torn-paper">
+                <h1>Legend of the Relic</h1>
+                <p id="victory-story"></p>
+                <button id="restart-journey-btn" class="rusty-btn" style="padding: 15px 0; width:100%;">Return Home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div id="help-modal" class="modal-overlay hidden">
+        <div class="content-width">
+            <div class="torn-paper">
+                <h1>Navigation</h1>
+                <p>1. Check the target direction at the top bar.<br>2. Drag the needle's Red Tip toward that heading.<br>3. Hit Confirm to lock in your bearing!</p>
+                <button id="close-help" class="rusty-btn" style="padding:15px 0; width:100%;">Understood</button>
+            </div>
+        </div>
+    </div>
+
+    <header id="header-line">
+        <div id="target-display">Wait...</div>
+        <div id="stats">1/5 | 0 pts</div>
+        <div id="nav-bar">
+            <button class="icon-btn" id="home-btn" title="Home"><i class="fa-solid fa-house"></i></button>
+            <button class="icon-btn" id="restart-btn" title="Restart"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+            <button class="icon-btn" id="help-btn" title="Help"><i class="fa-solid fa-question"></i></button>
+            <button class="icon-btn" id="mute-btn" title="Mute"><i id="speaker-icon" class="fa-solid fa-volume-high"></i></button>
+        </div>
+    </header>
+
+    <div class="compass" id="compass-area">
+        <div class="body">
+            <div class="take"><div class="ring"></div></div>
+            <div class="panel">
+                <div class="hold-bg">
+                    <div class="glass"></div>
+                    <div class="hold-mark">
+                        <div><span></span><span></span><span></span><span></span></div>
+                        <div><span></span><span></span><span></span><span></span></div>
+                        <div><span></span><span></span><span></span><span></span></div>
+                        <div><span></span><span></span><span></span><span></span></div>
+                        <div><span></span><span></span><span></span><span></span></div>
+                        <div><span></span><span></span><span></span><span></span></div>
+                    </div>
+                    <div class="hold-arrows">
+                        <div class="arrow arrow-up"></div>
+                        <div class="arrow arrow-right"></div>
+                        <div class="arrow arrow-down"></div>
+                        <div class="arrow arrow-left"></div>
+                        <div class="arrow-sub arrow-up-right"></div>
+                        <div class="arrow-sub arrow-up-left"></div>
+                        <div class="arrow-sub arrow-down-right"></div>
+                        <div class="arrow-sub arrow-down-left"></div>
+                    </div>
+                    <div class="hold-directions">
+                        <div class="direction direction-n">N</div>
+                        <div class="direction direction-l">E</div>
+                        <div class="direction direction-s">S</div>
+                        <div class="direction direction-o">W</div>
+                        <div class="direction-sub direction-ne">NE</div>
+                        <div class="direction-sub direction-no">NW</div>
+                        <div class="direction-sub direction-se">SE</div>
+                        <div class="direction-sub direction-so">SW</div>
+                    </div>
+                </div>
+                <div class="hold-main-arrow" id="needle-container">
+                    <div class="main-arrow"></div>
+                    <div class="main-arrow down"></div>
+                </div>
+                <div class="center"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button id="action-btn" class="rusty-btn">Confirm</button>
+        <div id="horizontal-viewport">
+            <div id="center-marker"></div>
+            <div id="horizontal-strip"></div>
+        </div>
+    </div>
+
+    <div id="message-box"></div>
+
+    <script>
+        const needle = document.getElementById('needle-container');
+        const compassArea = document.getElementById('compass-area');
+        const actionBtn = document.getElementById('action-btn');
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
+        const targetDisplay = document.getElementById('target-display');
+        const statsDisplay = document.getElementById('stats');
+        const messageBox = document.getElementById('message-box');
+        const muteBtn = document.getElementById('mute-btn');
+        const speakerIcon = document.getElementById('speaker-icon');
+        const homeBtn = document.getElementById('home-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const helpBtn = document.getElementById('help-btn');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelp = document.getElementById('close-help');
+        const eduBtn = document.getElementById('edu-open-btn');
+        const eduModal = document.getElementById('edu-modal');
+        const closeEdu = document.getElementById('close-edu');
+        const victoryModal = document.getElementById('victory-modal');
+        const victoryStory = document.getElementById('victory-story');
+        const restartJourneyBtn = document.getElementById('restart-journey-btn');
+        const hStrip = document.getElementById('horizontal-strip');
+
+        // Game State
+        let score = 0;
+        let currentLevel = 1;
+        const maxLevels = 5;
+        let currentRotation = 45; 
+        let lastMouseAngle = null; 
+        let lastTickAngle = 45; 
+        let isDragging = false;
+        let targetDirection = "";
+        let targetAngle = 0;
+        let gameOver = false;
+        let gameStarted = false;
+        let muted = false;
+
+        function getTickSpacing() { return window.innerWidth <= 600 ? 60 : 80; }
+
+        function buildTape() {
+            hStrip.innerHTML = '';
+            const tapeDirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N", "NE", "E"]; 
+            const tickWidth = getTickSpacing();
+            tapeDirs.forEach(d => {
+                const div = document.createElement('div');
+                div.className = 'tick-mark';
+                div.style.width = tickWidth + 'px';
+                div.innerText = d;
+                hStrip.appendChild(div);
+            });
+        }
+        buildTape();
+        window.addEventListener('resize', buildTape);
+
+        // Sound Engine
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, duration, type = 'sine', volume = 0.1) {
+            if (muted) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        const sounds = {
+            perfect: () => { playTone(523.25, 0.4, 'sine'); setTimeout(() => playTone(659.25, 0.5, 'sine'), 100); },
+            good: () => playTone(440, 0.3, 'sine'),
+            fail: () => playTone(110, 0.5, 'triangle', 0.2),
+            click: () => playTone(880, 0.05, 'sine', 0.05),
+            tick: () => playTone(1200, 0.02, 'sine', 0.02)
+        };
+
+        const directions = [
+            { name: "North", angle: 0 }, { name: "North East", angle: 45 },
+            { name: "East", angle: 90 }, { name: "South East", angle: 135 },
+            { name: "South", angle: 180 }, { name: "South West", angle: 225 },
+            { name: "West", angle: 270 }, { name: "North West", angle: 315 }
+        ];
+
+        function showMessage(text, color) {
+            messageBox.innerText = text;
+            messageBox.style.color = color;
+            messageBox.classList.add('active');
+            setTimeout(() => messageBox.classList.remove('active'), 2000);
+        }
+
+        function updateStats() { statsDisplay.innerText = `${currentLevel}/${maxLevels} | ${score} pts`; }
+
+        function showVictory() {
+            gameOver = true;
+            victoryStory.innerText = `Through storm and shadow, you navigated with a steady hand. The ancient Peach Relic glows in your grasp, marking you as a Master of the North! With a final score of ${score}, your saga will be told for generations.`;
+            victoryModal.classList.remove('hidden');
+        }
+
+        function setNewTarget() {
+            if (currentLevel > maxLevels) {
+                showVictory();
+                return;
+            }
+            const index = Math.floor(Math.random() * directions.length);
+            targetDirection = directions[index].name;
+            targetAngle = directions[index].angle;
+            targetDisplay.innerText = `Find ${targetDirection}`;
+        }
+
+        function updateHorizontalTape(angle) {
+            const tickWidth = getTickSpacing();
+            const offset = (angle / 45) * tickWidth;
+            hStrip.style.transform = `translateX(${-offset}px)`;
+        }
+
+        function getMouseAngle(e) {
+            const rect = compassArea.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const dx = clientX - centerX;
+            const dy = clientY - centerY;
+            let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            angle += 90; 
+            if (angle < 0) angle += 360;
+            return angle;
+        }
+
+        function handleMove(e) {
+            if (!isDragging || gameOver || !gameStarted) return;
+            const angle = getMouseAngle(e);
+            if (lastMouseAngle !== null) {
+                let delta = angle - lastMouseAngle;
+                if (delta > 180) delta -= 360;
+                if (delta < -180) delta += 360;
+                currentRotation += delta;
+                needle.style.transform = `rotate(${currentRotation}deg)`;
+                
+                // DRAG TICK SOUND
+                if (Math.abs(currentRotation - lastTickAngle) >= 8) {
+                    sounds.tick();
+                    lastTickAngle = currentRotation;
+                }
+
+                let tapeAngle = (currentRotation - 45) % 360;
+                if (tapeAngle < 0) tapeAngle += 360;
+                updateHorizontalTape(tapeAngle);
+            }
+            lastMouseAngle = angle;
+        }
+
+        // Logic UI hooks
+        startBtn.addEventListener('click', () => {
+            audioCtx.resume();
+            startScreen.classList.add('hidden');
+            gameStarted = true;
+            setNewTarget();
+            updateStats();
+            sounds.click();
+            updateHorizontalTape(0);
+        });
+
+        homeBtn.addEventListener('click', () => {
+            sounds.click();
+            startScreen.classList.remove('hidden');
+            gameStarted = false;
+            victoryModal.classList.add('hidden');
+            score = 0; currentLevel = 1; gameOver = false;
+            updateStats();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            sounds.click();
+            score = 0; currentLevel = 1; gameOver = false;
+            victoryModal.classList.add('hidden');
+            updateStats(); setNewTarget();
+            showMessage("Restarted!", "#4a332a");
+        });
+
+        restartJourneyBtn.addEventListener('click', () => {
+            sounds.click();
+            startScreen.classList.remove('hidden');
+            victoryModal.classList.add('hidden');
+            gameStarted = false;
+            score = 0; currentLevel = 1; gameOver = false;
+            updateStats();
+        });
+
+        helpBtn.addEventListener('click', () => { sounds.click(); helpModal.classList.remove('hidden'); });
+        closeHelp.addEventListener('click', () => { sounds.click(); helpModal.classList.add('hidden'); });
+        eduBtn.addEventListener('click', () => { sounds.click(); eduModal.classList.remove('hidden'); });
+        closeEdu.addEventListener('click', () => { sounds.click(); eduModal.classList.add('hidden'); });
+
+        muteBtn.addEventListener('click', () => {
+            muted = !muted;
+            speakerIcon.className = muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
+            if (!muted) sounds.click();
+        });
+
+        compassArea.addEventListener('mousedown', (e) => { isDragging = true; lastMouseAngle = getMouseAngle(e); });
+        compassArea.addEventListener('touchstart', (e) => { isDragging = true; lastMouseAngle = getMouseAngle(e); handleMove(e); });
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('touchmove', handleMove);
+        window.addEventListener('mouseup', () => { isDragging = false; lastMouseAngle = null; });
+        window.addEventListener('touchend', () => { isDragging = false; lastMouseAngle = null; });
+
+        actionBtn.addEventListener('click', () => {
+            if (!gameStarted || gameOver) return;
+            let pointingAngle = (currentRotation - 45) % 360;
+            if (pointingAngle < 0) pointingAngle += 360;
+            let diff = Math.abs(pointingAngle - targetAngle);
+            if (diff > 180) diff = 360 - diff;
+            const perfect = 10 - currentLevel; 
+            const close = 30 - (currentLevel * 3); 
+            if (diff < perfect) {
+                const pts = Math.round(100 - diff);
+                score += pts; currentLevel++; sounds.perfect();
+                showMessage(`Perfect! +${pts}`, "#4a332a");
+                updateStats(); setTimeout(setNewTarget, 1500);
+            } else if (diff < close) {
+                const pts = Math.round(50 - diff);
+                score += pts; currentLevel++; sounds.good();
+                showMessage(`Good! +${pts}`, "#4a332a");
+                updateStats(); setTimeout(setNewTarget, 1500);
+            } else {
+                sounds.fail();
+                showMessage(`Miss! (${Math.round(diff)}° off)`, "#8b2a1e");
+            }
+        });
+        needle.style.transform = `rotate(45deg)`;
+        updateHorizontalTape(0);
+    </script>
+</body>
+</html>
