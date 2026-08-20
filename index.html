@@ -36,6 +36,7 @@
     display: flex; flex-direction: column; align-items: center;
     transition: background 0.4s ease, color 0.4s ease; overflow-x: hidden;
     overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
   }
   body.chaos-mode { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; filter: invert(1) hue-rotate(180deg); }
   @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
@@ -44,24 +45,57 @@
   
   .menacing-trail { position: fixed; pointer-events: none; color: #a78bfa; font-weight: 900; font-family: 'Space Grotesk', sans-serif; font-size: 20px; animation: float-away 1s forwards; z-index: 9999; text-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
   @keyframes float-away { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-40px) scale(1.5); opacity: 0; } }
+  
   #loader { position: fixed; inset: 0; z-index: 10000; background: #050507; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; transition: opacity 0.5s ease; cursor: pointer; padding: 20px; text-align: center; }
   .loader-text { font-family: 'Space Grotesk', sans-serif; font-size: clamp(20px, 5vw, 24px); font-weight: 700; background: var(--button-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 1s infinite alternate; line-height: 1.4; }
   .mobile-break { display: none; }
   .loader-subtext { font-family: 'Inter', sans-serif; color: var(--text-muted); font-size: 14px; opacity: 0.8; animation: pulse 2s infinite alternate-reverse; max-width: 90%; }
   @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
+  
   .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(15, 17, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); color: #f0f0f5; padding: 12px 24px; border-radius: 50px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 10001; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 8px; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(155, 155, 155, 0.3); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(155, 155, 155, 0.5); }
   
-  /* safari background fixes here */
-  #bg-wrap { position: fixed; top: 0; bottom: 0; left: 0; right: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-  #bg-image { position: absolute; top: -15%; left: -15%; width: 130%; height: 130%; object-fit: cover; opacity: 0.4; mix-blend-mode: screen; transition: opacity 0.6s ease-in-out; }
-  #bg-svg { position: absolute; top: -15%; left: -15%; width: 130%; height: 130%; display: flex; align-items: center; justify-content: center; opacity: 0.1; mask-image: radial-gradient(circle, transparent 30%, black 100%); -webkit-mask-image: radial-gradient(circle, transparent 30%, black 100%); }
+  #bg-wrap { 
+    position: fixed; 
+    /* THIS IS THE FIX: Bleed the boundaries 250px off top/bottom so Safari URL bars NEVER expose a black gap */
+    top: -250px; 
+    bottom: -250px; 
+    left: -100px; 
+    right: -100px; 
+    z-index: 0; 
+    overflow: hidden; 
+    pointer-events: none; 
+  }
+  #bg-image { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    opacity: 0.4; 
+    mix-blend-mode: screen; 
+    transition: opacity 0.6s ease-in-out; 
+  }
+  #bg-svg { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    opacity: 0.1; 
+    mask-image: radial-gradient(circle, transparent 30%, black 100%); 
+    -webkit-mask-image: radial-gradient(circle, transparent 30%, black 100%); 
+  }
   
   .gogo { font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 20vh; line-height: 0.8; color: transparent; -webkit-text-stroke: 2px currentColor; transform: rotate(-8deg); opacity: 0.5; animation: sway 20s ease-in-out infinite alternate; }
   @keyframes sway { from { transform: translateX(-5%) rotate(-8deg); } to { transform: translateX(5%) rotate(-4deg); } }
   
-  .wrap { width: 100%; max-width: 1140px; padding: 20px; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 24px; }
+  .wrap { width: 100%; max-width: 1140px; padding: 20px; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 24px; padding-top: max(20px, env(safe-area-inset-top)); }
   header { display: flex; justify-content: space-between; align-items: center; padding: 24px; border-radius: 24px; background: var(--glass-surface); backdrop-filter: blur(var(--blur-amt)); -webkit-backdrop-filter: blur(var(--blur-amt)); border: 1px solid var(--glass-border); box-shadow: var(--card-shadow); position: relative; overflow: hidden; color: var(--card-text); transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease; }
   header::before { content:''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--accent-gradient); }
   .header-left { display: flex; align-items: center; gap: 16px; }
@@ -76,10 +110,10 @@
   .header-actions { display: flex; gap: 12px; align-items: center; }
   .controls { display: flex; flex-direction: column; gap: 12px; flex-wrap: wrap; }
   .controls-row { display: flex; gap: 16px; flex-wrap: wrap; }
-  .search-wrap { flex: 1; min-width: 200px; position: relative; background: var(--glass-surface); border-radius: 16px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); transition: border-color 0.3s, box-shadow 0.3s, background 0.4s ease, color 0.4s ease; color: var(--card-text); }
+  .search-wrap { flex: 1; min-width: 200px; position: relative; background: var(--glass-surface); border-radius: 16px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease, color 0.4s ease; color: var(--card-text); }
   .search-wrap:focus-within { animation: rainbow-border-glow 4s linear infinite; }
-  .search-wrap input { width: 100%; background: transparent; border: 0; outline: 0; color: inherit; font-family: 'Space Grotesk', sans-serif; font-weight: 600; padding: 16px 16px 16px 48px; font-size: 16px; }
-  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--card-muted); pointer-events: none; }
+  .search-wrap input { width: 100%; background: transparent; border: 0; outline: 0; color: inherit; font-family: 'Space Grotesk', sans-serif; font-weight: 600; padding: 16px 16px 16px 48px; font-size: 16px; transition: color 0.4s ease; }
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--card-muted); pointer-events: none; transition: color 0.4s ease; }
   .comp-warning { font-size: 14px; font-weight: 600; text-align: center; background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding: 0; margin: 16px auto 10px; max-width: 80%; }
   .preset-row { display: flex; gap: 10px; }
   .preset { width: 52px; height: 52px; border-radius: 14px; border: 0; cursor: pointer; font-size: 24px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: var(--card-text); }
@@ -94,8 +128,8 @@
   .top { display: flex; align-items: center; gap: 12px; }
   .icon-box { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); color: var(--card-text); transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease; }
   .icon-box svg { width: 26px; height: 26px; }
-  .card-info h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 18px; letter-spacing: -0.5px; color: var(--card-text); }
-  .card-info p { margin: 2px 0 0; color: var(--card-muted); font-size: 13px; }
+  .card-info h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 18px; letter-spacing: -0.5px; color: var(--card-text); transition: color 0.4s ease; }
+  .card-info p { margin: 2px 0 0; color: var(--card-muted); font-size: 13px; transition: color 0.4s ease; }
   .thumb-wrap { height: 120px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.2); position: relative; border: 1px solid var(--glass-border); cursor: pointer; }
   .fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--card-muted); gap: 8px; background: radial-gradient(circle at center, rgba(255,255,255,0.05), transparent); z-index: 1; }
   .thumb-wrap img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease, opacity 0.5s ease; opacity: 0; }
@@ -118,20 +152,20 @@
   .modal-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .close-btn { background: transparent; border: 0; color: #94a3b8; cursor: pointer; font-size: 24px; line-height: 1; transition: color 0.2s, transform 0.2s; }
   .close-btn:hover { color: #ff6b6b; transform: scale(1.1) rotate(90deg); }
-  .modal iframe { width: 100%; height: 85vh; height: 85dvh; border: 0; background: var(--bg); }
+  .modal iframe { width: 100%; height: 85vh; border: 0; background: var(--bg); transition: background 0.4s ease; }
   .external-link-btn { color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); transition: all 0.2s ease; }
   .external-link-btn:hover { background: rgba(139, 92, 246, 0.2); transform: translateY(-1px); }
-  footer { width: 100%; margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 11px; padding-bottom: 20px; opacity: 0.6; margin-bottom: 12px; }
+  footer { width: 100%; margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 11px; padding-bottom: 20px; opacity: 0.6; margin-bottom: 12px; transition: color 0.4s ease; }
   
   @media (max-width: 600px) {
     .controls { flex-direction: column; } .search-wrap { width: 100%; } .preset-row { width: 100%; justify-content: space-between; }
     .preset { width: 48px; height: 48px; } .card { padding: 12px; } .modal { padding: 0; }
-    .modal-panel { height: 100vh; height: 100dvh; max-height: 100dvh; border-radius: 0; border: none; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
-    .modal iframe { height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+    .modal-panel { position: fixed; inset: 0; height: 100%; width: 100%; max-width: none; border-radius: 0; border: none; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); transform: translateY(20px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; }
+    .modal.open .modal-panel { transform: translateY(0); opacity: 1; }
+    .modal iframe { flex: 1; min-height: 0; height: auto; }
     .mobile-break { display: block; } header { align-items: flex-start; } .title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
     .header-actions { flex-direction: column; gap: 8px; margin-top: 4px; } .status-text { margin-top: 8px; } header h1 { font-size: 22px; } .pfp { width: 50px; height: 50px; }
   }
-
 </style>
 </head>
 <body>
@@ -189,7 +223,6 @@
   </div>
 <script>
 const $ = id => document.getElementById(id), $$ = sel => document.querySelectorAll(sel);
-
 const presetInfo = [
   {emoji:"🧸", url:"https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmNsd3dseDN6dHI4aTExdnY4N3N0ajFyZXc1MWI5bGMycnZ0OG05YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dwAKRfxu3kxB12HFmW/giphy.gif"},
   {emoji:"🥊", url:"https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnI0OHBoaTg0NzcwaTR6aWdxYXZiODZjd2xwdTlpMHUyZ3h3MXFwayZlcD12MV9pbnRlcm55YWlfnaWZfYnlfaWQmY3Q9Zw/PamI2MtO1DU1a/giphy.gif"},
@@ -197,9 +230,8 @@ const presetInfo = [
   {emoji:"🚬", url:"https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnA3c2hzY214Nml4M3ZjbTJ5ZG5jMDl3ODNjbGJhZ211eDF5NGNzdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LtVmxCRHQu33a/giphy.gif"},
   {emoji:"🍡", url:"https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTk5YWkwbDRoeDl6MHNqc2puY3c0aW9iNWJ0eDhjZjE1N2JkNnF6aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WfaHuht7D5SSNfetTf/giphy.gif"}
 ];
-
 const ICONS = {
-  burger_stack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 6 0 0 1 16 0H4z"/><path d="M3 12c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0"/><rect x="4" y="14" width="16" height="3" rx="1.5"/><path d="M5 21h14a2 2 0 0 0 2-2v-1H3v1a2 2 0 0 0 2 2z"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="7" x2="16.01" y2="7"/></svg>`,
+  burger_stack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 6 0 0 1 16 0H4z"/><path d="M3 12c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0"/><rect x="4" y="14" width="16" height="3" rx="1.5"/><path d="M5 21h14a2 2 0 0 0 2-2v-1H3v1a2 2 0 0 0 2 2z"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="7" x2="16.01" y2="7"/></svg>`,
   pizza_fraction: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 13V4a9 9 0 1 0 9 9h-9Z"/><path d="M14 10V1a9 9 0 0 1 9 9h-9Z"/><circle cx="7" cy="14" r="1"/><circle cx="11" cy="18" r="1"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="5" r="1"/></svg>`,
   bio_war: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M5 5l1.5 1.5"/><path d="M17.5 17.5L19 19"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M5 19l1.5-1.5"/><path d="M17.5 6.5L19 5"/></svg>`,
   solar_ascent: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 12 15 6 20 5C20 5 21 10 17 14C14.5 16.5 12 12 12 12Z"/><path d="M12 15C12 15 9 10 5 9C5 9 4 14 8 17C10 18.5 12 15 12 15Z"/></svg>`,
@@ -217,7 +249,6 @@ const ICONS = {
   chem_balancer: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><circle cx="10" cy="16" r="1"/><circle cx="14" cy="16" r="1"/></svg>`,
   cargo_pilot: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.7.5-1.1z"/></svg>`
 };
-
 const games = [
   {id:"burger_stack", url:"https://angyfwen.github.io/web-minigames/burger_stack/", title:"burger stack", desc:"a logic puzzle game that teaches computer science stack data structures through building ordered burgers."},
   {id:"pizza_fraction", url:"https://angyfwen.github.io/web-minigames/pizza_fraction/", title:"pizza fraction", desc:"a fraction-based game where you slice and serve pizzas to match incoming order fractions."},
@@ -250,7 +281,6 @@ const sfx = {
   play(type) {
     if(!this.ctx) this.init();
     if(this.ctx?.state === 'suspended') this.ctx.resume();
-    
     if (type === 'click' && this.clickAudio) {
         this.clickAudio.currentTime = 0;
         this.clickAudio.play().catch(() => { this.clickAudio = null; this.play('click'); });
@@ -258,7 +288,6 @@ const sfx = {
     }
     const o = this.ctx.createOscillator(), g = this.ctx.createGain(), n = this.ctx.currentTime;
     o.connect(g); g.connect(this.ctx.destination);
-    
     if (type === 'hover') {
       o.type = 'sine'; o.frequency.setValueAtTime(440, n); o.frequency.exponentialRampToValueAtTime(800, n + 0.05);
       g.gain.setValueAtTime(0.02, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.05);
@@ -274,7 +303,6 @@ const sfx = {
     }
   }
 };
-
 let bgAudio = new Audio("audios/ac_3pm.mp3"), jojoAudio = null, isBgPlaying = false;
 bgAudio.loop = true; bgAudio.volume = 0.3;
 bgAudio.onerror = () => { const btn = $('music-toggle'); if(btn) { btn.innerHTML = "🚫"; btn.title = "missing audio! check path"; btn.style.opacity = "0.5"; } };
@@ -283,20 +311,14 @@ const bgImg = $('bg-image');
 const setBg = url => {
   if(!url){ bgImg.style.opacity = '0'; return; }
   bgImg.style.opacity = '0';
-  setTimeout(() => { 
-    bgImg.onload = () => { bgImg.style.opacity = '0.4'; };
-    bgImg.src = url; 
-  }, 600); 
+  setTimeout(() => { bgImg.onload = () => { bgImg.style.opacity = '0.4'; }; bgImg.src = url; }, 600); 
 };
 const setRandomBg = () => setBg(presetInfo[Math.floor(Math.random() * presetInfo.length)].url);
-
 const showToast = msg => {
     const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-    $('toast-container').appendChild(t);
-    requestAnimationFrame(() => t.classList.add('show'));
+    $('toast-container').appendChild(t); requestAnimationFrame(() => t.classList.add('show'));
     setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
 };
-
 const toggleBgMusic = () => {
   const btn = $('music-toggle'); sfx.init();
   if (isBgPlaying) {
@@ -307,18 +329,15 @@ const toggleBgMusic = () => {
       .catch(e => { isBgPlaying = false; if(e.name !== "NotAllowedError") { btn.innerHTML = "🚫"; btn.title = "error: " + e.message; }});
   }
 };
-
 const playJojoMusic = () => {
   if(isBgPlaying && bgAudio) bgAudio.pause();
   if(!jojoAudio) { jojoAudio = new Audio("audios/oraoraora.mp3"); jojoAudio.loop = true; jojoAudio.volume = 0.6; jojoAudio.onerror = () => { jojoAudio = null; showToast("missing oraoraora.mp3! (T_T)"); }; }
   if(jojoAudio?.paused) { jojoAudio.currentTime = 0; jojoAudio.play().catch(()=>{}); }
 };
-
 const stopJojoMusic = () => {
   if(jojoAudio) { jojoAudio.pause(); jojoAudio.currentTime = 0; }
   if(isBgPlaying && bgAudio) bgAudio.play().catch(()=>{});
 };
-
 const applyFilter = () => {
   const q = $('search').value.toLowerCase(), isChaos = document.body.classList.contains('chaos-mode');
   if (q === 'jojo') {
@@ -328,16 +347,10 @@ const applyFilter = () => {
     const p = localStorage.getItem('bgPreset'); setBg(presetInfo[p] ? presetInfo[p].url : presetInfo[0].url);
   }
   $$('.card').forEach(c => {
-    if (c.textContent.toLowerCase().includes(q)) {
-        c.style.display = 'flex';
-        setTimeout(() => c.style.opacity = '1', 10);
-    } else {
-        c.style.opacity = '0';
-        setTimeout(() => { if(c.style.opacity === '0') c.style.display = 'none'; }, 300);
-    }
+    if (c.textContent.toLowerCase().includes(q)) { c.style.display = 'flex'; setTimeout(() => c.style.opacity = '1', 10); } 
+    else { c.style.opacity = '0'; setTimeout(() => { if(c.style.opacity === '0') c.style.display = 'none'; }, 300); }
   });
 };
-
 const getFavs = () => { try { return JSON.parse(localStorage.getItem('wf_favs_v2')||'[]') } catch{ return [] } };
 const isFav = id => getFavs().includes(id);
 const toggleFav = (id, btn) => {
@@ -353,22 +366,16 @@ const openPreview = id => {
   modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow = 'hidden';
   setTimeout(() => { iframe.src = g.url; iframe.onload = () => spinner.style.opacity = '0'; }, 100);
 };
-
 $('modal-fullscreen').addEventListener('click', () => {
   sfx.play('click');
   try { (iframe.requestFullscreen?.() || iframe.webkitRequestFullscreen?.())?.catch(() => showToast("fullscreen blocked! (T_T)")); } 
   catch { showToast("fullscreen blocked! (T_T)"); }
 });
-
 $('modal-close').addEventListener('click', () => { 
-  sfx.play('click'); 
-  modal.classList.remove('open'); 
-  modal.setAttribute('aria-hidden','true'); 
-  document.body.style.overflow = ''; 
+  sfx.play('click'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; 
   setTimeout(() => iframe.src = 'about:blank', 400); 
 });
 modal.addEventListener('click', e => { if(e.target === modal) $('modal-close').click(); });
-
 const shareGame = id => {
   const g = games.find(x => x.id === id), url = g?.url || location.href;
   const copy = () => {
@@ -380,7 +387,6 @@ const shareGame = id => {
   if(navigator.share) navigator.share({ title: g?.title || id, url }).catch(e => { if(e.name !== 'AbortError') copy(); });
   else copy();
 };
-
 let lastTrailTime = 0;
 document.addEventListener('mousemove', e => {
   if (Date.now() - lastTrailTime > 100) { 
@@ -390,7 +396,6 @@ document.addEventListener('mousemove', e => {
     document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
   }
 });
-
 const setLoaderReady = () => {
   const loader = $('loader'); if (!loader || loader.style.display === 'none') return;
   setRandomBg();
@@ -406,11 +411,9 @@ const setLoaderReady = () => {
       }, 500);
   }, {once: true});
 };
-
 const initializeUI = () => {
     $('music-toggle').addEventListener('click', toggleBgMusic);
     $('search').addEventListener('input', applyFilter);
-
     const modeBtn = $('mode-toggle');
     modeBtn.addEventListener('click', () => {
       sfx.play('click'); document.documentElement.classList.toggle('light');
@@ -418,11 +421,9 @@ const initializeUI = () => {
       localStorage.setItem('siteMode', isLight ? 'light' : 'dark');
       modeBtn.textContent = isLight ? '🌞' : '✨'; if(bgImg.src) bgImg.style.opacity = '0.4'; 
     });
-
     const presetRow = $('preset-row');
     presetRow.innerHTML = presetInfo.map((p, i) => `<button class="preset" title="preset ${i+1}" data-index="${i}"><span aria-hidden="true">${p.emoji}</span></button>`).join('');
     presetRow.addEventListener('click', e => { const btn = e.target.closest('.preset'); if(btn) { sfx.play('click'); const i = btn.dataset.index; setBg(presetInfo[i].url); localStorage.setItem('bgPreset', i); }});
-
     $('games-grid').innerHTML = games.map((g, i) => `
       <div class="card" data-id="${g.id}" style="animation-delay: ${i * 0.05}s">
         <div class="top"><div class="icon-box" aria-hidden="true">${ICONS[g.id] || ''}</div><div class="card-info"><h3>${g.title}</h3><p>${g.desc}</p></div></div>
@@ -440,7 +441,6 @@ const initializeUI = () => {
         </div>
       </div>
     `).join('');
-
     $('games-grid').addEventListener('click', e => {
         const card = e.target.closest('.card'); if (!card) return;
         const id = card.dataset.id, iconBtn = e.target.closest('.icon-btn');
@@ -451,19 +451,16 @@ const initializeUI = () => {
             else if (iconBtn.classList.contains('share-btn')) shareGame(id);
         }
     });
-
     $$('#music-toggle, #mode-toggle, .preset, .card, .play-btn, .icon-btn').forEach(el => el.addEventListener('mouseenter', e => { e.stopPropagation(); sfx.play('hover'); }));
     $('footer-note').textContent = "this is a FOOTer ;-; • tap emojis to summon cool bg gifs • too sleepy to explain, just click shit and scream • (psst: search 'jojo')";
     if(localStorage.getItem('siteMode') === 'light') { document.documentElement.classList.add('light'); modeBtn.textContent = '🌞'; }
 };
-
 window.onload = () => {
-  initializeUI(); setRandomBg();
+  initializeUI();
   const jokes = ["summoning the chaos... ( ﾉ ﾟｰﾟ)ﾉ", "i swear youre getting there just wait plz (´。＿。｀)", "downloading more ram... jk (¬‿¬)", "convincing the browser to cooperate... (ง •_•)ง", "loading pixels one by one... (┬┬﹏┬┬)", "making coffee for the server ☕ ( ´･･)ﾉ(._.`)"];
   $('loader-subtext').textContent = jokes[Math.floor(Math.random()*jokes.length)];
   setTimeout(setLoaderReady, 100); setTimeout(setLoaderReady, 3000);
 };
-
 document.addEventListener('click', () => sfx.init(), {once:true});
 </script>
 </body>
