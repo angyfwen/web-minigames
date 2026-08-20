@@ -31,7 +31,7 @@
   html { background: var(--bg); }
   body {
     background: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif;
-    margin: 0; padding: 0; min-height: 100vh;
+    margin: 0; padding: 0; min-height: 100vh; min-height: 100dvh;
     display: flex; flex-direction: column; align-items: center;
     transition: background 0.4s ease, color 0.4s ease; overflow-x: hidden;
   }
@@ -53,10 +53,11 @@
   
   #bg-wrap { 
     position: fixed; 
-    top: -50%; 
-    bottom: -50%; 
-    left: -50%; 
-    right: -50%; 
+    top: 0; 
+    left: 0; 
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh;
     z-index: 0; 
     pointer-events: none; 
     transform: translateZ(0);
@@ -448,7 +449,7 @@ const initializeUI = () => {
 };
 window.onload = () => {
   initializeUI();
-  const jokes = ["summoning the chaos... ( ﾉ ﾟｰﾟ)ﾉ", "i swear youre getting there just wait plz (´。＿。｀)", "downloading more ram... jk (¬‿¬)", "convincing the browser to cooperate... (ง •_•)ง", "loading pixels one by one... (┬┬﹏┬┬)", "making coffee for the server ☕ ( ´･･)ﾉ(._.`)"];
+  const jokes = ["summoning the chaos... ( ﾉ ﾟｰﾟ)ﾉ", "i swear youre getting there just wait plz (´。＿。｀)", "downloading more ram... jk (¬‿¬)", "convincing the browser to cooperate... (ง •_•)ง", "loading pixels one by one... (┬┬﹏┬┬)", "making coffee for the server ☕ ( ´･･)ﾉ(._.^)"];
   $('loader-subtext').textContent = jokes[Math.floor(Math.random()*jokes.length)];
   setTimeout(setLoaderReady, 100); setTimeout(setLoaderReady, 3000);
 };
