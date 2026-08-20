@@ -2,143 +2,251 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<!-- viewport-fit=cover tells Safari to let the background stretch underneath the glass bars -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>alis' web minigames</title>
 <meta name="description" content="jojoverse vibes • play the collection" />
 <link rel="icon" href="/favicon.ico" />
 <meta property="og:image" content="https://image.thum.io/get/width/1200/crop/630/https://angyfwen.github.io/web-minigames/" />
+
+<!-- typography -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --bg: #050507; --text-main: #f0f0f5; --text-muted: #94a3b8;
+    --bg: #050507;
+    --text-main: #f0f0f5; --text-muted: #94a3b8;
     --card-text: #f0f0f5; --card-muted: #94a3b8;
-    --glass-surface: rgba(20, 20, 25, 0.65); --glass-border: rgba(255, 255, 255, 0.08); --glass-highlight: rgba(255, 255, 255, 0.15);
-    --blur-amt: 16px; --primary: #8b5cf6;
+    
+    --glass-surface: rgba(20, 20, 25, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.15);
+    --blur-amt: 16px;
+
+    --primary: #8b5cf6;
     --accent-gradient: linear-gradient(135deg, #ff6b6b, #ffd36b);
     --button-gradient: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
+    
+    --glow: 0 0 20px rgba(139, 92, 246, 0.15);
     --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
+
   :root.light {
-    --bg: #050507; --text-main: #f0f0f5; --text-muted: #94a3b8;
+    --bg: #050507;
+    --text-main: #f0f0f5; --text-muted: #94a3b8;
     --card-text: #1e293b; --card-muted: #64748b;
-    --glass-surface: rgba(255, 255, 255, 0.92); --glass-border: rgba(0, 0, 0, 0.1); --glass-highlight: rgba(255, 255, 255, 1);
+    --glass-surface: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 1);
+    --glow: 0 0 20px rgba(255, 255, 255, 0.4);
     --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
+
   * { box-sizing: border-box; }
   
-  html { background: var(--bg); }
   body {
-    background: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif;
+    background: var(--bg); color: var(--text-main);
+    font-family: 'Inter', sans-serif;
     margin: 0; padding: 0; min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
     transition: background 0.4s ease, color 0.4s ease; overflow-x: hidden;
   }
+
   body.chaos-mode { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; filter: invert(1) hue-rotate(180deg); }
-  @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-  @keyframes rainbow-border-glow { 0%, 100% { border-color: #ff6b6b; box-shadow: 0 0 15px rgba(255,107,107,0.3); } 20% { border-color: #ffd36b; box-shadow: 0 0 15px rgba(255,211,107,0.3); } 40% { border-color: #4ade80; box-shadow: 0 0 15px rgba(74,222,128,0.3); } 60% { border-color: #60a5fa; box-shadow: 0 0 15px rgba(96,165,250,0.3); } 80% { border-color: #a78bfa; box-shadow: 0 0 15px rgba(167,139,250,0.3); } }
-  @keyframes rainbow-border-text-glow { 0%, 100% { border-color: #ff6b6b; color: #ff6b6b; box-shadow: inset 0 0 10px rgba(255,107,107,0.2); } 20% { border-color: #ffd36b; color: #ffd36b; box-shadow: inset 0 0 10px rgba(255,211,107,0.2); } 40% { border-color: #4ade80; color: #4ade80; box-shadow: inset 0 0 10px rgba(74,222,128,0.2); } 60% { border-color: #60a5fa; color: #60a5fa; box-shadow: inset 0 0 10px rgba(96,165,250,0.2); } 80% { border-color: #a78bfa; color: #a78bfa; box-shadow: inset 0 0 10px rgba(167,139,250,0.2); } }
-  
-  .menacing-trail { position: fixed; pointer-events: none; color: #a78bfa; font-weight: 900; font-family: 'Space Grotesk', sans-serif; font-size: 20px; animation: float-away 1s forwards; z-index: 9999; text-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  @keyframes rainbow-border-glow {
+    0%, 100% { border-color: #ff6b6b; box-shadow: 0 0 15px rgba(255,107,107,0.3); }
+    20% { border-color: #ffd36b; box-shadow: 0 0 15px rgba(255,211,107,0.3); }
+    40% { border-color: #4ade80; box-shadow: 0 0 15px rgba(74,222,128,0.3); }
+    60% { border-color: #60a5fa; box-shadow: 0 0 15px rgba(96,165,250,0.3); }
+    80% { border-color: #a78bfa; box-shadow: 0 0 15px rgba(167,139,250,0.3); }
+  }
+
+  @keyframes rainbow-border-text-glow {
+    0%, 100% { border-color: #ff6b6b; color: #ff6b6b; box-shadow: inset 0 0 10px rgba(255,107,107,0.2); }
+    20% { border-color: #ffd36b; color: #ffd36b; box-shadow: inset 0 0 10px rgba(255,211,107,0.2); }
+    40% { border-color: #4ade80; color: #4ade80; box-shadow: inset 0 0 10px rgba(74,222,128,0.2); }
+    60% { border-color: #60a5fa; color: #60a5fa; box-shadow: inset 0 0 10px rgba(96,165,250,0.2); }
+    80% { border-color: #a78bfa; color: #a78bfa; box-shadow: inset 0 0 10px rgba(167,139,250,0.2); }
+  }
+
+  .menacing-trail {
+    position: fixed; pointer-events: none; color: #a78bfa; font-weight: 900;
+    font-family: 'Space Grotesk', sans-serif; font-size: 20px;
+    animation: float-away 1s forwards; z-index: 9999; text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+  }
   @keyframes float-away { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-40px) scale(1.5); opacity: 0; } }
-  
-  #loader { position: fixed; inset: 0; z-index: 10000; background: #050507; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; transition: opacity 0.5s ease; cursor: pointer; padding: 20px; text-align: center; }
-  .loader-text { font-family: 'Space Grotesk', sans-serif; font-size: clamp(20px, 5vw, 24px); font-weight: 700; background: var(--button-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 1s infinite alternate; line-height: 1.4; }
+
+  #loader {
+    position: fixed; inset: 0; z-index: 10000; background: #050507;
+    display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center;
+    transition: opacity 0.5s ease; cursor: pointer; padding: 20px; text-align: center;
+  }
+  .loader-text { 
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(20px, 5vw, 24px); font-weight: 700;
+    background: var(--button-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: pulse 1s infinite alternate; line-height: 1.4;
+  }
   .mobile-break { display: none; }
-  .loader-subtext { font-family: 'Inter', sans-serif; color: var(--text-muted); font-size: 14px; opacity: 0.8; animation: pulse 2s infinite alternate-reverse; max-width: 90%; }
+  .loader-subtext {
+    font-family: 'Inter', sans-serif; color: var(--text-muted); font-size: 14px; opacity: 0.8;
+    animation: pulse 2s infinite alternate-reverse; max-width: 90%;
+  }
   @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
-  
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(15, 17, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); color: #f0f0f5; padding: 12px 24px; border-radius: 50px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 10001; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 8px; }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(15, 17, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f0f0f5; padding: 12px 24px; border-radius: 50px;
+    font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 10001; opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 8px;
+  }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(155, 155, 155, 0.3); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(155, 155, 155, 0.5); }
-  
-  #bg-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  #bg-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; mix-blend-mode: screen; transition: opacity 0.6s ease; }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(155, 155, 155, 0.3); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(155, 155, 155, 0.5); }
+
+  #bg-wrap { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  #bg-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; mix-blend-mode: screen; transition: opacity 0.6s ease-in-out; }
   #bg-svg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.1; mask-image: radial-gradient(circle, transparent 30%, black 100%); }
-  
   .gogo { font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 20vh; line-height: 0.8; color: transparent; -webkit-text-stroke: 2px currentColor; transform: rotate(-8deg); opacity: 0.5; animation: sway 20s ease-in-out infinite alternate; }
   @keyframes sway { from { transform: translateX(-5%) rotate(-8deg); } to { transform: translateX(5%) rotate(-4deg); } }
-  
-  .wrap { width: 100%; max-width: 1140px; padding: 20px; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 24px; }
-  header { display: flex; justify-content: space-between; align-items: center; padding: 24px; border-radius: 24px; background: var(--glass-surface); backdrop-filter: blur(var(--blur-amt)); -webkit-backdrop-filter: blur(var(--blur-amt)); border: 1px solid var(--glass-border); box-shadow: var(--card-shadow); position: relative; overflow: hidden; color: var(--card-text); transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease; }
+
+  .wrap { width: 100%; max-width: 1140px; padding: 20px; z-index: 2; display: flex; flex-direction: column; gap: 24px; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 24px; border-radius: 24px; background: var(--glass-surface);
+    backdrop-filter: blur(var(--blur-amt)); -webkit-backdrop-filter: blur(var(--blur-amt));
+    border: 1px solid var(--glass-border); box-shadow: var(--card-shadow);
+    position: relative; overflow: hidden; color: var(--card-text);
+  }
   header::before { content:''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--accent-gradient); }
+
   .header-left { display: flex; align-items: center; gap: 16px; }
   .pfp { width: 58px; height: 58px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; }
   .pfp:hover { transform: scale(1.1) rotate(5deg); border-color: #ff6b6b; }
   .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   header h1 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 28px; letter-spacing: -1px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .status-text { margin: 2px 0 0; color: var(--card-muted); font-size: 13px; font-weight: 500; }
+  
   .github-link { display: flex; align-items: center; gap: 5px; color: var(--card-muted); font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 20px; border: 1px solid transparent; }
   .github-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); transform: translateY(-1px); }
   :root.light .github-link:hover { color: #000; background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
   .header-actions { display: flex; gap: 12px; align-items: center; }
-  
+
   .controls { display: flex; flex-direction: column; gap: 12px; flex-wrap: wrap; }
   .controls-row { display: flex; gap: 16px; flex-wrap: wrap; }
-  .search-wrap { flex: 1; min-width: 200px; position: relative; background: var(--glass-surface); border-radius: 16px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease, color 0.4s ease; color: var(--card-text); }
+  .search-wrap { flex: 1; min-width: 200px; position: relative; background: var(--glass-surface); border-radius: 16px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); transition: border-color 0.2s, box-shadow 0.2s; color: var(--card-text); }
   .search-wrap:focus-within { animation: rainbow-border-glow 4s linear infinite; }
-  .search-wrap input { width: 100%; background: transparent; border: 0; outline: 0; color: inherit; font-family: 'Space Grotesk', sans-serif; font-weight: 600; padding: 16px 16px 16px 48px; font-size: 16px; transition: color 0.4s ease; }
-  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--card-muted); pointer-events: none; transition: color 0.4s ease; }
+  .search-wrap input { width: 100%; background: transparent; border: 0; outline: 0; color: inherit; font-family: 'Space Grotesk', sans-serif; font-weight: 600; padding: 16px 16px 16px 48px; font-size: 16px; }
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--card-muted); pointer-events: none; }
   .comp-warning { font-size: 14px; font-weight: 600; text-align: center; background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding: 0; margin: 16px auto 10px; max-width: 80%; }
+
   .preset-row { display: flex; gap: 10px; }
-  .preset { width: 52px; height: 52px; border-radius: 14px; border: 0; cursor: pointer; font-size: 24px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: var(--card-text); }
+  .preset { width: 52px; height: 52px; border-radius: 14px; border: 0; cursor: pointer; font-size: 24px; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); color: var(--card-text); }
   .preset:hover { transform: translateY(-4px) scale(1.1); background: var(--glass-highlight); }
-  .preset:active { transform: scale(0.95); } .preset.active { animation: rainbow-border-text-glow 4s linear infinite; }
+  .preset:active { transform: scale(0.95); }
+  .preset.active { animation: rainbow-border-text-glow 4s linear infinite; }
   
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-  .card { background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur-amt)); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.4s ease, background 0.4s ease, color 0.4s ease, opacity 0.4s ease; position: relative; overflow: hidden; opacity: 0; animation: fadeUp 0.6s forwards; color: var(--card-text); }
+  .card {
+    background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur-amt)); border-radius: 20px; padding: 16px;
+    display: flex; flex-direction: column; gap: 16px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+    position: relative; overflow: hidden; opacity: 0; animation: fadeUp 0.6s forwards; color: var(--card-text);
+  }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
   :root.light .card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
   .top { display: flex; align-items: center; gap: 12px; }
-  .icon-box { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); color: var(--card-text); transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease; }
+  .icon-box { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); color: var(--card-text); }
   .icon-box svg { width: 26px; height: 26px; }
-  .card-info h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 18px; letter-spacing: -0.5px; color: var(--card-text); transition: color 0.4s ease; }
-  .card-info p { margin: 2px 0 0; color: var(--card-muted); font-size: 13px; transition: color 0.4s ease; }
+  .card-info h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 18px; letter-spacing: -0.5px; color: var(--card-text); }
+  .card-info p { margin: 2px 0 0; color: var(--card-muted); font-size: 13px; }
+
+  /* thumbnails */
   .thumb-wrap { height: 120px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.2); position: relative; border: 1px solid var(--glass-border); cursor: pointer; }
   .fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--card-muted); gap: 8px; background: radial-gradient(circle at center, rgba(255,255,255,0.05), transparent); z-index: 1; }
   .thumb-wrap img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease, opacity 0.5s ease; opacity: 0; }
   .card:hover .thumb-wrap img { transform: scale(1.08); }
+
   .actions { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 4px; }
-  .play-btn { padding: 10px 24px; border-radius: 12px; border: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; color: #000; text-decoration: none; cursor: pointer; background: var(--button-gradient); background-size: 300% 100%; animation: gradientMove 4s ease infinite; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); transition: transform 0.2s, box-shadow 0.2s; }
+  .play-btn {
+    padding: 10px 24px; border-radius: 12px; border: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px;
+    color: #000; text-decoration: none; cursor: pointer; background: var(--button-gradient); background-size: 300% 100%;
+    animation: gradientMove 4s ease infinite; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); transition: transform 0.2s, box-shadow 0.2s;
+  }
   @keyframes gradientMove { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-  .play-btn:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5); } .play-btn:active { transform: scale(0.95); }
+  .play-btn:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5); }
+  .play-btn:active { transform: scale(0.95); }
+
   .secondary-actions { display: flex; gap: 8px; }
   .icon-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--glass-border); background: transparent; color: var(--card-muted); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
   .icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--card-text); }
-  .icon-btn.hearted { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.3); background: rgba(255, 107, 107, 0.1); } .icon-btn.hearted svg { fill: currentColor; }
-  
-  .modal { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.4s ease, visibility 0.4s ease; }
-  .modal.open { opacity: 1; visibility: visible; pointer-events: auto; }
-  .modal-panel { width: 100%; max-width: 1000px; background: var(--glass-surface); border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 0 40px rgba(139, 92, 246, 0.2), 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(var(--blur-amt)); -webkit-backdrop-filter: blur(var(--blur-amt)); overflow: hidden; display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease, border-color 0.4s ease; }
+  .icon-btn.hearted { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.3); background: rgba(255, 107, 107, 0.1); }
+  .icon-btn.hearted svg { fill: currentColor; }
+
+  .modal { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.3s; }
+  .modal.open { display: flex; opacity: 1; }
+  .modal-panel { width: 100%; max-width: 1000px; background: var(--glass-surface); border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 0 40px rgba(139, 92, 246, 0.2), 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(var(--blur-amt)); -webkit-backdrop-filter: blur(var(--blur-amt)); overflow: hidden; display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .modal.open .modal-panel { transform: scale(1); }
-  .modal-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--glass-highlight); border-bottom: 1px solid var(--glass-border); position: relative; transition: background 0.4s ease, border-color 0.4s ease; }
-  .modal-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent-gradient); }
+  .modal-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: transparent; border-bottom: 1px solid var(--glass-border); }
   .modal-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .close-btn { background: transparent; border: 0; color: #94a3b8; cursor: pointer; font-size: 24px; line-height: 1; transition: color 0.2s, transform 0.2s; }
   .close-btn:hover { color: #ff6b6b; transform: scale(1.1) rotate(90deg); }
-  .modal iframe { width: 100%; height: 85vh; border: 0; background: var(--bg); transition: background 0.4s ease; }
+  .modal iframe { width: 100%; height: 85vh; border: 0; background: var(--bg); }
+  
   .external-link-btn { color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); transition: all 0.2s ease; }
   .external-link-btn:hover { background: rgba(139, 92, 246, 0.2); transform: translateY(-1px); }
-  footer { width: 100%; margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 11px; padding-bottom: 20px; opacity: 0.6; margin-bottom: 12px; transition: color 0.4s ease; }
-  
+
+  footer { width: 100%; margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 11px; padding-bottom: 20px; opacity: 0.6; margin-bottom: 12px; }
+
   @media (max-width: 600px) {
-    .controls { flex-direction: column; } .search-wrap { width: 100%; } .preset-row { width: 100%; justify-content: space-between; }
-    .preset { width: 48px; height: 48px; } .card { padding: 12px; } .modal { padding: 0; }
-    .modal-panel { height: 100vh; width: 100vw; max-width: none; border-radius: 0; border: none; transform: translateY(20px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; }
-    .modal.open .modal-panel { transform: translateY(0); opacity: 1; }
-    .modal iframe { flex: 1; height: 100%; }
-    .mobile-break { display: block; } header { align-items: flex-start; } .title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
-    .header-actions { flex-direction: column; gap: 8px; margin-top: 4px; } .status-text { margin-top: 8px; } header h1 { font-size: 22px; } .pfp { width: 50px; height: 50px; }
+    .controls { flex-direction: column; }
+    .search-wrap { width: 100%; }
+    .preset-row { width: 100%; justify-content: space-between; }
+    .preset { width: 48px; height: 48px; }
+    .card { padding: 12px; }
+    
+    /* mobile app-like modal */
+    .modal { padding: 0; }
+    .modal-panel { height: 100vh; height: 100dvh; max-height: 100dvh; border-radius: 0; border: none; }
+    .modal iframe { height: calc(100vh - 60px); height: calc(100dvh - 60px); }
+    
+    .mobile-break { display: block; }
+    header { align-items: flex-start; }
+    .title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .header-actions { flex-direction: column; gap: 8px; margin-top: 4px; }
+    .status-text { margin-top: 8px; }
+    header h1 { font-size: 22px; }
+    .pfp { width: 50px; height: 50px; }
   }
 </style>
 </head>
 <body>
-  <div id="loader"><div class="loader-text">loading chaos...</div><div id="loader-subtext" class="loader-subtext"></div></div>
+  
+  <div id="loader">
+    <div class="loader-text">loading chaos...</div>
+    <div id="loader-subtext" class="loader-subtext"></div>
+  </div>
+
   <div id="toast-container"></div>
-  <div id="bg-wrap" aria-hidden="true"><img id="bg-image" alt="" /><div id="bg-svg"><div class="gogo">GOGOGOGO</div></div></div>
+
+  <div id="bg-wrap" aria-hidden="true">
+    <img id="bg-image" alt="" />
+    <div id="bg-svg"><div class="gogo">GOGOGOGO</div></div>
+  </div>
 
   <div class="wrap">
     <header>
@@ -148,13 +256,17 @@
           <div class="title-row">
             <h1>alis' web minigames</h1>
             <a href="https://github.com/angyfwen" target="_blank" rel="noopener noreferrer" class="github-link" title="github">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg> angyfwen
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+              angyfwen
             </a>
           </div>
           <p class="status-text">mostly from internship projects... i guess...</p>
         </div>
       </div>
-      <div class="header-actions"><button id="music-toggle" class="preset" title="toggle bg music (ac 3pm)">🎵</button><button id="mode-toggle" class="preset" title="toggle dark / light">✨</button></div>
+      <div class="header-actions">
+        <button id="music-toggle" class="preset" title="toggle bg music (ac 3pm)">🎵</button>
+        <button id="mode-toggle" class="preset" title="toggle dark / light">✨</button>
+      </div>
     </header>
 
     <div class="controls" role="region" aria-label="controls">
@@ -165,18 +277,23 @@
         </div>
         <div class="preset-row" id="preset-row" aria-hidden="false"></div>
       </div>
-      <div class="comp-warning">games are now phone friendly! (ง •_•)ง <br class="mobile-break"> still... computer is recommended for the chaos!</div>
+      <div class="comp-warning">
+        games are now phone friendly! (ง •_•)ง <br class="mobile-break"> still... computer is recommended for the chaos!
+      </div>
     </div>
+
+    <!-- dynamic grid -->
     <div class="grid" id="games-grid" role="list" aria-live="polite"></div>
+
     <footer id="footer-note"></footer>
   </div>
-  
+
   <div class="modal" id="modal" role="dialog" aria-hidden="true">
     <div class="modal-panel" role="document">
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:10px">
           <span id="modal-title" class="modal-title">preview</span>
-          <span id="modal-spinner" class="spinner" style="opacity:0; transition:opacity 0.3s; font-size:12px">loading...</span>
+          <span id="modal-spinner" class="spinner" style="display:none; font-size:12px">loading...</span>
         </div>
         <div style="display:flex; gap:12px; align-items:center">
             <button class="icon-btn" id="modal-fullscreen" title="fullscreen" style="width:32px; height:32px; border:none; margin-right:4px;">
@@ -188,8 +305,8 @@
       <iframe id="modal-iframe" title="game preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </div>
   </div>
+
 <script>
-const $ = id => document.getElementById(id), $$ = sel => document.querySelectorAll(sel);
 const presetInfo = [
   {emoji:"🧸", url:"https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmNsd3dseDN6dHI4aTExdnY4N3N0ajFyZXc1MWI5bGMycnZ0OG05YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dwAKRfxu3kxB12HFmW/giphy.gif"},
   {emoji:"🥊", url:"https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnI0OHBoaTg0NzcwaTR6aWdxYXZiODZjd2xwdTlpMHUyZ3h3MXFwayZlcD12MV9pbnRlcm55YWlfnaWZfYnlfaWQmY3Q9Zw/PamI2MtO1DU1a/giphy.gif"},
@@ -197,8 +314,10 @@ const presetInfo = [
   {emoji:"🚬", url:"https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnA3c2hzY214Nml4M3ZjbTJ5ZG5jMDl3ODNjbGJhZ211eDF5NGNzdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LtVmxCRHQu33a/giphy.gif"},
   {emoji:"🍡", url:"https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTk5YWkwbDRoeDl6MHNqc2puY3c0aW9iNWJ0eDhjZjE1N2JkNnF6aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WfaHuht7D5SSNfetTf/giphy.gif"}
 ];
+
+// svg icons
 const ICONS = {
-  burger_stack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 6 0 0 1 16 0H4z"/><path d="M3 12c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0"/><rect x="4" y="14" width="16" height="3" rx="1.5"/><path d="M5 21h14a2 2 0 0 0 2-2v-1H3v1a2 2 0 0 0 2 2z"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="7" x2="16.01" y2="7"/></svg>`,
+  burger_stack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 6 0 0 1 16 0H4z"/><path d="M3 12c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0"/><rect x="4" y="14" width="16" height="3" rx="1.5"/><path d="M5 21h14a2 2 0 0 0 2-2v-1H3v1a2 2 0 0 0 2 2z"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="7" x2="16.01" y2="7"/></svg>`,
   pizza_fraction: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 13V4a9 9 0 1 0 9 9h-9Z"/><path d="M14 10V1a9 9 0 0 1 9 9h-9Z"/><circle cx="7" cy="14" r="1"/><circle cx="11" cy="18" r="1"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="5" r="1"/></svg>`,
   bio_war: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M5 5l1.5 1.5"/><path d="M17.5 17.5L19 19"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M5 19l1.5-1.5"/><path d="M17.5 6.5L19 5"/></svg>`,
   solar_ascent: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 12 15 6 20 5C20 5 21 10 17 14C14.5 16.5 12 12 12 12Z"/><path d="M12 15C12 15 9 10 5 9C5 9 4 14 8 17C10 18.5 12 15 12 15Z"/></svg>`,
@@ -216,6 +335,7 @@ const ICONS = {
   chem_balancer: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><circle cx="10" cy="16" r="1"/><circle cx="14" cy="16" r="1"/></svg>`,
   cargo_pilot: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.7.5-1.1z"/></svg>`
 };
+
 const games = [
   {id:"burger_stack", url:"https://angyfwen.github.io/web-minigames/burger_stack/", title:"burger stack", desc:"a logic puzzle game that teaches computer science stack data structures through building ordered burgers."},
   {id:"pizza_fraction", url:"https://angyfwen.github.io/web-minigames/pizza_fraction/", title:"pizza fraction", desc:"a fraction-based game where you slice and serve pizzas to match incoming order fractions."},
@@ -238,198 +358,322 @@ const games = [
 
 const sfx = {
   ctx: null, clickAudio: null,
-  init() {
+  init: function() {
     if(this.ctx) return;
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if(Ctx) this.ctx = new Ctx();
-    this.clickAudio = new Audio('audios/una.mp3'); this.clickAudio.volume = 0.5;
+    this.clickAudio = new Audio('audios/una.mp3');
+    this.clickAudio.volume = 0.5;
     this.clickAudio.onerror = () => { this.clickAudio = null; };
   },
-  play(type) {
+  play: function(type) {
     if(!this.ctx) this.init();
-    if(this.ctx?.state === 'suspended') this.ctx.resume();
-    if (type === 'click' && this.clickAudio) {
+    if(!this.ctx || this.ctx.state === 'suspended') this.ctx?.resume();
+    
+    if (type === 'hover') {
+      const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); const now = this.ctx.currentTime;
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+      gain.gain.setValueAtTime(0.02, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.start(now); osc.stop(now + 0.06);
+    } else if (type === 'click') {
+      if (this.clickAudio) {
         this.clickAudio.currentTime = 0;
         this.clickAudio.play().catch(() => { this.clickAudio = null; this.play('click'); });
-        return;
-    }
-    const o = this.ctx.createOscillator(), g = this.ctx.createGain(), n = this.ctx.currentTime;
-    o.connect(g); g.connect(this.ctx.destination);
-    if (type === 'hover') {
-      o.type = 'sine'; o.frequency.setValueAtTime(440, n); o.frequency.exponentialRampToValueAtTime(800, n + 0.05);
-      g.gain.setValueAtTime(0.02, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.05);
-      o.start(n); o.stop(n + 0.06);
-    } else if (type === 'click') {
-      o.type = 'triangle'; o.frequency.setValueAtTime(200, n); o.frequency.exponentialRampToValueAtTime(50, n + 0.1);
-      g.gain.setValueAtTime(0.05, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.1);
-      o.start(n); o.stop(n + 0.1);
+      } else {
+         const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); const now = this.ctx.currentTime;
+         osc.connect(gain); gain.connect(this.ctx.destination);
+         osc.type = 'triangle'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+         gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+         osc.start(now); osc.stop(now + 0.1);
+      }
     } else if (type === 'chaos') {
-      o.type = 'sawtooth'; o.frequency.setValueAtTime(100, n); o.frequency.linearRampToValueAtTime(1000, n + 0.3); o.frequency.linearRampToValueAtTime(100, n + 0.6);
-      g.gain.setValueAtTime(0.1, n); g.gain.linearRampToValueAtTime(0.001, n + 0.6);
-      o.start(n); o.stop(n + 0.6);
+      const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); const now = this.ctx.currentTime;
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.linearRampToValueAtTime(1000, now + 0.3); osc.frequency.linearRampToValueAtTime(100, now + 0.6);
+      gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.001, now + 0.6);
+      osc.start(now); osc.stop(now + 0.6);
     }
   }
 };
-let bgAudio = new Audio("audios/ac_3pm.mp3"), jojoAudio = null, isBgPlaying = false;
-bgAudio.loop = true; bgAudio.volume = 0.3;
-bgAudio.onerror = () => { const btn = $('music-toggle'); if(btn) { btn.innerHTML = "🚫"; btn.title = "missing audio! check path"; btn.style.opacity = "0.5"; } };
 
-const bgImg = $('bg-image');
-const setBg = url => {
+const BG_MUSIC_URL = "audios/ac_3pm.mp3";
+const JOJO_SFX_URL = "audios/oraoraora.mp3";
+const JOJO_BG_GIF = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZobzNlampmZGM1dHJ5cXNhbThkNTVibzRsZmdkdTliOWs1NjNvbCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TyFdAtfZBODNC/giphy.gif";
+
+let bgAudio = new Audio(BG_MUSIC_URL);
+bgAudio.loop = true; bgAudio.volume = 0.3;
+bgAudio.onerror = () => { 
+  const btn = document.getElementById('music-toggle');
+  if(btn) { btn.innerHTML = "🚫"; btn.title = "missing audios/ac_3pm.mp3! check folder/filename"; btn.style.opacity = "0.5"; }
+};
+
+let jojoAudio = null;
+let isBgPlaying = false;
+
+const bgImg = document.getElementById('bg-image');
+function setBg(url){
   if(!url){ bgImg.style.opacity = '0'; return; }
   bgImg.style.opacity = '0';
-  setTimeout(() => { bgImg.onload = () => { bgImg.style.opacity = '0.4'; }; bgImg.src = url; }, 600); 
-};
-const setRandomBg = () => setBg(presetInfo[Math.floor(Math.random() * presetInfo.length)].url);
-const showToast = msg => {
-    const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-    $('toast-container').appendChild(t); requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
-};
+  setTimeout(() => {
+    bgImg.src = url;
+    bgImg.onload = () => { bgImg.style.opacity = '0.4'; };
+  }, 600); 
+}
+function setRandomBg() { setBg(presetInfo[Math.floor(Math.random() * presetInfo.length)].url); }
 
-const toggleBgMusic = () => {
-  const btn = $('music-toggle'); sfx.init();
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast'; toast.textContent = msg;
+    document.getElementById('toast-container').appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+function toggleBgMusic() {
+  const btn = document.getElementById('music-toggle');
+  sfx.init();
   if (isBgPlaying) {
     bgAudio.pause(); isBgPlaying = false; btn.classList.remove('active'); btn.style.opacity = "0.7";
   } else {
     if(document.body.classList.contains('chaos-mode')){ isBgPlaying = true; btn.classList.add('active'); return; }
-    bgAudio.play()?.then(() => { isBgPlaying = true; btn.classList.add('active'); btn.style.opacity = "1"; btn.innerHTML = "🎵"; })
-      .catch(e => { isBgPlaying = false; if(e.name !== "NotAllowedError") { btn.innerHTML = "🚫"; btn.title = "error: " + e.message; }});
+    const p = bgAudio.play();
+    if(p !== undefined) p.then(() => { isBgPlaying = true; btn.classList.add('active'); btn.style.opacity = "1"; btn.innerHTML = "🎵"; })
+      .catch(e => { isBgPlaying = false; if(e.name !== "NotAllowedError") { btn.innerHTML = "🚫"; btn.title = "file issue: " + e.message; }});
   }
-};
-const playJojoMusic = () => {
-  if(isBgPlaying && bgAudio) bgAudio.pause();
-  if(!jojoAudio) { jojoAudio = new Audio("audios/oraoraora.mp3"); jojoAudio.loop = true; jojoAudio.volume = 0.6; jojoAudio.onerror = () => { jojoAudio = null; showToast("missing oraoraora.mp3! (T_T)"); }; }
-  if(jojoAudio?.paused) { jojoAudio.currentTime = 0; jojoAudio.play().catch(()=>{}); }
-};
-const stopJojoMusic = () => {
-  if(jojoAudio) { jojoAudio.pause(); jojoAudio.currentTime = 0; }
-  if(isBgPlaying && bgAudio) bgAudio.play().catch(()=>{});
-};
-const applyFilter = () => {
-  const q = $('search').value.toLowerCase(), isChaos = document.body.classList.contains('chaos-mode');
-  if (q === 'jojo') {
-    if (!isChaos) { document.body.classList.add('chaos-mode'); playJojoMusic(); setBg("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZobzNlampmZGM1dHJ5cXNhbThkNTVibzRsZmdkdTliOWs1NjNvbCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TyFdAtfZBODNC/giphy.gif"); }
-  } else if (isChaos) {
-    document.body.classList.remove('chaos-mode'); stopJojoMusic();
-    const p = localStorage.getItem('bgPreset'); setBg(presetInfo[p] ? presetInfo[p].url : presetInfo[0].url);
-  }
-  $$('.card').forEach(c => {
-    if (c.textContent.toLowerCase().includes(q)) { c.style.display = 'flex'; setTimeout(() => c.style.opacity = '1', 10); } 
-    else { c.style.opacity = '0'; setTimeout(() => { if(c.style.opacity === '0') c.style.display = 'none'; }, 300); }
-  });
-};
-const getFavs = () => { try { return JSON.parse(localStorage.getItem('wf_favs_v2')||'[]') } catch{ return [] } };
-const isFav = id => getFavs().includes(id);
-const toggleFav = (id, btn) => {
-  const arr = getFavs(), i = arr.indexOf(id);
-  if(i === -1) { arr.push(id); btn.classList.add('hearted'); } else { arr.splice(i,1); btn.classList.remove('hearted'); }
-  localStorage.setItem('wf_favs_v2', JSON.stringify(arr));
-};
+}
 
-const modal = $('modal'), iframe = $('modal-iframe'), spinner = $('modal-spinner');
-const openPreview = id => {
-  const g = games.find(x => x.id === id); if(!g) return;
-  $('modal-title').textContent = `${g.title} ✧･ﾟ: *✧･ﾟ:*`; spinner.style.opacity = '1'; iframe.src = '';
-  modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow = 'hidden';
-  setTimeout(() => { iframe.src = g.url; iframe.onload = () => spinner.style.opacity = '0'; }, 100);
-};
-$('modal-fullscreen').addEventListener('click', () => {
+function playJojoMusic() {
+  if (isBgPlaying && bgAudio) bgAudio.pause();
+  if (!jojoAudio) {
+    jojoAudio = new Audio(JOJO_SFX_URL); jojoAudio.loop = true; jojoAudio.volume = 0.6;
+    jojoAudio.onerror = () => { jojoAudio = null; showToast("missing audios/oraoraora.mp3! (T_T)"); }; 
+  }
+  if (jojoAudio && jojoAudio.paused) { jojoAudio.currentTime = 0; jojoAudio.play().catch(e => {}); }
+}
+function stopJojoMusic() {
+  if (jojoAudio) { jojoAudio.pause(); jojoAudio.currentTime = 0; }
+  if (isBgPlaying && bgAudio) bgAudio.play().catch(e => {});
+}
+
+function applyFilter() {
+  const q = document.getElementById('search').value.toLowerCase();
+  if (q === 'jojo') {
+    if (!document.body.classList.contains('chaos-mode')) {
+      document.body.classList.add('chaos-mode'); playJojoMusic(); setBg(JOJO_BG_GIF);
+    }
+  } else {
+    if (document.body.classList.contains('chaos-mode')) {
+      document.body.classList.remove('chaos-mode'); stopJojoMusic();
+      const savedPreset = localStorage.getItem('bgPreset');
+      setBg(savedPreset !== null && presetInfo[savedPreset] ? presetInfo[savedPreset].url : presetInfo[0].url);
+    }
+  }
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = card.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+  });
+}
+
+function getFavs(){ try { return JSON.parse(localStorage.getItem('wf_favs_v2')||'[]') } catch(e){ return [] } }
+function isFav(id){ return getFavs().includes(id) }
+function toggleFav(id, btn){
+  const arr = getFavs(); const i = arr.indexOf(id);
+  if(i === -1) { arr.push(id); btn.classList.add('hearted'); } 
+  else { arr.splice(i,1); btn.classList.remove('hearted'); }
+  localStorage.setItem('wf_favs_v2', JSON.stringify(arr));
+}
+
+const modal = document.getElementById('modal');
+const iframe = document.getElementById('modal-iframe');
+const spinner = document.getElementById('modal-spinner');
+
+function openPreview(id){
+  const g = games.find(x => x.id === id);
+  if(!g) return;
+  document.getElementById('modal-title').textContent = `✨ ${g.title} ✧･ﾟ: *✧･ﾟ:*`; 
+  spinner.style.display = 'block'; iframe.src = '';
+  modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+  setTimeout(() => { iframe.src = g.url; iframe.onload = () => spinner.style.display = 'none'; }, 100);
+}
+
+document.getElementById('modal-fullscreen').addEventListener('click', () => {
   sfx.play('click');
-  try { (iframe.requestFullscreen?.() || iframe.webkitRequestFullscreen?.())?.catch(() => showToast("fullscreen blocked! (T_T)")); } 
-  catch { showToast("fullscreen blocked! (T_T)"); }
-});
-$('modal-close').addEventListener('click', () => { 
-  sfx.play('click'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; 
-  setTimeout(() => iframe.src = 'about:blank', 400); 
-});
-modal.addEventListener('click', e => { if(e.target === modal) $('modal-close').click(); });
-const shareGame = id => {
-  const g = games.find(x => x.id === id), url = g?.url || location.href;
-  const copy = () => {
-    const el = document.createElement('textarea'); el.value = url; el.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(el); el.select();
-    try { document.execCommand('copy'); showToast('link copied! (b ᵔ▽ᵔ)b'); } catch { showToast('unable to copy (T_T)'); }
-    el.remove();
-  };
-  if(navigator.share) navigator.share({ title: g?.title || id, url }).catch(e => { if(e.name !== 'AbortError') copy(); });
-  else copy();
-};
-let lastTrailTime = 0;
-document.addEventListener('mousemove', e => {
-  if (Date.now() - lastTrailTime > 100) { 
-    lastTrailTime = Date.now();
-    const el = document.createElement('div'); el.className = 'menacing-trail'; el.textContent = 'ゴ';
-    el.style.left = `${e.clientX}px`; el.style.top = `${e.clientY}px`; el.style.transform = `rotate(${Math.random() * 20 - 10}deg)`; 
-    document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
+  try {
+    if (iframe.requestFullscreen) {
+      const p = iframe.requestFullscreen();
+      if (p) p.catch(e => showToast("fullscreen blocked by browser! (T_T)"));
+    }
+    else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+  } catch (e) {
+    showToast("fullscreen blocked by browser! (T_T)");
   }
 });
-const setLoaderReady = () => {
-  const loader = $('loader'); if (!loader || loader.style.display === 'none') return;
+
+document.getElementById('modal-close').addEventListener('click', () => {
+  sfx.play('click'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); iframe.src = 'about:blank';
+});
+modal.addEventListener('click', (e) => { if(e.target === modal) document.getElementById('modal-close').click(); });
+
+function shareGame(id){
+  const g = games.find(x => x.id === id); const url = g ? g.url : location.href;
+  
+  const copyToClipboard = () => {
+    const el = document.createElement('textarea');
+    el.value = url;
+    el.style.position = 'fixed'; 
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    el.select();
+    try {
+      document.execCommand('copy');
+      showToast('link copied to clipboard! (b ᵔ▽ᵔ)b');
+    } catch (err) {
+      showToast('unable to copy link (T_T)');
+    }
+    document.body.removeChild(el);
+  };
+
+  if(navigator.share) {
+    const p = navigator.share({ title: g ? g.title : id, url });
+    if (p) p.catch(e => {
+      // If user cancelled, do nothing. Otherwise, copy link as fallback.
+      if(e.name !== 'AbortError') copyToClipboard();
+    });
+  } else { 
+    copyToClipboard();
+  }
+}
+
+let lastTrailTime = 0;
+document.addEventListener('mousemove', (e) => {
+  const now = Date.now();
+  if (now - lastTrailTime > 100) { 
+    lastTrailTime = now;
+    const el = document.createElement('div');
+    el.className = 'menacing-trail'; el.textContent = 'ゴ';
+    el.style.left = `${e.clientX}px`; el.style.top = `${e.clientY}px`;
+    el.style.transform = `rotate(${Math.random() * 20 - 10}deg)`; 
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+});
+
+function setLoaderReady() {
+  const loader = document.getElementById('loader');
+  if (!loader || loader.style.display === 'none') return;
   setRandomBg();
   loader.querySelector('.loader-text').innerHTML = 'loading is done click anywhere!<br class="mobile-break"> (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧';
-  $('loader-subtext').textContent = "click to unleash the chaos";
+  document.getElementById('loader-subtext').textContent = "click to unleash the chaos";
+  
   document.addEventListener('click', () => {
       loader.style.opacity = '0';
       setTimeout(() => {
           loader.style.display = 'none';
+          const btn = document.getElementById('music-toggle');
           if(!isBgPlaying && !document.body.classList.contains('chaos-mode')) {
-             bgAudio.play()?.then(() => { isBgPlaying = true; const btn = $('music-toggle'); btn.classList.add('active'); btn.style.opacity = "1"; }).catch(()=>{});
+             bgAudio.play().then(() => { isBgPlaying = true; btn.classList.add('active'); btn.style.opacity = "1"; }).catch(e => console.log(e));
           }
       }, 500);
   }, {once: true});
-};
+}
 
-const initializeUI = () => {
-    $('music-toggle').addEventListener('click', toggleBgMusic);
-    $('search').addEventListener('input', applyFilter);
-    const modeBtn = $('mode-toggle');
-    modeBtn.addEventListener('click', () => {
-      sfx.play('click'); document.documentElement.classList.toggle('light');
+function initializeUI() {
+    document.getElementById('music-toggle').addEventListener('click', toggleBgMusic);
+    document.getElementById('search').addEventListener('input', applyFilter);
+
+    const modeToggle = document.getElementById('mode-toggle');
+    modeToggle.addEventListener('click', () => {
+      sfx.play('click');
+      document.documentElement.classList.toggle('light');
       const isLight = document.documentElement.classList.contains('light');
       localStorage.setItem('siteMode', isLight ? 'light' : 'dark');
-      modeBtn.textContent = isLight ? '🌞' : '✨'; if(bgImg.src) bgImg.style.opacity = '0.4'; 
+      modeToggle.textContent = isLight ? '🌞' : '✨';
+      if(bgImg.src) bgImg.style.opacity = '0.4'; 
     });
-    const presetRow = $('preset-row');
-    presetRow.innerHTML = presetInfo.map((p, i) => `<button class="preset" title="preset ${i+1}" data-index="${i}"><span aria-hidden="true">${p.emoji}</span></button>`).join('');
-    presetRow.addEventListener('click', e => { const btn = e.target.closest('.preset'); if(btn) { sfx.play('click'); const i = btn.dataset.index; setBg(presetInfo[i].url); localStorage.setItem('bgPreset', i); }});
-    $('games-grid').innerHTML = games.map((g, i) => `
-      <div class="card" data-id="${g.id}" style="animation-delay: ${i * 0.05}s">
-        <div class="top"><div class="icon-box" aria-hidden="true">${ICONS[g.id] || ''}</div><div class="card-info"><h3>${g.title}</h3><p>${g.desc}</p></div></div>
+
+    const presetRow = document.getElementById('preset-row');
+    presetRow.innerHTML = presetInfo.map((p, i) => 
+      `<button class="preset" title="preset ${i+1}" data-index="${i}"><span aria-hidden="true">${p.emoji}</span></button>`
+    ).join('');
+    
+    presetRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('.preset');
+        if(btn) {
+           sfx.play('click');
+           const i = btn.dataset.index;
+           setBg(presetInfo[i].url); localStorage.setItem('bgPreset', i);
+        }
+    });
+
+    // render grid
+    const grid = document.getElementById('games-grid');
+    grid.innerHTML = games.map((g, index) => `
+      <div class="card" data-id="${g.id}" style="animation-delay: ${index * 0.05}s">
+        <div class="top">
+          <div class="icon-box" aria-hidden="true">${ICONS[g.id] || ''}</div>
+          <div class="card-info"><h3>${g.title}</h3><p>${g.desc}</p></div>
+        </div>
         <div class="thumb-wrap" role="img" aria-label="${g.title} thumbnail">
-          <div class="fallback"><div style="width:24px; opacity:0.5">${ICONS[g.id] || ''}</div><small style="font-size:10px; text-transform:uppercase; letter-spacing:1px">no preview</small></div>
+          <div class="fallback">
+            <div style="width:24px; opacity:0.5">${ICONS[g.id] || ''}</div>
+            <small style="font-size:10px; text-transform:uppercase; letter-spacing:1px">no preview</small>
+          </div>
           <img src="images/${g.id}.jpg" alt="${g.title} preview" loading="lazy" onload="this.style.opacity=1" onerror="this.style.opacity=0;" />
         </div>
         <div class="actions">
           <button class="play-btn" data-id="${g.id}">play</button>
           <div class="secondary-actions">
-            <a href="${g.url}" target="_blank" rel="noopener" class="icon-btn external-btn" title="open in new tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
+            <a href="${g.url}" target="_blank" rel="noopener" class="icon-btn external-btn" title="open in new tab">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </a>
             <button class="icon-btn fav-btn ${isFav(g.id) ? 'hearted' : ''}" title="favorite"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
             <button class="icon-btn share-btn" title="share link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></button>
           </div>
         </div>
       </div>
     `).join('');
-    $('games-grid').addEventListener('click', e => {
-        const card = e.target.closest('.card'); if (!card) return;
-        const id = card.dataset.id, iconBtn = e.target.closest('.icon-btn');
-        if (e.target.closest('.play-btn') || e.target.closest('.thumb-wrap')) { sfx.play('click'); openPreview(id); return; }
+
+    // event delegation
+    grid.addEventListener('click', (e) => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+        const id = card.dataset.id;
+        
+        if (e.target.closest('.play-btn')) { sfx.play('click'); openPreview(id); return; }
+        
+        const iconBtn = e.target.closest('.icon-btn');
         if (iconBtn) {
             sfx.play('click');
-            if (iconBtn.classList.contains('fav-btn')) toggleFav(id, iconBtn);
+            if (iconBtn.classList.contains('external-btn')) return; // let native link behavior handle it
+            else if (iconBtn.classList.contains('fav-btn')) toggleFav(id, iconBtn);
             else if (iconBtn.classList.contains('share-btn')) shareGame(id);
+            return;
         }
+        
+        if (e.target.closest('.thumb-wrap')) { sfx.play('click'); openPreview(id); }
     });
-    $$('#music-toggle, #mode-toggle, .preset, .card, .play-btn, .icon-btn').forEach(el => el.addEventListener('mouseenter', e => { e.stopPropagation(); sfx.play('hover'); }));
-    $('footer-note').textContent = "this is a FOOTer ;-; • tap emojis to summon cool bg gifs • too sleepy to explain, just click shit and scream • (psst: search 'jojo')";
-    if(localStorage.getItem('siteMode') === 'light') { document.documentElement.classList.add('light'); modeBtn.textContent = '🌞'; }
-};
-window.onload = () => {
+
+    // hover effects
+    document.querySelectorAll('#music-toggle, #mode-toggle, .preset, .card, .play-btn, .icon-btn').forEach(el => {
+       el.addEventListener('mouseenter', (e) => { e.stopPropagation(); sfx.play('hover'); });
+    });
+
+    document.getElementById('footer-note').textContent = "this is a FOOTer ;-; • tap emojis to summon cool bg gifs • too sleepy to explain, just click shit and scream • (psst: search 'jojo')";
+
+    if(localStorage.getItem('siteMode') === 'light') { document.documentElement.classList.add('light'); document.getElementById('mode-toggle').textContent = '🌞'; }
+}
+
+window.onload = function() {
   initializeUI();
+  setRandomBg();
+  
   const jokes = ["summoning the chaos... ( ﾉ ﾟｰﾟ)ﾉ", "i swear youre getting there just wait plz (´。＿。｀)", "downloading more ram... jk (¬‿¬)", "convincing the browser to cooperate... (ง •_•)ง", "loading pixels one by one... (┬┬﹏┬┬)", "making coffee for the server ☕ ( ´･･)ﾉ(._.`)"];
-  $('loader-subtext').textContent = jokes[Math.floor(Math.random()*jokes.length)];
-  setTimeout(setLoaderReady, 100); setTimeout(setLoaderReady, 3000);
-};
+  document.getElementById('loader-subtext').textContent = jokes[Math.floor(Math.random()*jokes.length)];
+
+  setTimeout(setLoaderReady, 100); 
+  setTimeout(setLoaderReady, 3000);
+}
+
 document.addEventListener('click', () => sfx.init(), {once:true});
 </script>
 </body>
