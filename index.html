@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>alis' web minigames</title>
 <meta name="description" content="jojoverse vibes • play the collection" />
 <link rel="icon" href="/favicon.ico" />
@@ -49,18 +49,18 @@
   .loader-subtext { font-family: 'Inter', sans-serif; color: var(--text-muted); font-size: 14px; opacity: 0.8; animation: pulse 2s infinite alternate-reverse; max-width: 90%; }
   @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
   
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(15, 17, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); color: #f0f0f5; padding: 12px 24px; border-radius: 50px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 10001; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 8px; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(155, 155, 155, 0.3); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(155, 155, 155, 0.5); }
+  ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(155, 155, 155, 0.3); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(155, 155, 155, 0.5); }
   
   #bg-wrap { 
     position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100vw; 
-    height: 100vh; 
+    top: -50%; 
+    bottom: -50%; 
+    left: -50%; 
+    right: -50%; 
     z-index: 0; 
     pointer-events: none; 
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
   #bg-image { 
     position: absolute; 
