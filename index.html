@@ -205,7 +205,8 @@
   .modal-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: #f0f0f5; }
   .close-btn { background: transparent; border: 0; color: #94a3b8; cursor: pointer; font-size: 24px; line-height: 1; }
   .close-btn:hover { color: #f0f0f5; }
-  .modal iframe { width: 100%; height: 70vh; border: 0; background: #000; }
+  .rotate-hint { display: none; color: var(--text-muted); font-size: 12px; font-style: italic; }
+  .modal iframe { width: 100%; height: 85vh; border: 0; background: #000; }
   
   .external-link-btn { color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); transition: all 0.2s ease; }
   .external-link-btn:hover { background: rgba(139, 92, 246, 0.2); transform: translateY(-1px); }
@@ -218,7 +219,13 @@
     .preset-row { width: 100%; justify-content: space-between; }
     .preset { width: 48px; height: 48px; }
     .card { padding: 12px; }
-    .modal iframe { height: 60vh; }
+    
+    /* mobile app-like modal */
+    .modal { padding: 0; }
+    .modal-panel { height: 100vh; height: 100dvh; max-height: 100dvh; border-radius: 0; border: none; }
+    .modal iframe { height: calc(100vh - 60px); height: calc(100dvh - 60px); }
+    .rotate-hint { display: inline-block; }
+    
     .mobile-break { display: block; }
     header { align-items: flex-start; }
     .title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
@@ -288,11 +295,14 @@
       <div class="modal-header">
         <div style="display:flex; align-items:center; gap:10px">
           <span id="modal-title" class="modal-title">preview</span>
+          <span class="rotate-hint">rotate phone if needed ↻</span>
           <span id="modal-spinner" class="spinner" style="display:none; font-size:12px">loading...</span>
         </div>
         <div style="display:flex; gap:12px; align-items:center">
-            <a id="modal-external" href="#" target="_blank" rel="noopener noreferrer" class="external-link-btn">open ↗</a>
-            <button class="close-btn" id="modal-close" title="Close">×</button>
+            <button class="icon-btn" id="modal-fullscreen" title="fullscreen" style="width:32px; height:32px; border:none; margin-right:4px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            </button>
+            <button class="close-btn" id="modal-close" title="close">×</button>
         </div>
       </div>
       <iframe id="modal-iframe" title="game preview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
@@ -310,7 +320,7 @@ const presetInfo = [
 
 // svg icons
 const ICONS = {
-  burger_stack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-4.4 0-8 3.1-8 7h16c0-3.9-3.6-7-8-7Z"/><path d="M3 13h18"/><rect x="4" y="15" width="16" height="2" rx="1"/><path d="M5 19h14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2Z"/><circle cx="10" cy="7" r="0.5"/><circle cx="14" cy="7" r="0.5"/><circle cx="12" cy="9" r="0.5"/></svg>`,
+  burger_stack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 6 0 0 1 16 0H4z"/><path d="M3 12c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0"/><rect x="4" y="14" width="16" height="3" rx="1.5"/><path d="M5 21h14a2 2 0 0 0 2-2v-1H3v1a2 2 0 0 0 2 2z"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="7" x2="16.01" y2="7"/></svg>`,
   pizza_fraction: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 13V4a9 9 0 1 0 9 9h-9Z"/><path d="M14 10V1a9 9 0 0 1 9 9h-9Z"/><circle cx="7" cy="14" r="1"/><circle cx="11" cy="18" r="1"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="5" r="1"/></svg>`,
   bio_war: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M5 5l1.5 1.5"/><path d="M17.5 17.5L19 19"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M5 19l1.5-1.5"/><path d="M17.5 6.5L19 5"/></svg>`,
   solar_ascent: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 12 15 6 20 5C20 5 21 10 17 14C14.5 16.5 12 12 12 12Z"/><path d="M12 15C12 15 9 10 5 9C5 9 4 14 8 17C10 18.5 12 15 12 15Z"/></svg>`,
@@ -479,16 +489,22 @@ function toggleFav(id, btn){
 const modal = document.getElementById('modal');
 const iframe = document.getElementById('modal-iframe');
 const spinner = document.getElementById('modal-spinner');
-const externalLink = document.getElementById('modal-external'); 
 
 function openPreview(id){
   const g = games.find(x => x.id === id);
   if(!g) return;
-  document.getElementById('modal-title').textContent = g.title; externalLink.href = g.url; 
+  document.getElementById('modal-title').textContent = g.title; 
   spinner.style.display = 'block'; iframe.src = '';
   modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
   setTimeout(() => { iframe.src = g.url; iframe.onload = () => spinner.style.display = 'none'; }, 100);
 }
+
+document.getElementById('modal-fullscreen').addEventListener('click', () => {
+  sfx.play('click');
+  if (iframe.requestFullscreen) iframe.requestFullscreen();
+  else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+});
+
 document.getElementById('modal-close').addEventListener('click', () => {
   sfx.play('click'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); iframe.src = 'about:blank';
 });
@@ -572,16 +588,18 @@ function initializeUI() {
         <div class="thumb-wrap" role="img" aria-label="${g.title} thumbnail">
           <div class="fallback">
             <div style="width:24px; opacity:0.5">${ICONS[g.id] || ''}</div>
-            <small style="font-size:10px; text-transform:uppercase; letter-spacing:1px">No Preview</small>
+            <small style="font-size:10px; text-transform:uppercase; letter-spacing:1px">no preview</small>
           </div>
-          <img src="https://image.thum.io/get/width/600/crop/800/noanimate/${g.url}?refresh=${Date.now()}" alt="${g.title} preview" loading="lazy" onload="this.style.opacity=1" />
+          <img src="images/${g.id}.jpg" alt="${g.title} preview" loading="lazy" onload="this.style.opacity=1" onerror="this.style.opacity=0;" />
         </div>
         <div class="actions">
-          <a class="play-btn" href="${g.url}" target="_blank" rel="noopener">Play</a>
+          <button class="play-btn" data-id="${g.id}">play</button>
           <div class="secondary-actions">
-            <button class="icon-btn preview-btn" title="Preview"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
-            <button class="icon-btn fav-btn ${isFav(g.id) ? 'hearted' : ''}" title="Favorite"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
-            <button class="icon-btn share-btn" title="Share Link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></button>
+            <a href="${g.url}" target="_blank" rel="noopener" class="icon-btn external-btn" title="open in new tab">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </a>
+            <button class="icon-btn fav-btn ${isFav(g.id) ? 'hearted' : ''}" title="favorite"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
+            <button class="icon-btn share-btn" title="share link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></button>
           </div>
         </div>
       </div>
@@ -593,12 +611,12 @@ function initializeUI() {
         if (!card) return;
         const id = card.dataset.id;
         
-        if (e.target.closest('.play-btn')) { sfx.play('click'); return; }
+        if (e.target.closest('.play-btn')) { sfx.play('click'); openPreview(id); return; }
         
         const iconBtn = e.target.closest('.icon-btn');
         if (iconBtn) {
             sfx.play('click');
-            if (iconBtn.classList.contains('preview-btn')) openPreview(id);
+            if (iconBtn.classList.contains('external-btn')) return; // let native link behavior handle it
             else if (iconBtn.classList.contains('fav-btn')) toggleFav(id, iconBtn);
             else if (iconBtn.classList.contains('share-btn')) shareGame(id);
             return;
