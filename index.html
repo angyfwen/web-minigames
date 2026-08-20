@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- viewport-fit=cover tells Safari to let the background stretch underneath the glass bars -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>alis' web minigames</title>
 <meta name="description" content="jojoverse vibes • play the collection" />
 <link rel="icon" href="/favicon.ico" />
@@ -18,13 +19,13 @@
     --blur-amt: 16px; --primary: #8b5cf6;
     --accent-gradient: linear-gradient(135deg, #ff6b6b, #ffd36b);
     --button-gradient: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
-    --glow: 0 0 20px rgba(139, 92, 246, 0.15); --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
   :root.light {
     --bg: #050507; --text-main: #f0f0f5; --text-muted: #94a3b8;
     --card-text: #1e293b; --card-muted: #64748b;
     --glass-surface: rgba(255, 255, 255, 0.92); --glass-border: rgba(0, 0, 0, 0.1); --glass-highlight: rgba(255, 255, 255, 1);
-    --glow: 0 0 20px rgba(255, 255, 255, 0.4); --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
   * { box-sizing: border-box; }
   
@@ -53,35 +54,9 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(155, 155, 155, 0.3); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(155, 155, 155, 0.5); }
   
-  #bg-wrap { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100vw; 
-    height: 100vh; 
-    z-index: 0; 
-    pointer-events: none; 
-  }
-  #bg-image { 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    opacity: 0.4; 
-    mix-blend-mode: screen; 
-    transition: opacity 0.6s ease; 
-  }
-  #bg-svg { 
-    position: absolute; 
-    inset: 0; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    opacity: 0.1; 
-    mask-image: radial-gradient(circle, transparent 30%, black 100%); 
-  }
+  #bg-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  #bg-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; mix-blend-mode: screen; transition: opacity 0.6s ease; }
+  #bg-svg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.1; mask-image: radial-gradient(circle, transparent 30%, black 100%); }
   
   .gogo { font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 20vh; line-height: 0.8; color: transparent; -webkit-text-stroke: 2px currentColor; transform: rotate(-8deg); opacity: 0.5; animation: sway 20s ease-in-out infinite alternate; }
   @keyframes sway { from { transform: translateX(-5%) rotate(-8deg); } to { transform: translateX(5%) rotate(-4deg); } }
@@ -99,6 +74,7 @@
   .github-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); transform: translateY(-1px); }
   :root.light .github-link:hover { color: #000; background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
   .header-actions { display: flex; gap: 12px; align-items: center; }
+  
   .controls { display: flex; flex-direction: column; gap: 12px; flex-wrap: wrap; }
   .controls-row { display: flex; gap: 16px; flex-wrap: wrap; }
   .search-wrap { flex: 1; min-width: 200px; position: relative; background: var(--glass-surface); border-radius: 16px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease, color 0.4s ease; color: var(--card-text); }
@@ -112,7 +88,7 @@
   .preset:active { transform: scale(0.95); } .preset.active { animation: rainbow-border-text-glow 4s linear infinite; }
   
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-  .card { background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur-amt)); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.4s ease, background 0.4s ease, color 0.4s ease, opacity 0.3s ease; position: relative; overflow: hidden; opacity: 0; animation: fadeUp 0.6s forwards; color: var(--card-text); }
+  .card { background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur-amt)); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.4s ease, background 0.4s ease, color 0.4s ease, opacity 0.4s ease; position: relative; overflow: hidden; opacity: 0; animation: fadeUp 0.6s forwards; color: var(--card-text); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
   :root.light .card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
@@ -151,9 +127,9 @@
   @media (max-width: 600px) {
     .controls { flex-direction: column; } .search-wrap { width: 100%; } .preset-row { width: 100%; justify-content: space-between; }
     .preset { width: 48px; height: 48px; } .card { padding: 12px; } .modal { padding: 0; }
-    .modal-panel { position: fixed; inset: 0; height: 100%; width: 100%; max-width: none; border-radius: 0; border: none; transform: translateY(20px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; }
+    .modal-panel { height: 100vh; width: 100vw; max-width: none; border-radius: 0; border: none; transform: translateY(20px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; }
     .modal.open .modal-panel { transform: translateY(0); opacity: 1; }
-    .modal iframe { flex: 1; min-height: 0; height: auto; }
+    .modal iframe { flex: 1; height: 100%; }
     .mobile-break { display: block; } header { align-items: flex-start; } .title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
     .header-actions { flex-direction: column; gap: 8px; margin-top: 4px; } .status-text { margin-top: 8px; } header h1 { font-size: 22px; } .pfp { width: 50px; height: 50px; }
   }
@@ -310,6 +286,7 @@ const showToast = msg => {
     $('toast-container').appendChild(t); requestAnimationFrame(() => t.classList.add('show'));
     setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
 };
+
 const toggleBgMusic = () => {
   const btn = $('music-toggle'); sfx.init();
   if (isBgPlaying) {
@@ -402,6 +379,7 @@ const setLoaderReady = () => {
       }, 500);
   }, {once: true});
 };
+
 const initializeUI = () => {
     $('music-toggle').addEventListener('click', toggleBgMusic);
     $('search').addEventListener('input', applyFilter);
