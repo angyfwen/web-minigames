@@ -4,337 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pizza Slicer</title>
-
-    <!-- RESTORED FONTS & ICONS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
         :root {
-            /* KITCHEN THEME COLORS */
             --bg-kitchen: #bdc3c7; 
-            
-            /* WOODEN BOARD COLORS */
             --c-wood-base: #e3b988; 
             --c-wood-grain: #c49a6c; 
             --c-wood-dark: #a17a4e; 
-            
-            /* PIZZA CRUST */
             --c-pizza-crust: #d68f4d;
             --c-pizza-crust-dark: #b57030; 
-            
-            /* BASE INGREDIENTS */
             --c-tomato: #e74c3c;
             --c-tomato-dark: #c0392b; 
             --c-tomato-stain: #c0392b;
-            
             --c-basil: #597536;
             --c-mozzarella: #fbfbfb;
             --c-olive: #3e3e02;
-            
             --c-onion-outer: #8e44ad;
             --c-onion-inner: #e1bee7;
-            
             --c-mushroom-cap: #8d6e63;
             --c-mushroom-stem: #d7ccc8;
-            
             --c-herb: #2d5a27; 
-            
-            /* NEW INGREDIENTS HIHI */
             --c-pepperoni: #bf360c;
             --c-pepperoni-fat: #ffab91;
-            
-            --c-pepper: #43a047; /* Green Pepper */
-            
+            --c-pepper: #43a047;
             --c-pineapple: #fdd835;
-            
             --c-chili: #d32f2f;
-
-            /* TOOLS */
             --c-cutter-handle: #c0392b;
             --c-cutter-metal: #95a5a6;
             --c-cutter-metal-dark: #7f8c8d;
-            
-            /* PROPS */
             --c-garlic: #f5f5f5;
             --c-box-cardboard: #eecfa1;
             --c-box-border: #d2b48c;
-            /* OIL DRIPS COLOR */
             --c-oil: #fbc02d;
-
-            /* UI THEME - RECEIPT STYLE */
             --paper-bg: #fffdf0;
             --ink-color: #333;
             --paper-shadow: 4px 4px 12px rgba(0,0,0,0.15);
-            /* Narrower border matching ink color */
             --paper-border: 1.5px solid var(--ink-color);
         }
-
-        /* VARIANTS */
-        .variant-2 { /* PESTO VEGGIE */
-            --c-tomato: #8CBF56;
-            --c-tomato-dark: #6e9643;
-            --c-tomato-stain: #6B9C38;
-            --c-olive: #2c2c2c;
-            --c-mushroom-cap: #f5f5f5; 
-            --c-mushroom-stem: #e0e0e0;
-        }
-        .variant-3 { /* SUPREME (Onion, Olive, Pepperoni) */
-            --c-tomato: #e74c3c;
-            --c-tomato-dark: #c0392b;
-            --c-tomato-stain: #c0392b;
-            --c-olive: #8e44ad;
-            --c-mozzarella: #fff;
-            --c-basil: #597536; 
-        }
-        .variant-4 { /* ALFREDO */
-            --c-tomato: #fdfaf0;
-            --c-tomato-dark: #e6e2d3;
-            --c-tomato-stain: #f1c40f;
-            --c-olive: #2c3e50;
-            --c-mozzarella: #ffffff;
-            --c-basil: #597536;
-            --c-mushroom-cap: #5D4037;
-            --c-mushroom-stem: #8D6E63;
-        }
-        .variant-5 { /* BBQ HAWAIIAN */
-            --c-tomato: #5D4037;
-            --c-tomato-dark: #3e2723;
-            --c-tomato-stain: #3E2723;
-            --c-olive: #388E3C;
-            --c-mozzarella: #FFC107;
-            --c-basil: #1b5e20;
-            --c-mushroom-cap: #3E2723;
-            --c-mushroom-stem: #5D4037;
-        }
-
-        body {
-            padding: 0;
-            margin: 0;
-            height: 100dvh; 
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--bg-kitchen);
-            background-image: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.1) 100%);
-            font-family: 'Courier New', Courier, monospace;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
-            color: var(--ink-color);
-        }
-
-        /* SCENE WRAPPER */
-        #scene {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100vw;
-            height: 100dvh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
-        }
-
-        /* FLOUR MESS */
-        .flour {
-            position: absolute;
-            top: -10vmin;
-            right: -10vmin;
-            width: 80vmin;
-            height: 50vmin;
-            background: radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 40%, transparent 70%);
-            z-index: 0; 
-            transform: rotate(-15deg);
-            pointer-events: none;
-        }
-
-        /* OIL DRIPS */
-        .oil-drip {
-            position: absolute;
-            background-color: var(--c-oil);
-            opacity: 0.7;
-            z-index: 1; 
-            box-shadow: inset 0.3vmin 0.3vmin 0.5vmin rgba(255,255,255,0.6), 0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.1);
-        }
+        .variant-2 { --c-tomato: #8CBF56; --c-tomato-dark: #6e9643; --c-tomato-stain: #6B9C38; --c-olive: #2c2c2c; --c-mushroom-cap: #f5f5f5; --c-mushroom-stem: #e0e0e0; }
+        .variant-3 { --c-tomato: #e74c3c; --c-tomato-dark: #c0392b; --c-tomato-stain: #c0392b; --c-olive: #8e44ad; --c-mozzarella: #fff; --c-basil: #597536; }
+        .variant-4 { --c-tomato: #fdfaf0; --c-tomato-dark: #e6e2d3; --c-tomato-stain: #f1c40f; --c-olive: #2c3e50; --c-mozzarella: #ffffff; --c-basil: #597536; --c-mushroom-cap: #5D4037; --c-mushroom-stem: #8D6E63; }
+        .variant-5 { --c-tomato: #5D4037; --c-tomato-dark: #3e2723; --c-tomato-stain: #3E2723; --c-olive: #388E3C; --c-mozzarella: #FFC107; --c-basil: #1b5e20; --c-mushroom-cap: #3E2723; --c-mushroom-stem: #5D4037; }
+        body { padding: 0; margin: 0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: var(--bg-kitchen); background-image: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.1) 100%); font-family: 'Courier New', Courier, monospace; touch-action: none; -webkit-user-select: none; user-select: none; color: var(--ink-color); }
+        #scene { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease; }
         
+        .flour { position: absolute; top: -10vmin; right: -10vmin; width: 80vmin; height: 50vmin; background: radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 40%, transparent 70%); z-index: 0; transform: rotate(-15deg); pointer-events: none; }
+        .oil-drip { position: absolute; background-color: var(--c-oil); opacity: 0.7; z-index: 1; box-shadow: inset 0.3vmin 0.3vmin 0.5vmin rgba(255,255,255,0.6), 0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.1); }
         .oil-drip.o1 { width: 6vmin; height: 4vmin; bottom: 15vmin; right: 30vmin; border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%; transform: rotate(10deg); }
         .oil-drip.o2 { width: 2.5vmin; height: 2.5vmin; bottom: 14vmin; right: 26vmin; border-radius: 50%; }
         .oil-drip.o3 { width: 4vmin; height: 3vmin; top: 20vmin; left: 30vmin; border-radius: 40% 60% 50% 50%; transform: rotate(-20deg); }
-
-        /* ROLLER PIN */
-        .roller-pin {
-            position: absolute;
-            top: -5vmin;
-            right: -5vmin;
-            width: 50vmin; 
-            height: 12vmin;
-            transform: rotate(45deg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            filter: drop-shadow(1vmin 1vmin 0.5vmin rgba(0,0,0,0.15));
-            z-index: 1; 
-        }
+        .roller-pin { position: absolute; top: -5vmin; right: -5vmin; width: 50vmin; height: 12vmin; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; filter: drop-shadow(1vmin 1vmin 0.5vmin rgba(0,0,0,0.15)); z-index: 1; }
         .roller-pin .handle { width: 20%; height: 40%; background-color: var(--c-wood-dark); border-radius: 0.5vmin; position: relative; box-shadow: inset 0 -0.5vmin 0.5vmin rgba(0,0,0,0.2); z-index: 2; }
         .roller-pin .body { width: 60%; height: 100%; background-color: var(--c-wood-base); background-image: repeating-linear-gradient(180deg, transparent, transparent 1vmin, rgba(0,0,0,0.05) 1vmin, rgba(0,0,0,0.05) 1.2vmin); border-radius: 1vmin; margin: 0; box-shadow: inset 0 -1vmin 1vmin rgba(0,0,0,0.15), inset 0 1vmin 1vmin rgba(255,255,255,0.2); position: relative; }
-
-        /* PIZZA BOXES */
         .pizza-boxes { position: absolute; top: -15vmin; left: -15vmin; z-index: 1; transform: rotate(15deg); filter: drop-shadow(1vmin 1vmin 0.5vmin rgba(0,0,0,0.15)); }
         .box { width: 40vmin; height: 40vmin; background-color: var(--c-box-cardboard); border: 0.4vmin solid var(--c-box-border); position: absolute; display: flex; align-items: center; justify-content: center; box-shadow: 0.5vmin 0.5vmin 1vmin rgba(0,0,0,0.1); }
         .box::after { content: 'PIZZA'; color: #c0392b; font-weight: bold; font-family: sans-serif; font-size: 5vmin; border: 0.5vmin solid #c0392b; padding: 0.5vmin 2vmin; transform: rotate(-45deg); opacity: 0.6; }
         .box.b1 { top: 5vmin; left: 5vmin; transform: rotate(-5deg); z-index: 1; }
         .box.b2 { top: 0; left: 0; z-index: 2; background-color: #f5deb3; transform: rotate(5deg); }
-
-        /* GARLIC */
         .garlic-group { position: absolute; bottom: 5vmin; right: 15vmin; z-index: 2; filter: drop-shadow(0.5vmin 0.5vmin 0.5vmin rgba(0,0,0,0.15)); }
         .garlic { position: absolute; width: 7vmin; height: 7vmin; background-color: var(--c-garlic); border-radius: 0 50% 50% 50%; transform: rotate(-45deg); box-shadow: inset -0.5vmin -0.5vmin 1vmin rgba(0,0,0,0.1); }
         .garlic.g1 { bottom: 0; right: 0; }
         .garlic.g2 { bottom: 2vmin; right: 4vmin; width: 5vmin; height: 5vmin; transform: rotate(15deg); border-radius: 50% 50% 50% 0; }
-
-        /* PIZZA CUTTER */
         .pizza-cutter { position: absolute; bottom: 5vmin; left: 5vmin; width: 30vmin; height: 10vmin; transform: rotate(-25deg); z-index: 2; filter: drop-shadow(1vmin 1vmin 0.5vmin rgba(0,0,0,0.2)); }
         .pizza-cutter .handle { width: 60%; height: 35%; background-color: var(--c-cutter-handle); border-radius: 2vmin; position: absolute; right: 0; top: 32%; box-shadow: inset 0 -0.5vmin 0.5vmin rgba(0,0,0,0.2), inset 0 0.5vmin 0.5vmin rgba(255,255,255,0.2); }
         .pizza-cutter .stem { width: 30%; height: 15%; background-color: var(--c-cutter-metal); position: absolute; right: 55%; top: 42%; z-index: -1; }
         .pizza-cutter .wheel { width: 10vmin; height: 10vmin; background: radial-gradient(circle, var(--c-cutter-metal) 40%, var(--c-cutter-metal-dark) 100%); border-radius: 50%; position: absolute; left: 0; top: 0; border: 0.5vmin solid #bdc3c7; box-shadow: inset 0 0 1vmin rgba(0,0,0,0.3); }
         .pizza-cutter .wheel::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 1.5vmin; height: 1.5vmin; background-color: #555; border-radius: 50%; box-shadow: 0 0 0 0.3vmin rgba(255,255,255,0.5); }
-
-        /* LOOSE TOMATO & BASIL */
         .loose-tomato { position: absolute; top: 50%; left: 5vmin; transform: translateY(-50%); width: 9vmin; height: 9vmin; background-color: var(--c-tomato); border-radius: 50%; box-shadow: 0.5vmin 0.5vmin 1vmin rgba(0,0,0,0.2), inset -0.5vmin -0.5vmin 1vmin rgba(0,0,0,0.2); z-index: 1; }
         .loose-tomato::after { content: ''; position: absolute; top: 20%; left: 50%; width: 1.5vmin; height: 1.5vmin; background-color: var(--c-herb); border-radius: 50%; }
         .loose-leaf { position: absolute; bottom: 15vmin; left: 20vmin; width: 6vmin; height: 6vmin; background-color: var(--c-basil); border-radius: 0 100%; transform: rotate(45deg); z-index: 1; box-shadow: 0.2vmin 0.2vmin 0.5vmin rgba(0,0,0,0.2); }
 
-        /* Main Pizza Wrapper */
-        .pizza-wrapper {
-            position: relative;
-            margin: auto;
-            width: 125vmin; 
-            height: 87.5vmin; 
-            transition: all 0.5s ease;
-            z-index: 5; 
-            flex-shrink: 0; 
-        }
-
-        /* NEW SEPARATED HANDLE (Behind Dish) */
-        .dish-handle {
-            position: absolute;
-            /* Updated handle position to be narrower and connected */
-            top: 50%; /* Start from center to ensure overlap */
-            left: 40%; /* Centered horizontally (100 - 20) / 2 */
-            width: 20%; /* Narrower handle */
-            height: 150%; /* Long enough to stick out */
-            background-color: var(--c-wood-base);
-            z-index: 1; /* Below Dish (2) */
-            /* Vertical wood grain to match direction */
-            background-image: repeating-linear-gradient(90deg, transparent, transparent 2vmin, rgba(0,0,0,0.05) 2vmin, rgba(0,0,0,0.05) 2.2vmin);
-            /* REMOVED BORDER, ADDED 3D SHADOWS */
-            box-shadow: 
-                1vmin 0 2vmin rgba(0,0,0,0.3), /* Drop Shadow */
-                inset 1vmin 0 2vmin rgba(255, 255, 255, 0.15), /* Light Side */
-                inset -1vmin 0 2vmin rgba(0, 0, 0, 0.1); /* Dark Side */
-            border-radius: 0 0 2vmin 2vmin;
-        }
-
-        /* WOODEN BOARD (Dish) */
-        .dish {
-            width: 56%;
-            height: 80%;
-            position: absolute;
-            top: 10%;
-            left: 22%;
-            border-radius: 50%;
-            background-color: var(--c-wood-base);
-            background-image: repeating-linear-gradient(90deg, transparent, transparent 2vmin, rgba(0,0,0,0.05) 2vmin, rgba(0,0,0,0.05) 2.2vmin);
-            box-shadow: 
-                2vmin 2vmin 3vmin rgba(0, 0, 0, 0.4), /* Drop Shadow */
-                inset 1vmin 1vmin 2vmin rgba(255, 255, 255, 0.2), /* Light Edge */
-                inset -1vmin -1vmin 2vmin rgba(0, 0, 0, 0.15); /* Dark Edge */
-            
-            z-index: 2; /* Above handle */
-        }
-
-        /* PIZZA */
-        .pizza {
-            width: 90%; height: 90%; position: absolute; top: 5%; left: 5%;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--c-pizza-crust) 63%, var(--c-pizza-crust-dark) 100%);
-            box-shadow: 1vmin 1vmin 1.5vmin rgba(0,0,0,0.3), inset 0.5vmin 0.5vmin 1vmin rgba(0,0,0,0.2);
-            overflow: hidden; 
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
-        }
-
-        /* SHAKE ANIMATION */
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-        
-        .pizza-wrapper.shake {
-            animation: shake 0.5s;
-            animation-iteration-count: 1;
-        }
-
-        /* SAUCE */
-        .tomato {
-            width: 88%; height: 88%; position: absolute; top: 6%; left: 6%;
-            border-radius: 50%; background-color: var(--c-tomato);
-            background-image: radial-gradient(circle at 30% 30%, transparent 0%, rgba(0,0,0,0.05) 100%);
-            overflow: hidden; transition: background-color 0.5s ease;
-            box-shadow: inset 1vmin 1vmin 3vmin rgba(0,0,0,0.35);
-        }
-
-        /* INGREDIENT Z-INDEX STACKING */
-        .seasoning, .chili-flakes { z-index: 20; }
-        .basil { z-index: 15; }
-        .mushroom, .pepperoni, .pepper, .pineapple { z-index: 10; }
-        .olive { z-index: 5; }
-        
-        /* ... INGREDIENT STYLES FROM PREVIOUS VERSIONS KEPT INTACT ... */
+        .pizza-wrapper { position: relative; margin: auto; width: 125vmin; height: 87.5vmin; transition: all 0.5s ease; z-index: 5; flex-shrink: 0; }
+        .dish-handle { position: absolute; top: 50%; left: 40%; width: 20%; height: 150%; background-color: var(--c-wood-base); z-index: 1; background-image: repeating-linear-gradient(90deg, transparent, transparent 2vmin, rgba(0,0,0,0.05) 2vmin, rgba(0,0,0,0.05) 2.2vmin); box-shadow: 1vmin 0 2vmin rgba(0,0,0,0.3), inset 1vmin 0 2vmin rgba(255, 255, 255, 0.15), inset -1vmin 0 2vmin rgba(0, 0, 0, 0.1); border-radius: 0 0 2vmin 2vmin; }
+        .dish { width: 56%; height: 80%; position: absolute; top: 10%; left: 22%; border-radius: 50%; background-color: var(--c-wood-base); background-image: repeating-linear-gradient(90deg, transparent, transparent 2vmin, rgba(0,0,0,0.05) 2vmin, rgba(0,0,0,0.05) 2.2vmin); box-shadow: 2vmin 2vmin 3vmin rgba(0, 0, 0, 0.4), inset 1vmin 1vmin 2vmin rgba(255, 255, 255, 0.2), inset -1vmin -1vmin 2vmin rgba(0, 0, 0, 0.15); z-index: 2; }
+        .pizza { width: 90%; height: 90%; position: absolute; top: 5%; left: 5%; border-radius: 50%; background: radial-gradient(circle, var(--c-pizza-crust) 63%, var(--c-pizza-crust-dark) 100%); box-shadow: 1vmin 1vmin 1.5vmin rgba(0,0,0,0.3), inset 0.5vmin 0.5vmin 1vmin rgba(0,0,0,0.2); overflow: hidden; -webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black); transform: translateZ(0); }
+        @keyframes shake { 0%,30%,60%,90% { transform: translate(1px, 2px) rotate(0deg); } 10%,50%,100% { transform: translate(-1px, -2px) rotate(-1deg); } 20%,70% { transform: translate(-3px, 1px) rotate(1deg); } 40%,80% { transform: translate(3px, -1px) rotate(-1deg); } }
+        .pizza-wrapper.shake { animation: shake 0.5s 1; }
+        .tomato { width: 88%; height: 88%; position: absolute; top: 6%; left: 6%; border-radius: 50%; background-color: var(--c-tomato); background-image: radial-gradient(circle at 30% 30%, transparent 0%, rgba(0,0,0,0.05) 100%); overflow: hidden; transition: background-color 0.5s ease; box-shadow: inset 1vmin 1vmin 3vmin rgba(0,0,0,0.35); -webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black); transform: translateZ(0); }
+        .seasoning, .chili-flakes { z-index: 20; } .basil { z-index: 15; } .mushroom, .pepperoni, .pepper, .pineapple { z-index: 10; } .olive { z-index: 5; }
         .seasoning { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 50%; opacity: 0.6; pointer-events: none; box-shadow: 10vmin 10vmin 0 -0.8vmin var(--c-herb), 20vmin 30vmin 0 -0.8vmin var(--c-herb), 40vmin 20vmin 0 -0.8vmin var(--c-herb), 50vmin 50vmin 0 -0.8vmin var(--c-herb), 30vmin 60vmin 0 -0.8vmin var(--c-herb), 60vmin 30vmin 0 -0.8vmin var(--c-herb), 70vmin 70vmin 0 -0.8vmin var(--c-herb), 25vmin 45vmin 0 -0.8vmin var(--c-herb), 55vmin 15vmin 0 -0.8vmin var(--c-herb), 15vmin 65vmin 0 -0.8vmin var(--c-herb), 65vmin 45vmin 0 -0.8vmin var(--c-herb), 35vmin 35vmin 0 -0.8vmin var(--c-herb), 45vmin 55vmin 0 -0.8vmin var(--c-herb); }
         .chili-flakes { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 50%; opacity: 0; transition: opacity 0.5s; pointer-events: none; box-shadow: 12vmin 12vmin 0 -0.7vmin var(--c-chili), 22vmin 28vmin 0 -0.7vmin var(--c-chili), 42vmin 22vmin 0 -0.7vmin var(--c-chili), 52vmin 48vmin 0 -0.7vmin var(--c-chili), 32vmin 62vmin 0 -0.7vmin var(--c-chili), 62vmin 28vmin 0 -0.7vmin var(--c-chili), 72vmin 68vmin 0 -0.7vmin var(--c-chili), 28vmin 42vmin 0 -0.7vmin var(--c-chili); }
         .variant-2 .chili-flakes, .variant-3 .chili-flakes, .variant-4 .chili-flakes, .variant-5 .chili-flakes { opacity: 0; }
         .steam { position: absolute; width: 20%; height: 20%; background: white; border-radius: 50%; filter: blur(1.5vmin); opacity: 0; z-index: 30; animation: steam-rise 3s infinite ease-out; }
-        .steam.s1 { top: 30%; left: 40%; animation-delay: 0s; }
-        .steam.s2 { top: 50%; left: 30%; animation-delay: 1s; width: 15%; height: 15%; }
-        .steam.s3 { top: 40%; left: 60%; animation-delay: 2s; width: 18%; height: 18%; }
+        .steam.s1 { top: 30%; left: 40%; animation-delay: 0s; } .steam.s2 { top: 50%; left: 30%; animation-delay: 1s; width: 15%; height: 15%; } .steam.s3 { top: 40%; left: 60%; animation-delay: 2s; width: 18%; height: 18%; }
         @keyframes steam-rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 20% { opacity: 0.4; } 100% { transform: translateY(-15vmin) scale(2); opacity: 0; } }
-        
         .basil { width: 15%; height: 15%; position: absolute; top: 50%; left: 45%; transform: translate(-50%, -50%) rotate(180deg); filter: drop-shadow(0.3vmin 0.5vmin 0.3vmin rgba(0,0,0,0.2)); }
-        .basil .leaf { width: 100%; height: 100%; border-radius: 0 100%; background-color: var(--c-basil); position: absolute; transition: background-color 0.5s ease; box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
-        .basil .leaf.left { top: 10%; left: 0%; z-index: 1; }
-        .basil .leaf.right { top: 20%; left: 60%; transform-origin: top left; transform: rotate(90deg); z-index: 2; box-shadow: -0.5vmin 0.5vmin 0.5vmin rgba(0,0,0,0.3); }
-
-        .mozzarella-center { width: 30%; height: 30%; position: absolute; top: 20%; left: 40%; background-color: var(--c-mozzarella); border-radius: 40% 50% 40% 60%; box-shadow: 4vmin 6vmin 0 -3vmin var(--c-mozzarella), 0 5vmin 0 -4vmin var(--c-mozzarella); transition: all 0.5s ease; filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
+        
+        .mozzarella-center, .mozzarella-small, .mozzarella-medium, .mozzarella-big, .mozzarella-mini, .mozzarella-top, .mushroom, .pepperoni, .pepper, .pineapple, .olive, .tomato-stain, .basil .leaf { position: absolute; transition: all 0.5s ease; }
+        .basil .leaf { width: 100%; height: 100%; border-radius: 0 100%; background-color: var(--c-basil); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+        .basil .leaf.left { top: 10%; left: 0%; z-index: 1; } .basil .leaf.right { top: 20%; left: 60%; transform-origin: top left; transform: rotate(90deg); z-index: 2; box-shadow: -0.5vmin 0.5vmin 0.5vmin rgba(0,0,0,0.3); }
+        
+        .mozzarella-center { width: 30%; height: 30%; top: 20%; left: 40%; background-color: var(--c-mozzarella); border-radius: 40% 50% 40% 60%; box-shadow: 4vmin 6vmin 0 -3vmin var(--c-mozzarella), 0 5vmin 0 -4vmin var(--c-mozzarella); filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
         .variant-2 .mozzarella-center { top: 30%; left: 30%; transform: scale(1.1); } .variant-3 .mozzarella-center { top: 50%; left: 50%; transform: rotate(90deg); } .variant-4 .mozzarella-center { top: 10%; left: 40%; transform: scale(0.8); } .variant-5 .mozzarella-center { top: 40%; left: 20%; transform: rotate(180deg); }
-        .mozzarella-small { width: 18%; height: 13%; position: absolute; top: 45%; left: 27%; background-color: var(--c-mozzarella); border-radius: 100% 80% 90% 100%; transition: all 0.5s ease; filter: drop-shadow(0.2vmin 0.2vmin 0.2vmin rgba(0,0,0,0.15)); }
+        .mozzarella-small { width: 18%; height: 13%; top: 45%; left: 27%; background-color: var(--c-mozzarella); border-radius: 100% 80% 90% 100%; filter: drop-shadow(0.2vmin 0.2vmin 0.2vmin rgba(0,0,0,0.15)); }
         .variant-2 .mozzarella-small { top: 15%; left: 50%; } .variant-3 .mozzarella-small { top: 70%; left: 20%; } .variant-4 .mozzarella-small { top: 60%; left: 70%; transform: scale(1.2); } .variant-5 .mozzarella-small { top: 20%; left: 60%; }
-        .mozzarella-medium { width: 25%; height: 25%; position: absolute; top: 80%; left: 40%; background-color: var(--c-mozzarella); border-radius: 50% 80%; box-shadow: -5vmin -10vmin 0 -2vmin var(--c-mozzarella); transition: all 0.5s ease; filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
+        .mozzarella-medium { width: 25%; height: 25%; top: 80%; left: 40%; background-color: var(--c-mozzarella); border-radius: 50% 80%; box-shadow: -5vmin -10vmin 0 -2vmin var(--c-mozzarella); filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
         .variant-2 .mozzarella-medium { top: 60%; left: 60%; transform: rotate(20deg); } .variant-3 .mozzarella-medium { top: 20%; left: 10%; transform: rotate(-20deg); } .variant-4 .mozzarella-medium { top: 30%; left: 75%; } .variant-5 .mozzarella-medium { top: 70%; left: 40%; transform: rotate(45deg); }
-        .mozzarella-big { width: 30%; height: 35%; position: absolute; top: 40%; left: -10%; background-color: var(--c-mozzarella); border-radius: 50%; box-shadow: 40vmin 2vmin 0 -1vmin var(--c-mozzarella); transition: all 0.5s ease; filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
+        .mozzarella-big { width: 30%; height: 35%; top: 40%; left: -10%; background-color: var(--c-mozzarella); border-radius: 50%; box-shadow: 40vmin 2vmin 0 -1vmin var(--c-mozzarella); filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
         .variant-2 .mozzarella-big { top: 50%; left: -5%; } .variant-3 .mozzarella-big { top: 10%; left: 50%; transform: scale(0.8); } .variant-4 .mozzarella-big { top: 60%; left: 10%; } .variant-5 .mozzarella-big { top: 10%; left: 10%; transform: rotate(90deg); }
-        .mozzarella-mini { width: 10%; height: 10%; position: absolute; top: 80%; left: 63%; background-color: var(--c-mozzarella); border-radius: 50%; box-shadow: -5vmin 0 0 0 var(--c-mozzarella), -3vmin -5vmin 0 -1vmin var(--c-mozzarella), -15vmin -5vmin 0 0 var(--c-mozzarella), 7vmin -10vmin 0 0 var(--c-mozzarella), 7vmin -20vmin 0 1vmin var(--c-mozzarella), 5vmin -24vmin 0 0vmin var(--c-mozzarella), 0vmin -35vmin 0 1vmin var(--c-mozzarella); transition: all 0.5s ease; filter: drop-shadow(0.2vmin 0.2vmin 0.2vmin rgba(0,0,0,0.15)); }
+        .mozzarella-mini { width: 10%; height: 10%; top: 80%; left: 63%; background-color: var(--c-mozzarella); border-radius: 50%; box-shadow: -5vmin 0 0 0 var(--c-mozzarella), -3vmin -5vmin 0 -1vmin var(--c-mozzarella), -15vmin -5vmin 0 0 var(--c-mozzarella), 7vmin -10vmin 0 0 var(--c-mozzarella), 7vmin -20vmin 0 1vmin var(--c-mozzarella), 5vmin -24vmin 0 0vmin var(--c-mozzarella), 0vmin -35vmin 0 1vmin var(--c-mozzarella); filter: drop-shadow(0.2vmin 0.2vmin 0.2vmin rgba(0,0,0,0.15)); }
         .variant-2 .mozzarella-mini { top: 75%; left: 20%; transform: rotate(180deg); } .variant-3 .mozzarella-mini { top: 30%; left: 80%; transform: rotate(90deg); } .variant-4 .mozzarella-mini { top: 40%; left: 20%; } .variant-5 .mozzarella-mini { top: 60%; left: 60%; transform: rotate(45deg); }
-        .mozzarella-top { width: 25%; height: 25%; position: absolute; top: 3%; left: 9%; border-radius: 80% 50%; background-color: var(--c-mozzarella); box-shadow: -6vmin 4vmin 0 -4vmin var(--c-mozzarella); transition: all 0.5s ease; filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
+        .mozzarella-top { width: 25%; height: 25%; top: 3%; left: 9%; border-radius: 80% 50%; background-color: var(--c-mozzarella); box-shadow: -6vmin 4vmin 0 -4vmin var(--c-mozzarella); filter: drop-shadow(0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.15)); }
         .variant-2 .mozzarella-top { top: 10%; left: 60%; } .variant-3 .mozzarella-top { top: 80%; left: 50%; } .variant-4 .mozzarella-top { top: 20%; left: 20%; transform: scale(1.2); } .variant-5 .mozzarella-top { top: 50%; left: 70%; transform: rotate(-90deg); }
-        .tomato-stain { width: 5%; height: 5%; position: absolute; top: 25%; left: 15%; background-color: var(--c-tomato-stain); border-radius: 50%; transition: all 0.5s ease; box-shadow: 10vmin 0 0 2vmin var(--c-tomato-stain), 10vmin 13vmin 0 1vmin var(--c-tomato-stain), 28vmin 9vmin 0 2vmin var(--c-tomato-stain), 10vmin 25vmin 0 2vmin var(--c-tomato-stain); }
+        .tomato-stain { width: 5%; height: 5%; top: 25%; left: 15%; background-color: var(--c-tomato-stain); border-radius: 50%; box-shadow: 10vmin 0 0 2vmin var(--c-tomato-stain), 10vmin 13vmin 0 1vmin var(--c-tomato-stain), 28vmin 9vmin 0 2vmin var(--c-tomato-stain), 10vmin 25vmin 0 2vmin var(--c-tomato-stain); }
         .variant-2 .tomato-stain { top: 50%; left: 50%; transform: rotate(90deg) scale(0.8); } .variant-3 .tomato-stain { top: 10%; left: 60%; transform: rotate(180deg); } .variant-4 .tomato-stain { top: 30%; left: 20%; transform: scale(1.2); } .variant-5 .tomato-stain { top: 40%; left: 70%; transform: rotate(-45deg); }
-
-        .olive { width: 8%; height: 8%; background-color: transparent; border: 1.2vmin solid var(--c-olive); border-radius: 50%; position: absolute; transition: all 0.5s ease; box-sizing: border-box; box-shadow: 0.3vmin 0.3vmin 0.5vmin rgba(0,0,0,0.2), inset 0.3vmin 0.3vmin 0.5vmin rgba(255,255,255,0.3); }
+        .olive { width: 8%; height: 8%; background-color: transparent; border: 1.2vmin solid var(--c-olive); border-radius: 50%; box-sizing: border-box; box-shadow: 0.3vmin 0.3vmin 0.5vmin rgba(0,0,0,0.2), inset 0.3vmin 0.3vmin 0.5vmin rgba(255,255,255,0.3); }
         .variant-3 .olive.one, .variant-3 .olive.three, .variant-3 .olive.five, .variant-2 .olive.one, .variant-2 .olive.three, .variant-2 .olive.five, .variant-5 .olive.one, .variant-5 .olive.three, .variant-5 .olive.five { width: 15%; height: 15%; border-width: 1vmin; border-color: var(--c-onion-outer); box-shadow: 0.3vmin 0.3vmin 0.5vmin rgba(0,0,0,0.2), inset 0 0 0 0.8vmin var(--c-onion-inner); }
         .variant-3 .olive.two, .variant-3 .olive.four, .variant-3 .olive.six { width: 8%; height: 8%; border-width: 1.2vmin; border-color: #3e3e02; }
         .olive.one { top: 20%; left: 20%; } .variant-2 .olive.one { top: 70%; left: 15%; } .variant-3 .olive.one { top: 50%; left: 50%; } .variant-4 .olive.one { top: 25%; left: 65%; } .variant-5 .olive.one { top: 80%; left: 30%; }
@@ -343,425 +116,167 @@
         .olive.four { top: 60%; left: 75%; transform: rotate(-15deg); } .variant-2 .olive.four { top: 15%; left: 60%; transform: rotate(-90deg); } .variant-3 .olive.four { top: 80%; left: 70%; transform: rotate(45deg); } .variant-4 .olive.four { top: 55%; left: 35%; transform: rotate(180deg); } .variant-5 .olive.four { top: 50%; left: 85%; transform: rotate(-30deg); }
         .olive.five { top: 50%; left: 40%; transform: rotate(-25deg); } .variant-2 .olive.five { top: 80%; left: 50%; transform: rotate(45deg); } .variant-3 .olive.five { top: 35%; left: 40%; transform: rotate(135deg); } .variant-4 .olive.five { top: 15%; left: 30%; transform: rotate(-45deg); } .variant-5 .olive.five { top: 65%; left: 65%; transform: rotate(90deg); }
         .olive.six { top: 20%; left: 60%; transform: rotate(90deg); } .variant-2 .olive.six { top: 35%; left: 10%; transform: rotate(0deg); } .variant-3 .olive.six { top: 15%; left: 30%; transform: rotate(-90deg); } .variant-4 .olive.six { top: 80%; left: 80%; transform: rotate(180deg); } .variant-5 .olive.six { top: 25%; left: 75%; transform: rotate(45deg); }
-
-        .mushroom { position: absolute; width: 12%; height: 12%; opacity: 0; transition: all 0.5s ease; z-index: 10; top: 50%; left: 50%; transform: scale(0); filter: drop-shadow(0.3vmin 0.3vmin 0.3vmin rgba(0,0,0,0.2)); }
+        .mushroom { width: 12%; height: 12%; opacity: 0; z-index: 10; top: 50%; left: 50%; transform: scale(0); filter: drop-shadow(0.3vmin 0.3vmin 0.3vmin rgba(0,0,0,0.2)); }
         .variant-2 .mushroom, .variant-4 .mushroom, .variant-5 .mushroom { opacity: 1; transform: scale(1); }
         .mushroom .cap { width: 100%; height: 60%; background-color: var(--c-mushroom-cap); border-radius: 50% 50% 15% 15%; position: absolute; top: 0; left: 0; z-index: 2; }
         .mushroom .stem { width: 40%; height: 50%; background-color: var(--c-mushroom-stem); position: absolute; bottom: 0; left: 30%; border-radius: 10%; z-index: 1; }
         .variant-2 .mushroom.m-one { top: 20%; left: 20%; transform: rotate(-10deg); } .variant-2 .mushroom.m-two { top: 70%; left: 55%; transform: rotate(30deg); } .variant-2 .mushroom.m-three { top: 40%; left: 80%; transform: rotate(-45deg); }
         .variant-4 .mushroom.m-one { top: 60%; left: 25%; transform: rotate(45deg); } .variant-4 .mushroom.m-two { top: 20%; left: 70%; transform: rotate(-20deg); } .variant-4 .mushroom.m-three { top: 80%; left: 50%; transform: rotate(10deg); }
         .variant-5 .mushroom.m-one { top: 30%; left: 50%; transform: rotate(90deg); } .variant-5 .mushroom.m-two { top: 50%; left: 20%; transform: rotate(0deg); } .variant-5 .mushroom.m-three { top: 15%; left: 75%; transform: rotate(-30deg); }
-
-        .pepperoni { position: absolute; width: 18%; height: 18%; background-color: var(--c-pepperoni); border-radius: 50%; opacity: 1; transform: scale(1); transition: all 0.5s ease; z-index: 10; background-image: radial-gradient(circle at 30% 30%, var(--c-pepperoni-fat) 10%, transparent 12%), radial-gradient(circle at 70% 60%, var(--c-pepperoni-fat) 8%, transparent 10%); box-shadow: 0.3vmin 0.3vmin 0.5vmin rgba(0,0,0,0.3); }
+        .pepperoni { width: 18%; height: 18%; background-color: var(--c-pepperoni); border-radius: 50%; opacity: 1; transform: scale(1); z-index: 10; background-image: radial-gradient(circle at 30% 30%, var(--c-pepperoni-fat) 10%, transparent 12%), radial-gradient(circle at 70% 60%, var(--c-pepperoni-fat) 8%, transparent 10%); box-shadow: 0.3vmin 0.3vmin 0.5vmin rgba(0,0,0,0.3); }
         .variant-2 .pepperoni, .variant-4 .pepperoni, .variant-5 .pepperoni { opacity: 0; transform: scale(0); } .variant-3 .pepperoni { opacity: 1; transform: scale(1); }
         .pepperoni.p1 { top: 25%; left: 30%; } .pepperoni.p2 { top: 65%; left: 60%; } .pepperoni.p3 { top: 30%; left: 70%; } .pepperoni.p4 { top: 70%; left: 30%; }
-
-        .pepper { position: absolute; width: 15%; height: 8%; border: 1vmin solid var(--c-pepper); border-top: none; border-radius: 0 0 50% 50%; opacity: 0; transition: all 0.5s ease; z-index: 10; transform: scale(0); box-shadow: 0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.2); }
+        .pepper { width: 15%; height: 8%; border: 1vmin solid var(--c-pepper); border-top: none; border-radius: 0 0 50% 50%; opacity: 0; z-index: 10; transform: scale(0); box-shadow: 0.2vmin 0.2vmin 0.3vmin rgba(0,0,0,0.2); }
         .variant-2 .pepper, .variant-5 .pepper { opacity: 1; transform: scale(1); }
         .variant-2 .pepper.pe1 { top: 50%; left: 20%; transform: rotate(45deg); } .variant-2 .pepper.pe2 { top: 20%; left: 60%; transform: rotate(-30deg); } .variant-5 .pepper.pe1 { top: 60%; left: 30%; transform: rotate(120deg); } .variant-5 .pepper.pe2 { top: 30%; left: 60%; transform: rotate(10deg); }
-
-        .pineapple { position: absolute; width: 8%; height: 10%; background-color: var(--c-pineapple); border-radius: 20% 60% 30% 70%; opacity: 0; transition: all 0.5s ease; z-index: 10; transform: scale(0); box-shadow: 0.2vmin 0.2vmin 0.2vmin rgba(0,0,0,0.2); }
+        .pineapple { width: 8%; height: 10%; background-color: var(--c-pineapple); border-radius: 20% 60% 30% 70%; opacity: 0; z-index: 10; transform: scale(0); box-shadow: 0.2vmin 0.2vmin 0.2vmin rgba(0,0,0,0.2); }
         .variant-5 .pineapple { opacity: 1; transform: scale(1); }
         .variant-5 .pineapple.pi1 { top: 40%; left: 40%; transform: rotate(20deg); } .variant-5 .pineapple.pi2 { top: 70%; left: 60%; transform: rotate(-40deg); } .variant-5 .pineapple.pi3 { top: 20%; left: 30%; transform: rotate(80deg); }
-
-        /* BUTTONS AND UI - RECEIPT STYLE MATCH */
-        #next-btn {
-            position: fixed; bottom: 30px; right: 30px; padding: 15px 20px;
-            background-color: var(--paper-bg); color: var(--ink-color); 
-            border: var(--paper-border);
-            border-radius: 0; /* Sharp corners */
-            -webkit-appearance: none; appearance: none;
-            font-size: 2rem; line-height: 1; 
-            font-weight: bold; font-family: inherit; cursor: pointer;
-            box-shadow: var(--paper-shadow);
-            transition: transform 0.1s; z-index: 100;
-            -webkit-tap-highlight-color: transparent;
-            margin-bottom: env(safe-area-inset-bottom);
-        }
-        #next-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
         
-        #level-indicator {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: var(--paper-bg); 
-            border: var(--paper-border);
-            color: var(--ink-color);
-            width: 50px; height: 40px; 
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; 
-            box-shadow: var(--paper-shadow); 
-            z-index: 100; text-transform: uppercase;
-            font-size: 1.2rem;
-            margin-top: env(safe-area-inset-top);
-            white-space: nowrap;
-        }
-
-        #cut-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; 
-            pointer-events: none; border-radius: 50%; overflow: hidden;
-        }
+        #next-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 20px; background-color: var(--paper-bg); color: var(--ink-color); border: var(--paper-border); border-radius: 0; -webkit-appearance: none; appearance: none; font-size: 2rem; line-height: 1; font-weight: bold; font-family: inherit; cursor: pointer; box-shadow: var(--paper-shadow); transition: transform 0.1s; z-index: 100; -webkit-tap-highlight-color: transparent; margin-bottom: env(safe-area-inset-bottom); }
+        #next-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        #level-indicator { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: var(--paper-bg); border: var(--paper-border); color: var(--ink-color); width: 50px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: var(--paper-shadow); z-index: 100; text-transform: uppercase; font-size: 1.2rem; margin-top: env(safe-area-inset-top); white-space: nowrap; }
+        #cut-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; pointer-events: none; border-radius: 50%; overflow: hidden; }
         #scene.drawing { cursor: crosshair; }
-
         .cut-line { stroke: #3e2723; stroke-width: 0.15vmin; stroke-linecap: round; filter: drop-shadow(0 0.1vmin 0.1vmin rgba(255,255,255,0.2)); opacity: 0.9; }
         .cut-line.preview { stroke-dasharray: 2vmin; opacity: 0.6; }
-
-        /* --- CONTROL BUTTONS TOP RIGHT --- */
-        #controls-container {
-            position: fixed; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 200;
-            margin-top: env(safe-area-inset-top); margin-right: env(safe-area-inset-right);
-        }
-
-        /* --- MENU BUTTON TOP LEFT --- */
-        .nav-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 15px; z-index: 1000; pointer-events: none;
-            padding-top: env(safe-area-inset-top);
-        }
-        
-        .menu-btn-rainbow {
-            pointer-events: auto;
-            padding: 8px 16px; border-radius: 20px; color: white;
-            font-family: 'Nunito', sans-serif; font-weight: 900; text-decoration: none;
-            cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
-            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
-            background-size: 300% 100%; animation: gradientMove 4s ease infinite; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); border: 2px solid rgba(255,255,255,0.2);
-        }
-        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        .icon-btn {
-            width: 40px; height: 40px; 
-            background: var(--paper-bg); 
-            border: var(--paper-border);
-            border-radius: 0; 
-            /* Fix for squished buttons on mobile */
-            flex-shrink: 0; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: var(--paper-shadow);
-            transition: transform 0.1s; -webkit-tap-highlight-color: transparent;
-        }
+        #left-controls { position: fixed; top: 10px; left: 10px; display: flex; gap: 10px; z-index: 200; margin-top: env(safe-area-inset-top); margin-left: env(safe-area-inset-left); }
+        #controls-container { position: fixed; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 200; margin-top: env(safe-area-inset-top); margin-right: env(safe-area-inset-right); }
+        .icon-btn { width: 40px; height: 40px; background: var(--paper-bg); border: var(--paper-border); border-radius: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--paper-shadow); transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
         .icon-btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
         .icon-btn svg { width: 20px; height: 20px; stroke: var(--ink-color); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-
-        /* MODALS ANIMATION */
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        #help-modal, #story-modal, #start-screen, #edu-modal, #hint-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
-            z-index: 300; backdrop-filter: blur(5px);
-        }
-        
-        #edu-modal { z-index: 500; } /* Higher Z-index to show over start screen */
-
-        .modal-animate .receipt, 
-        .modal-animate .modal-content {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        
-        /* START SCREEN - Red Checkered Tablecloth */
-        #start-screen {
-            display: flex; z-index: 400; /* Top most */
-            background-color: #f8f1e5; /* Off-white base */
-            background-image: 
-                /* Horizontal stripes */
-                linear-gradient(rgba(180, 40, 40, 0.4) 50%, transparent 50%),
-                /* Vertical stripes */
-                linear-gradient(90deg, rgba(180, 40, 40, 0.4) 50%, transparent 50%);
-            background-size: 10vmin 10vmin;
-            /* Heavy Vignette for cinematic look */
-            box-shadow: inset 0 0 25vmin rgba(0,0,0,0.6);
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* DECORATIVE PIZZAS ON START SCREEN */
-        .start-deco-wrapper {
-            position: absolute;
-            width: 65vmin; /* HUGE size */
-            height: 65vmin;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* Reuse game pizza structure for decorations */
-        .start-deco-wrapper .dish {
-            position: relative; top: 0; left: 0; width: 100%; height: 100%;
-            box-shadow: 2vmin 2vmin 4vmin rgba(0,0,0,0.5);
-        }
-        .start-deco-wrapper .pizza {
-            position: absolute; top: 5%; left: 5%; width: 90%; height: 90%;
-        }
-
-        /* Positions - Pushing them into corners so they peek out */
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 300; backdrop-filter: blur(5px); }
+        #start-screen { display: flex; z-index: 400; background-color: #f8f1e5; background-image: linear-gradient(rgba(180, 40, 40, 0.4) 50%, transparent 50%), linear-gradient(90deg, rgba(180, 40, 40, 0.4) 50%, transparent 50%); background-size: 10vmin 10vmin; box-shadow: inset 0 0 25vmin rgba(0,0,0,0.6); }
+        #edu-modal { z-index: 500; }
+        .modal-animate .receipt, .modal-animate .modal-content { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .start-deco-wrapper { position: absolute; width: 65vmin; height: 65vmin; z-index: 0; pointer-events: none; }
+        .start-deco-wrapper .dish { position: relative; top: 0; left: 0; width: 100%; height: 100%; box-shadow: 2vmin 2vmin 4vmin rgba(0,0,0,0.5); }
+        .start-deco-wrapper .pizza { position: absolute; top: 5%; left: 5%; width: 90%; height: 90%; }
         .start-deco-wrapper.tl { top: -20vmin; left: -20vmin; transform: scale(0.9) rotate(135deg); }
         .start-deco-wrapper.tr { top: -20vmin; right: -20vmin; transform: scale(0.9) rotate(225deg); }
         .start-deco-wrapper.bl { bottom: -20vmin; left: -20vmin; transform: scale(0.9) rotate(45deg); }
         .start-deco-wrapper.br { bottom: -20vmin; right: -20vmin; transform: scale(0.9) rotate(-45deg); }
-
-
-        /* Ensure receipt is above decos */
-        #start-screen .receipt {
-            z-index: 10;
-            position: relative;
-        }
-
-        /* Common Modal Content Style - Consistent Width */
-        .modal-content {
-            background: var(--paper-bg); padding: 20px; 
-            border: var(--paper-border); 
-            box-shadow: var(--paper-shadow); 
-            width: 280px; max-width: 85vw; text-align: center;
-            font-family: 'Courier New', Courier, monospace;
-            color: var(--ink-color);
-        }
+        #start-screen .receipt { z-index: 10; position: relative; }
         
-        .modal-content h2 { 
-            margin-top: 0; 
-            border-bottom: 1px dashed #ccc; 
-            padding-bottom: 10px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        /* RECEIPT STYLING */
-        .receipt {
-            background: #fffdf0; /* Thermal paper off-white */
-            padding: 20px;
-            border: none;
-            width: 280px;
-            max-width: 85vw;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
-            font-family: 'Courier New', Courier, monospace;
-            text-align: left;
-            position: relative;
-            background-image: 
-                linear-gradient(135deg, transparent 5px, #fffdf0 5px), 
-                linear-gradient(45deg, transparent 5px, #fffdf0 5px);
-            background-size: 10px 100%;
-            background-position: bottom;
-            background-repeat: repeat-x;
-            padding-bottom: 30px;
-            color: var(--ink-color);
-        }
-        
+        .modal-content { background: var(--paper-bg); padding: 20px; border: var(--paper-border); box-shadow: var(--paper-shadow); width: 280px; max-width: 85vw; text-align: center; font-family: 'Courier New', Courier, monospace; color: var(--ink-color); }
+        .modal-content h2 { margin-top: 0; border-bottom: 1px dashed #ccc; padding-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .receipt { background: #fffdf0; padding: 20px; border: none; width: 280px; max-width: 85vw; box-shadow: 5px 5px 15px rgba(0,0,0,0.2); font-family: 'Courier New', Courier, monospace; text-align: left; position: relative; background-image: linear-gradient(135deg, transparent 5px, #fffdf0 5px), linear-gradient(45deg, transparent 5px, #fffdf0 5px); background-size: 10px 100%; background-position: bottom; background-repeat: repeat-x; padding-bottom: 30px; color: var(--ink-color); }
         .receipt-header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px; }
         .receipt-header h2 { margin: 0; font-size: 1.2rem; text-transform: uppercase; }
-        
         .receipt-meta { font-size: 0.8rem; color: #555; display: flex; justify-content: space-between; margin-bottom: 15px; }
-        
         .receipt-items { margin-bottom: 15px; font-size: 0.9rem; }
         .item-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .item-mod { font-size: 0.85rem; color: #444; padding-left: 10px; font-style: italic; }
-        
         .receipt-total { border-top: 2px dashed #ccc; padding-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; }
-        
         .receipt-footer { text-align: center; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-        
-        .close-btn {
-            padding: 10px 20px; background: var(--ink-color); color: var(--paper-bg); border: none; font-weight: bold;
-            font-family: inherit; cursor: pointer; font-size: 1rem; transition: transform 0.1s;
-            width: 100%;
-        }
+        .close-btn { padding: 10px 20px; background: var(--ink-color); color: var(--paper-bg); border: none; font-weight: bold; font-family: inherit; cursor: pointer; font-size: 1rem; transition: transform 0.1s; width: 100%; }
         .close-btn:active { transform: scale(0.98); }
-        
-        /* Secondary Button Style */
-        .secondary-btn {
-            padding: 10px 20px; 
-            background: transparent; 
-            color: var(--ink-color); 
-            border: 1px solid var(--ink-color); 
-            font-weight: bold;
-            font-family: inherit; cursor: pointer; font-size: 0.9rem; transition: transform 0.1s;
-            width: 100%;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        .secondary-btn { padding: 10px 20px; background: transparent; color: var(--ink-color); border: 1px solid var(--ink-color); font-weight: bold; font-family: inherit; cursor: pointer; font-size: 0.9rem; transition: transform 0.1s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .secondary-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
         .secondary-btn:active { transform: scale(0.98); background: rgba(0,0,0,0.05); }
+        
+        #accuracy-toast { display: none; position: fixed; top: 30%; left: 50%; transform: translateX(-50%); background: var(--paper-bg); color: var(--ink-color); padding: 10px 20px; font-size: 1.5rem; font-weight: bold; border: var(--paper-border); box-shadow: var(--paper-shadow); z-index: 500; pointer-events: none; white-space: nowrap; font-family: inherit; }
+        .rh-sub { font-size: 0.7rem; margin-top: 5px; }
+        .ri-welcome { text-align: center; margin: 30px 0; }
+        .ri-sub { font-size: 0.8rem; color: #555; }
+        .txt-l { text-align: left; font-size: 0.9rem; margin-bottom: 10px; }
+        .txt-c { text-align: center; font-size: 1.1rem; margin: 20px 0; }
 
-        /* MOBILE PORTRAIT ADJUSTMENTS */
         @media (orientation: portrait) {
             #scene { width: 100vw; height: 100dvh; transform: translate(-50%, -50%) scale(1.2); }
             #next-btn { right: 50%; transform: translateX(50%); width: 80%; text-align: center; bottom: 40px; }
             #next-btn:active { transform: translateX(50%) translate(2px, 2px); }
-            
-            /* Props Visibility */
             .roller-pin { top: 15vmin; right: -5vmin; transform: rotate(45deg) scale(0.8); }
             .pizza-cutter { bottom: 25vmin; left: 5vmin; transform: rotate(-25deg) scale(0.95); }
             .oil-drip.o1 { bottom: 22vmin; right: 20vmin; }
             .oil-drip.o2 { bottom: 20vmin; right: 18vmin; }
             .oil-drip.o3 { top: 25vmin; left: 20vmin; }
-            
-            /* Fraction Indicator Position on Mobile - STRICTLY CENTERED BELOW NAV */
-            #level-indicator { 
-                top: 80px; /* Move below the top bar buttons */
-                left: 50%; 
-                transform: translateX(-50%); 
-                margin: 0;
-            }
+            #level-indicator { top: 80px; left: 50%; transform: translateX(-50%); margin: 0; }
         }
-
     </style>
 </head>
 <body>
-
-    <!-- START SCREEN -->
-    <div id="start-screen" class="modal-animate">
-        <!-- Decorative pizzas will be injected here by JS -->
-        
+    <div id="start-screen" class="modal modal-animate">
         <div class="receipt">
-            <div class="receipt-header">
-                <h2>KITCHEN PIZZA<br>PARTY</h2>
-                <div style="font-size: 0.7rem; margin-top: 5px;">EST. 2025</div>
-            </div>
-            <div class="receipt-items" style="text-align: center; margin: 30px 0;">
-                <p>Welcome, Chef!</p>
-                <p style="font-size: 0.8rem; color: #555;">Ready to slice some fractions?</p>
-            </div>
+            <div class="receipt-header"><h2>KITCHEN PIZZA<br>PARTY</h2><div class="rh-sub">EST. 2025</div></div>
+            <div class="receipt-items ri-welcome"><p>Welcome, Chef!</p><p class="ri-sub">Ready to slice some fractions?</p></div>
             <div class="receipt-footer">
                 <button class="close-btn" id="start-game-btn">START SHIFT</button>
                 <button class="secondary-btn" id="edu-btn">
-                    <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
-                    EDUCATIONAL VALUE
+                    <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> EDUCATIONAL VALUE
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- EDUCATIONAL MODAL -->
-    <div id="edu-modal" class="modal-animate">
+    <div id="edu-modal" class="modal modal-animate">
         <div class="modal-content">
-            <h2>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
-                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
-                </svg>
-                How is this Educational?
-            </h2>
-            <p style="text-align: left; font-size: 0.9rem;">
-                <strong>Visualizing Fractions:</strong><br>
-                This game helps players connect abstract fractions (like 1/4) to concrete visual representations (pizza slices).
-            </p>
-            <p style="text-align: left; font-size: 0.9rem;">
-                <strong>Division:</strong><br>
-                It reinforces the concept that cutting (dividing) an object into equal parts creates fractions.
-            </p>
-            <p style="text-align: left; font-size: 0.9rem;">
-                <strong>Parts of a Whole:</strong><br>
-                Shows that 2 halves, 4 quarters, etc., make up one whole pizza.
-            </p>
+            <h2><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg> How is this Educational?</h2>
+            <p class="txt-l"><strong>Visualizing Fractions:</strong><br>This game helps players connect abstract fractions (like 1/4) to concrete visual representations (pizza slices).</p>
+            <p class="txt-l"><strong>Division:</strong><br>It reinforces the concept that cutting (dividing) an object into equal parts creates fractions.</p>
+            <p class="txt-l"><strong>Parts of a Whole:</strong><br>Shows that 2 halves, 4 quarters, etc., make up one whole pizza.</p>
             <button class="close-btn" id="close-edu-btn">BACK</button>
         </div>
     </div>
 
-    <!-- HINT MODAL -->
-    <div id="hint-modal" class="modal-animate">
+    <div id="hint-modal" class="modal modal-animate">
         <div class="modal-content">
-            <h2>HINT 💡</h2>
-            <p id="hint-text" style="text-align: center; font-size: 1.1rem; margin: 20px 0;">
-                Loading hint...
-            </p>
+            <h2>HINT 💡</h2><p id="hint-text" class="txt-c">Loading hint...</p>
             <button class="close-btn" id="close-hint-btn">THANKS</button>
         </div>
     </div>
 
-    <!-- MAIN MENU BUTTON TOP LEFT -->
-    <div class="nav-container">
-        <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
-            <i class="fa-solid fa-gamepad"></i> menu
-        </a>
+    <div id="help-modal" class="modal modal-animate">
+        <div class="modal-content">
+            <h2>How to Play</h2><p class="txt-l">1. Check the receipt for slice count.</p><p class="txt-l">2. Drag across the pizza to slice it.</p><p class="txt-l">3. Serve exact number of slices.</p>
+            <button class="close-btn" id="close-help-btn">GOT IT</button>
+        </div>
     </div>
 
-    <!-- Fraction Indicator MOVED OUTSIDE OF CONTROLS CONTAINER -->
+    <div id="story-modal" class="modal modal-animate">
+        <div class="receipt">
+            <div class="receipt-header"><h2>PIZZA KITCHEN</h2><div class="rh-sub">123 Dough Street</div></div>
+            <div class="receipt-meta"><span id="receipt-order-id">Order #001</span><span id="receipt-time">12:30 PM</span></div>
+            <div class="receipt-items" id="receipt-items"></div>
+            <div class="receipt-total"><span id="receipt-total-label">TOTAL</span><span id="receipt-total-price">$12.00</span></div>
+            <div class="receipt-footer"><button class="close-btn" id="start-level-btn">PREPARE ORDER</button></div>
+        </div>
+    </div>
+
+    <div id="left-controls">
+        <div class="icon-btn" id="hint-btn" title="Get a Hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg></div>
+    </div>
+
     <div id="level-indicator">1/2</div>
 
     <div id="controls-container">
-        <!-- Home Button -->
-        <div class="icon-btn" id="home-btn" title="Home">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        </div>
-        <!-- Retry Button -->
-        <div class="icon-btn" id="retry-btn" title="Retry Level">
-            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        </div>
-        <!-- Hint Button -->
-        <div class="icon-btn" id="hint-btn" title="Get a Hint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
-        </div>
-        <!-- Help Button (Now Left of Mute) -->
-        <div class="icon-btn" id="help-btn" title="Help">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-        </div>
-        <!-- Mute Button (Now Last) -->
+        <div class="icon-btn" id="home-btn" title="Home"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+        <div class="icon-btn" id="retry-btn" title="Retry Level"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></div>
+        <div class="icon-btn" id="help-btn" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
         <div class="icon-btn" id="mute-btn" title="Mute/Unmute">
             <svg id="icon-sound-on" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
             <svg id="icon-sound-off" viewBox="0 0 24 24" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
         </div>
     </div>
 
-    <!-- HELP MODAL -->
-    <div id="help-modal" class="modal-animate">
-        <div class="modal-content">
-            <h2>How to Play</h2>
-            <p>1. Check the receipt for slice count.</p>
-            <p>2. Drag across the pizza to slice it.</p>
-            <p>3. Serve exact number of slices.</p>
-            <button class="close-btn" id="close-help-btn">GOT IT</button>
-        </div>
-    </div>
-
-    <!-- STORY MODAL (RECEIPT STYLE) -->
-    <div id="story-modal" class="modal-animate">
-        <div class="receipt">
-            <div class="receipt-header">
-                <h2>PIZZA KITCHEN</h2>
-                <div style="font-size: 0.7rem; margin-top: 5px;">123 Dough Street</div>
-            </div>
-            <div class="receipt-meta">
-                <span id="receipt-order-id">Order #001</span>
-                <span id="receipt-time">12:30 PM</span>
-            </div>
-            <div class="receipt-items">
-                <!-- Order items injected here -->
-            </div>
-            <div class="receipt-total">
-                <span>TOTAL</span>
-                <span id="receipt-total-price">$12.00</span>
-            </div>
-            <div class="receipt-footer">
-                <button class="close-btn" id="start-level-btn">PREPARE ORDER</button>
-            </div>
-        </div>
-    </div>
+    <div id="accuracy-toast" class="modal-animate">100% ACCURATE!</div>
 
     <div id="scene">
-        <div class="flour"></div>
-        <div class="oil-drip o1"></div>
-        <div class="oil-drip o2"></div>
-        <div class="oil-drip o3"></div>
+        <div class="flour"></div><div class="oil-drip o1"></div><div class="oil-drip o2"></div><div class="oil-drip o3"></div>
         <div class="roller-pin"><div class="handle left"></div><div class="body"></div><div class="handle right"></div></div>
         <div class="pizza-boxes"><div class="box b1"></div><div class="box b2"></div></div>
         <div class="garlic-group"><div class="garlic g1"></div><div class="garlic g2"></div></div>
         <div class="pizza-cutter"><div class="handle"></div><div class="stem"></div><div class="wheel"></div></div>
-        <div class="loose-tomato"></div>
-        <div class="loose-leaf"></div>
+        <div class="loose-tomato"></div><div class="loose-leaf"></div>
 
         <div class="pizza-wrapper" id="pizza">
-            <!-- NEW SEPARATE HANDLE BEHIND DISH -->
             <div class="dish-handle"></div>
-            
             <div class="dish">
                 <div class="pizza">
                     <svg id="cut-layer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"></svg>
-                    <!-- Pizza ingredients structure will be used for cloning -->
                     <div class="tomato">
-                        <div class="seasoning"></div>
-                        <div class="chili-flakes"></div>
+                        <div class="seasoning"></div><div class="chili-flakes"></div>
                         <div class="mozzarella-center"></div><div class="mozzarella-small"></div><div class="mozzarella-big"></div><div class="mozzarella-medium"></div><div class="mozzarella-mini"></div><div class="mozzarella-top"></div><div class="tomato-stain"></div>
                         <div class="basil"><div class="leaf left"></div><div class="leaf right"></div></div>
                         <div class="pepperoni p1"></div><div class="pepperoni p2"></div><div class="pepperoni p3"></div><div class="pepperoni p4"></div>
@@ -775,447 +290,166 @@
             </div>
         </div>
     </div>
-
     <button id="next-btn">&rarr;</button>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let isMuted = false;
-        
-        function playSliceSound() {
-            if (isMuted) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); const filter = audioCtx.createBiquadFilter();
-            const bufferSize = audioCtx.sampleRate * 0.1; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-            const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-            filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, audioCtx.currentTime); filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            noise.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination); noise.start();
-        }
-        function playSuccessSound() {
-            if (isMuted) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-        }
-        function playFailSound() {
-            if (isMuted) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        }
+        // dom logic
+        const $ = id => document.getElementById(id), toggle = (el, show) => el.style.display = show ? 'flex' : 'none';
+        const scene = $('scene'), cutLayer = $('cut-layer'), pizza = $('pizza'), levelIndicator = $('level-indicator'), hintText = $('hint-text');
+        const startScreen = $('start-screen'), storyModal = $('story-modal'), eduModal = $('edu-modal'), helpModal = $('help-modal'), hintModal = $('hint-modal');
+        const rMeta = document.querySelector('.receipt-meta'), rItems = $('receipt-items'), rOrder = $('receipt-order-id'), rTime = $('receipt-time'), rTotal = $('receipt-total-price');
 
+        // background rendering (clones main pizza to save dom space)
+        ['tl', 'tr', 'bl', 'br'].forEach((c, i) => {
+            const w = document.createElement('div'), d = document.createElement('div'), p = document.querySelector('.pizza').cloneNode(true);
+            w.className = `start-deco-wrapper ${c}`; d.className = 'dish';
+            const cl = p.querySelector('#cut-layer'); if (cl) cl.removeAttribute('id');
+            if (i > 0) p.classList.add(`variant-${(i % 5) + 1}`);
+            d.appendChild(p); w.appendChild(d); startScreen.appendChild(w);
+        });
+
+        // game flow
         const levels = [
-            { level: 1, variant: 1, fraction: "1/2", name: "Spicy Margherita", price: "$12.00", targetSlices: 2 },
-            { level: 2, variant: 2, fraction: "1/4", name: "Pesto Veggie", price: "$14.50", targetSlices: 4 },
-            { level: 3, variant: 3, fraction: "2/6", name: "Supreme Feast", price: "$18.00", targetSlices: 6 },
-            { level: 4, variant: 4, fraction: "4/8", name: "Creamy Alfredo", price: "$15.00", targetSlices: 8 },
-            { level: 5, variant: 5, fraction: "2/8", name: "Party Hawaiian", price: "$22.00", targetSlices: 4 }
+            { v: 1, f: "1/2", n: "Spicy Margherita", p: "$12.00", t: 2 },
+            { v: 2, f: "1/4", n: "Pesto Veggie", p: "$14.50", t: 4 },
+            { v: 3, f: "2/6", n: "Supreme Feast", p: "$18.00", t: 6 },
+            { v: 4, f: "4/8", n: "Creamy Alfredo", p: "$15.00", t: 8 },
+            { v: 5, f: "2/8", n: "Party Hawaiian", p: "$22.00", t: 4 }
         ];
+        let currentLvl = 0, cuts = [], isDrawing = false, activeLine = null, gameActive = false, isMuted = false;
 
-        let currentLevelIndex = 0;
-        let cuts = [];
-        let isDrawing = false;
-        let startPoint = null;
-        let activeLine = null;
-        let gameActive = false;
+        // audio engine
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const resumeAudio = () => { if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume(); };
+        const makeOsc = (type, f1, f2, dur, vol, linear = false) => {
+            if (isMuted) return; resumeAudio();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), ct = audioCtx.currentTime;
+            osc.type = type; osc.frequency.setValueAtTime(f1, ct);
+            linear ? osc.frequency.linearRampToValueAtTime(f2, ct + dur) : osc.frequency.exponentialRampToValueAtTime(f2, ct + dur);
+            gain.gain.setValueAtTime(vol, ct); gain.gain.exponentialRampToValueAtTime(0.01, ct + dur);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(ct + dur);
+        };
+        const playSuccess = () => makeOsc('sine', 500, 1000, 0.5, 0.3);
+        const playFail = () => makeOsc('sawtooth', 150, 100, 0.3, 0.3, true);
+        const playSlice = () => {
+            if (isMuted) return; resumeAudio();
+            const gain = audioCtx.createGain(), filter = audioCtx.createBiquadFilter(), bs = audioCtx.sampleRate * 0.1, buf = audioCtx.createBuffer(1, bs, audioCtx.sampleRate), data = buf.getChannelData(0), ct = audioCtx.currentTime;
+            for (let i = 0; i < bs; i++) data[i] = Math.random() * 2 - 1;
+            const noise = audioCtx.createBufferSource(); noise.buffer = buf;
+            filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, ct); filter.frequency.exponentialRampToValueAtTime(100, ct + 0.1);
+            gain.gain.setValueAtTime(0.5, ct); gain.gain.exponentialRampToValueAtTime(0.01, ct + 0.1);
+            noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start();
+        };
 
-        const scene = document.getElementById('scene');
-        const cutLayer = document.getElementById('cut-layer');
-        const btn = document.getElementById('next-btn');
-        const pizza = document.getElementById('pizza');
-        const pizzaWrapper = document.getElementById('pizza'); 
-        const levelIndicator = document.getElementById('level-indicator');
+        // UI state management
+        const goHome = () => {
+            [storyModal, helpModal, hintModal, eduModal].forEach(m => toggle(m, false));
+            toggle(startScreen, true);
+            currentLvl = 0; cuts = []; cutLayer.innerHTML = '';
+            pizza.style.transition = "none"; pizza.style.transform = "translateY(0)";
+        };
 
-        const homeBtn = document.getElementById('home-btn');
-        const retryBtn = document.getElementById('retry-btn');
-        const muteBtn = document.getElementById('mute-btn');
-        const helpBtn = document.getElementById('help-btn');
-        const hintBtn = document.getElementById('hint-btn');
-        const eduBtn = document.getElementById('edu-btn');
-        
-        const helpModal = document.getElementById('help-modal');
-        const hintModal = document.getElementById('hint-modal');
-        const hintText = document.getElementById('hint-text');
-        const storyModal = document.getElementById('story-modal');
-        const startScreen = document.getElementById('start-screen');
-        const eduModal = document.getElementById('edu-modal');
-        
-        const closeHelpBtn = document.getElementById('close-help-btn');
-        const closeEduBtn = document.getElementById('close-edu-btn');
-        const closeHintBtn = document.getElementById('close-hint-btn');
-        const startLevelBtn = document.getElementById('start-level-btn');
-        const startGameBtn = document.getElementById('start-game-btn');
-
-        // Receipt Elements
-        const receiptMeta = document.querySelector('#story-modal .receipt-meta');
-        const receiptItems = document.querySelector('#story-modal .receipt-items');
-        const rOrder = document.getElementById('receipt-order-id');
-        const rTime = document.getElementById('receipt-time');
-        const rTotal = document.getElementById('receipt-total-price');
-
-        // Capture ORIGINAL Start Screen HTML exactly as it is on load
-        const originalStartScreenHTML = startScreen.innerHTML;
-
-        // --- BUTTON EVENTS ---
-        
-        // Use event delegation for start game btn since we might overwrite HTML
-        document.body.addEventListener('click', (e) => {
-            if(e.target.id === 'start-game-btn' || e.target.closest('#start-game-btn')) {
-                 if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume();
-                startScreen.style.display = 'none';
-                loadLevel(0);
+        const loadLevel = (idx) => {
+            gameActive = false; currentLvl = idx; cuts = []; cutLayer.innerHTML = '';
+            if (idx >= levels.length) {
+                const total = levels.reduce((sum, l) => sum + parseFloat(l.p.slice(1)), 0);
+                toggle(rMeta, false);
+                rItems.innerHTML = `<div class="ri-welcome"><p style="font-size:1.1rem; font-weight:bold; margin-bottom:10px;">SHIFT ENDED</p><p>Well done!</p><p>All customers are happy.</p></div>`;
+                $('receipt-total-label').innerText = "TOTAL EARNINGS"; rTotal.innerText = "$" + total.toFixed(2);
+                $('start-level-btn').innerText = "RETURN TO HOME";
+                pizza.style.transition = "none"; pizza.style.transform = "translateY(200vh)";
+                toggle(storyModal, true); playSuccess(); return;
             }
-            if(e.target.id === 'edu-btn' || e.target.closest('#edu-btn')) {
-                 eduModal.style.display = 'flex';
-            }
-        });
+            const data = levels[idx];
+            toggle(rMeta, true); $('receipt-total-label').innerText = "TOTAL"; levelIndicator.innerText = data.f;
+            rOrder.innerText = `Order #00${idx + 1}`; rTime.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            rItems.innerHTML = `<div class="item-row"><span>1x ${data.n}</span><span>${data.p}</span></div><div class="item-mod">** CUT: <span>${data.f}</span> **</div>`;
+            rTotal.innerText = data.p; $('start-level-btn').innerText = "PREPARE ORDER";
+            pizza.className = `pizza-wrapper variant-${data.v > 1 ? data.v : 1}`;
+            toggle(storyModal, true);
+        };
 
-        // Original start btn event (kept for initial load)
-        startGameBtn.addEventListener('click', () => {
-            if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume();
-            startScreen.style.display = 'none';
-            loadLevel(0);
-        });
+        $('start-game-btn').onclick = () => { resumeAudio(); toggle(startScreen, false); loadLevel(0); };
+        $('start-level-btn').onclick = () => {
+            if ($('start-level-btn').innerText === "RETURN TO HOME") goHome();
+            else { toggle(storyModal, false); gameActive = true; pizza.style.transition = "transform 0.5s ease-out"; pizza.style.transform = "translateY(0)"; }
+        };
+        $('home-btn').onclick = goHome;
+        $('retry-btn').onclick = () => { cuts = []; cutLayer.innerHTML = ''; levelIndicator.style.backgroundColor = '#fffdf0'; };
+        $('help-btn').onclick = () => toggle(helpModal, true); $('close-help-btn').onclick = () => toggle(helpModal, false);
+        $('edu-btn').onclick = () => toggle(eduModal, true); $('close-edu-btn').onclick = () => toggle(eduModal, false);
+        $('hint-btn').onclick = () => { if (currentLvl < levels.length) { hintText.innerText = `You need ${levels[currentLvl].t} slices total.\nTry making ${levels[currentLvl].t / 2} cuts!`; toggle(hintModal, true); }};
+        $('close-hint-btn').onclick = () => toggle(hintModal, false);
+        $('mute-btn').onclick = () => { isMuted = !isMuted; toggle($('icon-sound-on'), !isMuted); toggle($('icon-sound-off'), isMuted); isMuted ? audioCtx.suspend() : audioCtx.resume(); };
 
-        homeBtn.addEventListener('click', () => {
-            storyModal.style.display = 'none';
-            helpModal.style.display = 'none';
-            hintModal.style.display = 'none';
-            eduModal.style.display = 'none';
-            
-            // RESET TO ORIGINAL START SCREEN
-            startScreen.innerHTML = originalStartScreenHTML;
-            startScreen.style.display = 'flex';
-            
-            // Re-bind start button on fresh HTML
-            document.getElementById('start-game-btn').addEventListener('click', () => {
-                 if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume();
-                startScreen.style.display = 'none';
-                loadLevel(0);
-            });
-            document.getElementById('edu-btn').addEventListener('click', () => eduModal.style.display = 'flex');
-
-            // Re-Initialize decorative pizzas
-            createDecoPizzas();
-
-            currentLevelIndex = 0;
-            cuts = [];
-            cutLayer.innerHTML = '';
-            // Reset pizza position
-            pizza.style.transition = "none";
-            pizza.style.transform = "translateY(0)";
-        });
-
-        retryBtn.addEventListener('click', () => { cuts = []; cutLayer.innerHTML = ''; levelIndicator.style.backgroundColor = '#fffdf0'; });
-        helpBtn.addEventListener('click', () => helpModal.style.display = 'flex');
-        closeHelpBtn.addEventListener('click', () => helpModal.style.display = 'none');
-        
-        hintBtn.addEventListener('click', () => {
-            if (currentLevelIndex < levels.length) {
-                const target = levels[currentLevelIndex].targetSlices;
-                const cutsNeeded = target / 2;
-                hintText.innerText = `You need ${target} slices total.\nTry making ${cutsNeeded} cuts!`;
-                hintModal.style.display = 'flex';
-            }
-        });
-        closeHintBtn.addEventListener('click', () => hintModal.style.display = 'none');
-
-        eduBtn.addEventListener('click', () => eduModal.style.display = 'flex');
-        closeEduBtn.addEventListener('click', () => eduModal.style.display = 'none');
-
-        startLevelBtn.addEventListener('click', () => {
-            if (startLevelBtn.innerText === "RETURN TO HOME") {
-                // Return to home logic
-                storyModal.style.display = 'none';
-                
-                // RESET TO ORIGINAL START SCREEN
-                startScreen.innerHTML = originalStartScreenHTML;
-                startScreen.style.display = 'flex';
-                
-                // Re-bind buttons since HTML was replaced
-                document.getElementById('start-game-btn').addEventListener('click', () => {
-                     if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume();
-                    startScreen.style.display = 'none';
-                    loadLevel(0);
-                });
-                document.getElementById('edu-btn').addEventListener('click', () => eduModal.style.display = 'flex');
-                
-                // Re-Initialize decorative pizzas
-                createDecoPizzas();
-
-                // Reset level for next time
-                currentLevelIndex = 0;
-                cuts = [];
-                cutLayer.innerHTML = '';
-                // Ensure pizza is back in place for next game
-                pizza.style.transition = "none";
-                pizza.style.transform = "translateY(0)";
-            } else {
-                // Start normal level
-                storyModal.style.display = 'none'; 
-                gameActive = true; 
-                // Ensure pizza is visible if it was hidden
-                pizza.style.transition = "transform 0.5s ease-out";
-                pizza.style.transform = "translateY(0)";
-            }
-        });
-        
-        muteBtn.addEventListener('click', () => {
-            isMuted = !isMuted;
-            document.getElementById('icon-sound-on').style.display = isMuted ? 'none' : 'block';
-            document.getElementById('icon-sound-off').style.display = isMuted ? 'block' : 'none';
-            if (isMuted && audioCtx.state === 'running') audioCtx.suspend();
-            else if (!isMuted && audioCtx.state === 'suspended') audioCtx.resume();
-        });
-
-        function loadLevel(index) {
-            gameActive = false;
-
-            // Always reset the receipt structure in #story-modal
-            receiptMeta.style.display = 'flex';
-            receiptItems.innerHTML = `
-                <div class="item-row">
-                    <span id="receipt-item-name"></span>
-                    <span id="receipt-price"></span>
-                </div>
-                <div class="item-mod">
-                    ** CUT: <span id="receipt-fraction"></span> **
-                </div>
-            `;
-            
-            // Re-bind elements from the #story-modal specifically
-            const rItemRef = document.querySelector('#story-modal #receipt-item-name');
-            const rPriceRef = document.querySelector('#story-modal #receipt-price');
-            const rFracRef = document.querySelector('#story-modal #receipt-fraction');
-            
-            // Check for End of Game
-            if (index >= levels.length) {
-                // Calculate total earnings
-                let total = 0;
-                levels.forEach(l => total += parseFloat(l.price.replace('$', '')));
-
-                // Hide standard receipt details
-                receiptMeta.style.display = 'none';
-                
-                // Show Shift Ended Message - CLEAN SUMMARY
-                receiptItems.innerHTML = `
-                    <div style="text-align: center; margin: 20px 0;">
-                        <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">SHIFT ENDED</p>
-                        <p>Well done!</p>
-                        <p>All customers are happy.</p>
-                    </div>
-                `;
-                
-                const totalLabel = document.querySelector('#story-modal .receipt-total span:first-child');
-                totalLabel.innerText = "TOTAL EARNINGS";
-                rTotal.innerText = "$" + total.toFixed(2);
-                
-                startLevelBtn.innerText = "RETURN TO HOME";
-                
-                // Keep pizza hidden off screen
-                pizza.style.transition = "none";
-                pizza.style.transform = "translateY(200vh)";
-                
-                storyModal.style.display = 'flex';
-                playSuccessSound();
-                return;
-            } 
-            
-            // Normal Level Setup
-            const totalLabel = document.querySelector('#story-modal .receipt-total span:first-child');
-            if(totalLabel) totalLabel.innerText = "TOTAL";
-
-            const levelData = levels[index];
-            currentLevelIndex = index;
-            
-            levelIndicator.innerText = levelData.fraction;
-            
-            rOrder.innerText = `Order #00${index + 1}`;
-            rTime.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            // FIX: Update correct fields
-            if(rItemRef) rItemRef.innerText = `1x ${levelData.name}`;
-            if(rPriceRef) rPriceRef.innerText = levelData.price;
-            if(rFracRef) rFracRef.innerText = levelData.fraction;
-            if(rTotal) rTotal.innerText = levelData.price;
-            
-            startLevelBtn.innerText = "PREPARE ORDER";
-            
-            storyModal.style.display = 'flex';
-            
-            // Apply Pizza Skin
-            pizza.classList.remove('variant-2', 'variant-3', 'variant-4', 'variant-5');
-            if (levelData.variant > 1) pizza.classList.add(`variant-${levelData.variant}`);
-
-            cuts = [];
-            cutLayer.innerHTML = '';
-        }
-
-        // --- DECORATIVE PIZZAS ON START SCREEN ---
-        function createDecoPizzas() {
-            // Remove existing ones if any (to prevent duplicates on restart)
-            document.querySelectorAll('.start-deco-wrapper').forEach(e => e.remove());
-
-            const corners = ['tl', 'tr', 'bl', 'br'];
-            // Pizza structure without SVG layer
-            const pizzaHTML = `
-                <div class="dish">
-                    <div class="pizza">
-                        <div class="tomato">
-                            <div class="seasoning"></div>
-                            <div class="chili-flakes"></div>
-                            <div class="mozzarella-center"></div><div class="mozzarella-small"></div><div class="mozzarella-big"></div><div class="mozzarella-medium"></div><div class="mozzarella-mini"></div><div class="mozzarella-top"></div><div class="tomato-stain"></div>
-                            <div class="basil"><div class="leaf left"></div><div class="leaf right"></div></div>
-                            <div class="pepperoni p1"></div><div class="pepperoni p2"></div><div class="pepperoni p3"></div><div class="pepperoni p4"></div>
-                            <div class="pepper pe1"></div><div class="pepper pe2"></div>
-                            <div class="pineapple pi1"></div><div class="pineapple pi2"></div><div class="pineapple pi3"></div>
-                            <div class="mushroom m-one"><div class="cap"></div><div class="stem"></div></div><div class="mushroom m-two"><div class="cap"></div><div class="stem"></div></div><div class="mushroom m-three"><div class="cap"></div><div class="stem"></div></div>
-                            <div class="olive one"></div><div class="olive two"></div><div class="olive three"></div><div class="olive four"></div><div class="olive five"></div><div class="olive six"></div>
-                        </div>
-                    </div>
-                </div>`;
-
-            corners.forEach((corner, index) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = `start-deco-wrapper ${corner}`;
-                wrapper.innerHTML = pizzaHTML;
-                
-                // Assign a variant (cycling through 1-5)
-                const pizzaEl = wrapper.querySelector('.pizza');
-                const variant = (index % 5) + 1;
-                if (variant > 1) pizzaEl.classList.add(`variant-${variant}`);
-                
-                startScreen.appendChild(wrapper);
-            });
-        }
-        
-        // Call immediately to populate start screen
-        createDecoPizzas();
-
-
-        // Updated for auto-centering logic
-        function getSVGPoint(evt) {
+        // cutting mechanics
+        const getSVGPoint = (e) => {
             const pt = cutLayer.createSVGPoint();
-            if(evt.touches && evt.touches.length > 0) { pt.x = evt.touches[0].clientX; pt.y = evt.touches[0].clientY; }
-            else { pt.x = evt.clientX; pt.y = evt.clientY; }
+            pt.x = e.touches ? e.touches[0].clientX : e.clientX; pt.y = e.touches ? e.touches[0].clientY : e.clientY;
             return pt.matrixTransform(cutLayer.getScreenCTM().inverse());
-        }
+        };
+        const drawLine = (mx, my) => { const a = Math.atan2(my - 50, mx - 50); return { x1: 50 + 50 * Math.cos(a), y1: 50 + 50 * Math.sin(a), x2: 50 - 50 * Math.cos(a), y2: 50 - 50 * Math.sin(a) }; };
+        const setLine = (l, c) => { l.setAttribute("x1", c.x1); l.setAttribute("y1", c.y1); l.setAttribute("x2", c.x2); l.setAttribute("y2", c.y2); };
 
-        function drawCenteredLine(mouseX, mouseY) {
-            // Calculate angle from center (50, 50) to mouse point
-            const centerX = 50;
-            const centerY = 50;
-            const deltaX = mouseX - centerX;
-            const deltaY = mouseY - centerY;
-            const angle = Math.atan2(deltaY, deltaX);
-
-            // Extend line to edges of circle (radius 50)
-            const r = 50; 
-            const x1 = centerX + r * Math.cos(angle);
-            const y1 = centerY + r * Math.sin(angle);
-            const x2 = centerX - r * Math.cos(angle);
-            const y2 = centerY - r * Math.sin(angle);
-
-            return { x1, y1, x2, y2 };
-        }
-
-        function startCut(e) {
+        const startCut = (e) => {
             if (!gameActive) return;
-            if(e.type === 'touchstart') e.preventDefault();
-            if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume();
-            
-            // Interaction Check: Distance from center (50,50)
-            const pt = getSVGPoint(e);
-            const dist = Math.sqrt(Math.pow(pt.x - 50, 2) + Math.pow(pt.y - 50, 2));
-            if (dist > 60) return; // Restrict interaction to pizza area
-
-            isDrawing = true; 
-            const coords = drawCenteredLine(pt.x, pt.y);
-
-            activeLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            activeLine.setAttribute("x1", coords.x1); 
-            activeLine.setAttribute("y1", coords.y1);
-            activeLine.setAttribute("x2", coords.x2); 
-            activeLine.setAttribute("y2", coords.y2);
-            activeLine.setAttribute("class", "cut-line preview");
+            if (e.type === 'touchstart') e.preventDefault(); resumeAudio();
+            const pt = getSVGPoint(e); if (Math.hypot(pt.x - 50, pt.y - 50) > 60) return;
+            isDrawing = true; activeLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            setLine(activeLine, drawLine(pt.x, pt.y)); activeLine.setAttribute("class", "cut-line preview");
             cutLayer.appendChild(activeLine);
-        }
-
-        function moveCut(e) {
+        };
+        const moveCut = (e) => {
             if (!isDrawing || !activeLine) return;
-            if(e.type === 'touchmove') e.preventDefault();
-            
+            if (e.type === 'touchmove') e.preventDefault();
             const pt = getSVGPoint(e);
-            const coords = drawCenteredLine(pt.x, pt.y);
-            
-            activeLine.setAttribute("x1", coords.x1); 
-            activeLine.setAttribute("y1", coords.y1);
-            activeLine.setAttribute("x2", coords.x2); 
-            activeLine.setAttribute("y2", coords.y2);
-        }
-
-        function endCut(e) {
-            if (!isDrawing) return;
-            isDrawing = false;
+            setLine(activeLine, drawLine(pt.x, pt.y));
+        };
+        const endCut = () => {
+            if (!isDrawing) return; isDrawing = false;
             if (activeLine) {
-                playSliceSound();
-                const completedLine = activeLine;
-                completedLine.setAttribute("class", "cut-line");
-                completedLine.style.stroke = "#d7ccc8";
-                setTimeout(() => { if (completedLine) completedLine.style.stroke = "#3e2723"; }, 150);
-                cuts.push(completedLine);
-                activeLine = null;
+                playSlice(); activeLine.setAttribute("class", "cut-line"); activeLine.style.stroke = "#d7ccc8";
+                const line = activeLine; setTimeout(() => { if (line) line.style.stroke = "#3e2723"; }, 150);
+                cuts.push(line); activeLine = null;
             }
-        }
+        };
 
         scene.addEventListener('mousedown', startCut); scene.addEventListener('mousemove', moveCut); scene.addEventListener('mouseup', endCut);
         scene.addEventListener('touchstart', startCut, {passive: false}); scene.addEventListener('touchmove', moveCut, {passive: false}); scene.addEventListener('touchend', endCut);
 
-        btn.addEventListener('click', () => {
-            if (!gameActive) return;
-            if (audioCtx.state === 'suspended' && !isMuted) audioCtx.resume();
-
-            const currentLevel = levels[currentLevelIndex];
-            let slices = (cuts.length === 0) ? 1 : cuts.length * 2;
-
-            if (slices === currentLevel.targetSlices) {
-                playSuccessSound();
-                levelIndicator.style.backgroundColor = "#8BC34A";
-                gameActive = false;
-                
-                // Animate pizza OUT
-                pizza.style.transition = "transform 1s ease-in";
-                pizza.style.transform = "translateY(150vh)";
-
-                setTimeout(() => {
-                    levelIndicator.style.backgroundColor = "#fffdf0";
-                    // Load next level or end screen
-                    loadLevel(currentLevelIndex + 1);
-                    
-                    // If it's NOT the end game (which we check inside loadLevel), prepare pizza for next round
-                    if (currentLevelIndex < levels.length) {
-                        pizza.style.transition = "none";
-                        pizza.style.transform = "translateY(200vh)";
-                        void pizza.offsetWidth;
-                        
-                        // We animate it back UP in 'startLevelBtn' listener now, 
-                        // or we can queue it here if we want seamless transition behind modal.
-                        // But since we have a modal, let's leave it hidden until "Prepare Order" is clicked.
+        $('next-btn').onclick = () => {
+            if (!gameActive) return; resumeAudio();
+            const tg = levels[currentLvl].t;
+            if ((cuts.length === 0 ? 1 : cuts.length * 2) === tg) {
+                let acc = 100;
+                if (tg > 2 && cuts.length > 1) {
+                    let ang = [];
+                    cuts.forEach(l => {
+                        let a = Math.atan2(parseFloat(l.getAttribute('y1')) - 50, parseFloat(l.getAttribute('x1')) - 50);
+                        if (a < 0) a += 2 * Math.PI;
+                        ang.push(a); ang.push((a + Math.PI) % (2 * Math.PI));
+                    });
+                    ang.sort((a, b) => a - b);
+                    let err = 0, ideal = (2 * Math.PI) / tg;
+                    for (let i = 0; i < ang.length; i++) {
+                        let d = ang[(i + 1) % ang.length] - ang[i];
+                        if (d < 0) d += 2 * Math.PI;
+                        err += Math.abs(d - ideal);
                     }
-                }, 1000);
+                    acc = Math.max(0, 100 - (err / (2 * Math.PI) * 100));
+                }
+                const toast = $('accuracy-toast');
+                toast.innerText = `${acc.toFixed(1)}% ACCURACY!`;
+                toggle(toast, true);
+
+                playSuccess(); levelIndicator.style.backgroundColor = "#8BC34A"; gameActive = false;
+                pizza.style.transition = "transform 1s ease-in"; pizza.style.transform = "translateY(150vh)";
+                setTimeout(() => { toggle(toast, false); levelIndicator.style.backgroundColor = "#fffdf0"; loadLevel(currentLvl + 1); if (currentLvl < levels.length) { pizza.style.transition = "none"; pizza.style.transform = "translateY(200vh)"; void pizza.offsetWidth; }}, 1500);
             } else {
-                playFailSound();
-                pizzaWrapper.classList.add('shake');
-                setTimeout(() => { pizzaWrapper.classList.remove('shake'); }, 500);
-                levelIndicator.style.backgroundColor = "#FFCDD2";
-                setTimeout(() => { levelIndicator.style.backgroundColor = "#fffdf0"; }, 1000);
+                playFail(); pizza.classList.add('shake'); setTimeout(() => pizza.classList.remove('shake'), 500);
+                levelIndicator.style.backgroundColor = "#FFCDD2"; setTimeout(() => levelIndicator.style.backgroundColor = "#fffdf0", 1000);
             }
-        });
+        };
     </script>
 </body>
 </html>
