@@ -7,267 +7,174 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Titan+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Titan+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
         :root {
-            --bg-black: #000000;
-            --panel-bg: #0a0a0a;
-            --neon-pink: #ff00ff;
-            --neon-blue: #00ffff;
-            --neon-green: #00ff00;
-            --neon-yellow: #ffff00;
-            --neon-orange: #ff9900;
-            --neon-purple: #9d46ff; /* New Purple */
-            --neon-red: #ff3333;    /* New Red for Error */
-            --grid-off: #151515;
+            --bg-black: #050508;
+            --panel-bg: rgba(15, 15, 20, 0.65);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --neon-pink: #ff2a85;
+            --neon-blue: #00f0ff;
+            --neon-green: #00ff66;
+            --neon-yellow: #ffe600;
+            --neon-purple: #b026ff;
+            --neon-red: #ff3366;
+            --grid-off: rgba(255, 255, 255, 0.04);
+            --grid-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
         }
-
-        /* NUCLEAR SCROLL FIX */
         html, body {
-            margin: 0; padding: 0;
-            width: 100vw; height: 100vh; 
-            height: 100dvh; 
-            position: fixed; top: 0; left: 0;
-            overflow: hidden;
-            overscroll-behavior: none;
-            touch-action: none;
-            background-color: var(--bg-black);
-            color: #fff;
-            font-family: 'Fira Code', monospace;
-            display: flex; align-items: center; justify-content: center;
+            margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh;
+            position: fixed; top: 0; left: 0; overflow: hidden; overscroll-behavior: none;
+            touch-action: none; background-color: var(--bg-black); color: #fff;
+            font-family: 'Fira Code', monospace; display: flex; align-items: center; justify-content: center;
             user-select: none; -webkit-user-select: none;
         }
-
-        /* --- BACKGROUND --- */
-        .disco-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; z-index: 0; pointer-events: none;
-            background: #050505;
+        .ambient-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none;
+            background: radial-gradient(circle at 15% 50%, rgba(255, 42, 133, 0.08), transparent 50%), radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.08), transparent 50%);
         }
-        .beam {
-            position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
-            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 255, 0.4) 20deg, transparent 40deg, rgba(255, 0, 255, 0.4) 140deg, transparent 160deg, rgba(255, 255, 0, 0.4) 260deg, transparent 280deg);
-            animation: spin 15s linear infinite; opacity: 0.8; mix-blend-mode: screen;
+        .ambient-bg::after {
+            content: ''; position: absolute; inset: 0; opacity: 0.15;
+            background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
-        .beam.two {
-            animation-direction: reverse; animation-duration: 20s; opacity: 0.6;
-            background: conic-gradient(from 180deg, transparent 0deg, rgba(0, 255, 0, 0.4) 20deg, transparent 40deg);
+        .orb {
+            position: absolute; width: 60vmax; height: 60vmax; top: -10vmax; left: -10vmax;
+            background: radial-gradient(circle, var(--neon-purple) 0%, transparent 60%);
+            filter: blur(80px); opacity: 0.3; mix-blend-mode: screen;
+            animation: float 20s ease-in-out infinite alternate;
         }
-        @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
-
-        /* --- SCREENS --- */
-        .screen {
-            width: 100%; height: 100%;
-            display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10; position: absolute; top: 0; left: 0;
+        .orb.two {
+            top: auto; bottom: -20vmax; left: auto; right: -10vmax;
+            background: radial-gradient(circle, var(--neon-blue) 0%, transparent 60%);
+            animation-duration: 25s; animation-direction: alternate-reverse; opacity: 0.2;
         }
-        .screen.active { display: flex; animation: fadeUp 0.3s ease; }
-        @keyframes fadeUp { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
-
-        /* --- RAINBOW MENU BUTTON --- */
-        .menu-btn-rainbow {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 24px;
-            border-radius: 20px;
-            color: white;
-            font-family: 'Fira Code', monospace;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            
-            background: linear-gradient(90deg, #ff6b6b, #ffd36b, #4ade80, #60a5fa, #a78bfa);
-            background-size: 300% 100%; 
-            animation: gradientMove 4s ease infinite; 
-            
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s;
-        }
-        .menu-btn-rainbow:hover { transform: scale(1.05); }
-        .menu-btn-rainbow:active { transform: scale(0.95); }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* --- GAME PANEL --- */
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20%, 10%) scale(1.2); } }
+        .screen { width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; position: absolute; top: 0; left: 0; }
+        .screen.active { display: flex; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeUp { from {opacity:0; transform:translateY(20px) scale(0.98);} to {opacity:1; transform:translateY(0) scale(1);} }
         .game-panel {
-            background: rgba(10, 10, 10, 0.95); border: 1px solid #333;
-            border-radius: 16px; padding: 16px; 
-            width: 95%; max-width: 900px;
-            display: flex; flex-direction: column; gap: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            position: relative; z-index: 20;
-            max-height: 98vh; 
+            background: var(--panel-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--panel-border); border-radius: 24px; padding: 20px;
+            width: 95%; max-width: 800px; display: flex; flex-direction: column; gap: 12px;
+            box-shadow: var(--glass-shadow); position: relative; z-index: 20; 
+            height: 75dvh; max-height: 680px; overflow: hidden;
         }
-
-        /* TERMINAL WITH RED SHAKE STATE */
-        .terminal {
-            background: #020202; border-radius: 8px; padding: 12px;
-            border: 2px solid var(--neon-blue); display: flex; flex-direction: column;
-            flex-shrink: 0;
-            transition: border-color 0.2s, box-shadow 0.2s;
+        .terminal { 
+            background: rgba(0, 0, 0, 0.6); border-radius: 12px; padding: 14px; 
+            border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; flex-shrink: 0; transition: all 0.3s ease; position: relative;
         }
-        .terminal.error {
-            border-color: var(--neon-red);
-            box-shadow: 0 0 20px var(--neon-red), inset 0 0 20px rgba(255, 51, 51, 0.2);
+        .terminal::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 12px; pointer-events: none; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1); transition: all 0.3s ease;
         }
-
-        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-
-        .term-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 6px; }
-        .term-title { color: var(--neon-blue); font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
-        .term-content { color: #eee; font-size: 0.95rem; line-height: 1.4; white-space: nowrap; overflow-x: auto; }
-        .keyword { color: var(--neon-pink); font-weight: bold; }
-        .number { color: var(--neon-yellow); font-weight: bold; }
-        .comment { color: #666; font-style: italic; font-size: 0.8rem; }
-
-        .sequencer-container { 
-            position: relative; background: #050505; 
-            padding: 8px; border-radius: 10px; border: 1px solid #333; 
-            z-index: 30; flex-grow: 1; 
-            display: flex; flex-direction: column; justify-content: center;
-        }
-
-        .grid-layout {
-            display: grid; 
-            grid-template-columns: 50px repeat(8, 1fr); 
-            gap: 4px; width: 100%;
-        }
-
-        .col-header { text-align: center; color: #555; font-size: 0.7rem; font-weight: bold; padding-bottom: 4px;}
-        .track-label { 
-            display: flex; align-items: center; justify-content: flex-start;
-            font-weight: bold; font-size: 0.7rem; color: #888; 
-            text-transform: uppercase;
-        }
-
+        .terminal.error { border-color: var(--neon-red); }
+        .terminal.error::before { box-shadow: 0 0 30px rgba(255, 51, 102, 0.3), inset 0 0 20px rgba(255, 51, 102, 0.2); }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px,0,0); } 20%, 80% { transform: translate3d(3px,0,0); } 30%, 50%, 70% { transform: translate3d(-5px,0,0); } 40%, 60% { transform: translate3d(5px,0,0); } }
+        .term-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 10px; }
+        .term-title { color: var(--neon-blue); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+        .term-content { color: #f0f0f0; font-size: 0.95rem; line-height: 1.5; white-space: normal; overflow: hidden; font-weight: 400; text-shadow: 0 0 5px rgba(255,255,255,0.2); word-break: keep-all; }
+        .keyword { color: var(--neon-pink); font-weight: 700; }
+        .number { color: var(--neon-yellow); font-weight: 700; }
+        .sequencer-container { position: relative; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); z-index: 30; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; box-shadow: inset 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
+        .grid-layout { display: grid; grid-template-columns: 45px repeat(8, minmax(0, 1fr)); grid-template-rows: 20px repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; height: 100%; }
+        .col-header { text-align: center; color: rgba(255,255,255,0.4); font-size: 0.7rem; font-weight: 700; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2px; letter-spacing: 1px;}
+        .track-label { display: flex; align-items: center; justify-content: flex-start; font-weight: 700; font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
         .beat-btn { 
-            width: 100%; aspect-ratio: 1; 
-            background-color: var(--grid-off); border: 1px solid #333; 
-            border-radius: 4px; cursor: pointer; position: relative; z-index: 40; 
-            touch-action: manipulation;
+            width: 100%; height: 100%; background-color: var(--grid-off); 
+            border: 1px solid var(--grid-border); border-radius: 8px; cursor: pointer; position: relative; z-index: 40; touch-action: manipulation; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s, background-color 0.2s, box-shadow 0.2s;
         }
-        .beat-btn.active { border-color: white; box-shadow: 0 0 10px currentColor; }
-        .row-0.active { background-color: var(--neon-pink) !important; color: var(--neon-pink); }
-        .row-1.active { background-color: var(--neon-blue) !important; color: var(--neon-blue); }
-        .row-2.active { background-color: var(--neon-yellow) !important; color: var(--neon-yellow); }
-        .row-3.active { background-color: var(--neon-green) !important; color: var(--neon-green); }
-
+        .beat-btn:active { transform: scale(0.92); }
+        .beat-btn:hover:not(.active) { background-color: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+        .row-0.active { background-color: var(--neon-pink) !important; box-shadow: 0 0 15px var(--neon-pink), inset 0 0 10px rgba(255,255,255,0.5); border-color: var(--neon-pink); }
+        .row-1.active { background-color: var(--neon-blue) !important; box-shadow: 0 0 15px var(--neon-blue), inset 0 0 10px rgba(255,255,255,0.5); border-color: var(--neon-blue); }
+        .row-2.active { background-color: var(--neon-yellow) !important; box-shadow: 0 0 15px var(--neon-yellow), inset 0 0 10px rgba(255,255,255,0.5); border-color: var(--neon-yellow); }
+        .row-3.active { background-color: var(--neon-green) !important; box-shadow: 0 0 15px var(--neon-green), inset 0 0 10px rgba(255,255,255,0.5); border-color: var(--neon-green); }
         .sweep-bar { 
-            position: absolute; top: 25px; left: 58px; 
-            width: 2px; height: calc(100% - 35px); 
-            background: white; box-shadow: 0 0 10px white; 
-            pointer-events: none; display: none; z-index: 100; 
+            position: absolute; top: 15px; width: 4px; height: calc(100% - 25px); 
+            background: linear-gradient(180deg, rgba(255,255,255,0.1), #fff, rgba(255,255,255,0.1)); 
+            box-shadow: 0 0 15px #fff, 0 0 30px rgba(255,255,255,0.5); border-radius: 4px; 
+            pointer-events: none; display: none; z-index: 100; transition: left 0.05s linear;
         }
-
-        .controls { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; flex-shrink: 0; }
-        .control-row { display: flex; gap: 8px; width: 100%; }
-        
+        .controls { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; flex-shrink: 0; }
+        .control-row { display: flex; gap: 14px; width: 100%; align-items: center; }
         .btn { 
-            border: none; padding: 12px; border-radius: 8px; 
-            font-family: 'Fira Code', monospace; font-weight: bold; font-size: 0.9rem; 
-            cursor: pointer; text-transform: uppercase; 
-            display: flex; align-items: center; justify-content: center; gap: 6px; 
-            transition: 0.2s; flex: 1; touch-action: manipulation;
+            border: none; padding: 14px; border-radius: 12px; font-family: 'Fira Code', monospace; 
+            font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
+            flex: 1; touch-action: manipulation; box-shadow: 0 4px 15px rgba(0,0,0,0.3); white-space: nowrap;
         }
-        .btn:active { transform: scale(0.96); }
-        
-        /* Disable State */
-        .btn:disabled {
-            opacity: 0.4;
-            filter: grayscale(1);
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .btn-play { background: var(--neon-purple); color: white; box-shadow: 0 0 10px var(--neon-purple); }
-        .btn-stop { background: var(--neon-pink); color: white; display: none; }
-        .btn-submit { background: var(--neon-green); color: black; flex: 2; box-shadow: 0 0 10px var(--neon-green); }
-        .btn-icon { background: #222; color: #fff; border: 1px solid #444; flex: 0 0 45px; }
-
-        /* --- START SCREEN STYLES --- */
-        .start-container { 
-            text-align: center; 
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            padding: 40px;
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; align-items: center;
-        }
-        
-        .logo-line {
-            font-family: 'Titan One', cursive; font-size: 3.8rem; line-height: 0.9;
-            color: transparent; -webkit-text-stroke: 2px var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
-        }
-        .logo-line.pink { -webkit-text-stroke: 2px var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); }
-        
-        .equalizer { 
-            display: flex; gap: 8px; justify-content: center; 
-            height: 60px; 
-            margin: 20px 0; 
-            align-items: flex-end; 
-        }
-        .bar { 
-            width: 12px; 
-            background: #fff; 
-            border-radius: 4px; 
-            animation: bounce 0.6s infinite alternate ease-in-out;
-            box-shadow: 0 0 10px currentColor; 
-        }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn:active:not(:disabled) { transform: translateY(1px) scale(0.96); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; box-shadow: none !important; filter: grayscale(1); }
+        .btn-play { background: linear-gradient(135deg, var(--neon-purple), #7a15cc); color: white; box-shadow: 0 4px 15px rgba(176, 38, 255, 0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-stop { background: linear-gradient(135deg, var(--neon-pink), #cc1461); color: white; display: none; box-shadow: 0 4px 15px rgba(255, 42, 133, 0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-submit { background: linear-gradient(135deg, var(--neon-green), #00cc52); color: black; flex: 2; box-shadow: 0 4px 15px rgba(0, 255, 102, 0.4); border: 1px solid rgba(255,255,255,0.4); }
+        .btn-icon { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); flex: 0 0 48px; height: 48px; border-radius: 50%; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-icon:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+        .btn-hint { background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 240, 255, 0.1); flex: 0 1 auto; padding: 0 20px; height: 48px; border-radius: 24px; }
+        .btn-hint:hover { background: rgba(0, 240, 255, 0.2); box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); }
+        .start-container { text-align: center; background: var(--panel-bg); backdrop-filter: blur(24px); padding: 30px; border-radius: 30px; border: 1px solid var(--panel-border); box-shadow: var(--glass-shadow); display: flex; flex-direction: column; align-items: center; width: 90%; max-width: 400px; }
+        .logo-line { font-family: 'Titan One', cursive; font-size: 4.2rem; line-height: 0.95; color: transparent; -webkit-text-stroke: 2px var(--neon-blue); text-shadow: 0 0 25px rgba(0,240,255,0.6); }
+        .logo-line.pink { -webkit-text-stroke: 2px var(--neon-pink); text-shadow: 0 0 25px rgba(255,42,133,0.6); }
+        .equalizer { display: flex; gap: 8px; justify-content: center; height: 60px; margin: 25px 0; align-items: flex-end; }
+        .bar { width: 12px; background: #fff; border-radius: 6px; animation: bounce 0.6s infinite alternate cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 0 15px currentColor; }
         @keyframes bounce { 0% {height: 20%;} 100% {height: 100%;} }
-
-        /* --- MODALS --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(5px); }
-        .modal-box { 
-            background: #0a0a0a; border: 2px solid var(--neon-green); 
-            padding: 30px; border-radius: 16px; text-align: center; 
-            width: 85%; max-width: 400px;
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; }
+        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        .modal-box { background: rgba(15,15,20,0.85); border: 1px solid rgba(255,255,255,0.1); padding: 35px; border-radius: 24px; text-align: center; width: 85%; max-width: 420px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,255,255,0.05); transform: scale(0.9) translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; }
+        .modal.active .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+        .success-box { border-top: 4px solid var(--neon-green); }
+        .finish-box { border-top: 4px solid var(--neon-pink); }
+        .info-box { border-top: 4px solid var(--neon-yellow); text-align: left; }
+        .help-box { border-top: 4px solid var(--neon-blue); text-align: left; }
+        .info-item { margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 14px; }
+        .info-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .info-title { font-weight: 700; display: block; margin-bottom: 6px; font-size: 1.05rem; letter-spacing: 0.5px; }
+        .info-desc { color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.5; }
+        @media (max-width: 600px) {
+            .game-panel { padding: 12px; gap: 8px; border-radius: 16px; height: 75dvh; max-height: 600px; }
+            .sequencer-container { padding: 8px; }
+            .grid-layout { grid-template-columns: 35px repeat(8, minmax(0,1fr)); grid-template-rows: 15px repeat(4, minmax(0,1fr)); gap: 4px; }
+            .col-header { font-size: 0.6rem; }
+            .track-label { font-size: 0.55rem; }
+            .btn { padding: 10px; font-size: 0.75rem; }
+            .btn-icon { flex: 0 0 38px; height: 38px; }
+            .btn-hint { height: 38px; padding: 0 12px; }
+            .logo-line { font-size: 2.5rem; }
+            .start-container { padding: 25px; width: 95%; }
+            .terminal { padding: 10px; }
+            .term-header { margin-bottom: 6px; padding-bottom: 6px; }
+            .term-content { font-size: 0.75rem; }
+            .nomob { display: none !important; }
+            .modal-box { padding: 25px; }
+            .controls { gap: 10px; margin-top: 5px; }
+            .control-row { gap: 10px; }
         }
-        .finish-box { border-color: var(--neon-pink); }
-        .info-box { border-color: var(--neon-yellow); text-align: left; }
-        .help-box { border-color: var(--neon-blue); text-align: left; }
-
-        .info-item { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
-        .info-title { color: var(--neon-blue); font-weight: bold; display: block; margin-bottom: 4px; }
-        .info-desc { color: #999; font-size: 0.85rem; }
-
-        @media (max-width: 900px) {
-            .menu-btn-rainbow {
-                top: 15px; left: 15px;
-                font-size: 0.8rem;
-                padding: 8px 16px;
-            }
+        @media (max-height: 700px) {
+            .game-panel { padding: 8px; gap: 6px; height: 85dvh; max-height: 520px; }
+            .sequencer-container { padding: 6px; }
+            .grid-layout { gap: 4px; }
+            .terminal { padding: 8px; }
+            .term-header { margin-bottom: 4px; padding-bottom: 4px; }
+            .start-container { padding: 15px; }
+            .logo-line { font-size: 2.2rem; }
+            .equalizer { margin: 10px 0; height: 35px; }
+            .btn { padding: 8px; font-size: 0.7rem; }
+            .btn-icon, .btn-hint { flex: 0 0 34px; height: 34px; }
+            .controls { gap: 8px; margin-top: 2px; }
+            .control-row { gap: 8px; }
         }
-
     </style>
 </head>
 <body>
-
-    <div class="disco-bg">
-        <div class="beam"></div>
-        <div class="beam two"></div>
-    </div>
-
-    <a href="https://angyfwen.github.io/web-minigames/" class="menu-btn-rainbow">
-        <i class="fa-solid fa-gamepad"></i> menu
-    </a>
-
+    <div class="ambient-bg"><div class="orb"></div><div class="orb two"></div></div>
     <div id="start-screen" class="screen active">
         <div class="start-container">
             <div class="logo-line">RHYTHM</div>
@@ -279,387 +186,187 @@
                 <div class="bar" style="background:var(--neon-blue); animation-delay:0.4s; height: 60%;"></div>
             </div>
             <div class="logo-line pink">CODER</div>
-            
-            <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 15px; width: 240px;">
-                <button class="btn btn-play" style="width:100%" onclick="startGame()">
-                    <i class="fa-solid fa-play"></i> START SYSTEM
-                </button>
-                <button class="btn" style="background:transparent; border:2px solid var(--neon-blue); color:var(--neon-blue);" onclick="showInfo()">
-                    <i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE
-                </button>
+            <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 15px; width: 100%;">
+                <button class="btn btn-play" style="width:100%" onclick="startGame()"><i class="fa-solid fa-play"></i> START SYSTEM</button>
+                <button class="btn" style="background:rgba(255,230,0,0.1); border:1px solid var(--neon-yellow); color:var(--neon-yellow);" onclick="toggle('info-modal', true)"><i class="fa-solid fa-graduation-cap"></i> EDUCATIONAL VALUE</button>
             </div>
         </div>
     </div>
-
     <div id="game-screen" class="screen">
         <div class="game-panel">
-            
             <div class="terminal" id="code-terminal">
                 <div class="term-header">
-                    <span class="term-title">/// MISSION CODE</span>
-                    <span class="term-title text-white" id="level-num">LVL 1</span>
-                    <span class="term-title" id="difficulty-badge" style="color: #00ff00;">EASY</span>
+                    <span class="term-title">/// MISSION_CODE.exe</span>
+                    <div>
+                        <span class="term-title text-white mr-2 bg-white/10 px-2 py-1 rounded" id="level-num">LVL 1</span>
+                        <span class="term-title px-2 py-1 rounded" id="difficulty-badge" style="background: rgba(0,255,102,0.1); color: var(--neon-green);">EASY</span>
+                    </div>
                 </div>
                 <div class="term-content" id="instructions"></div>
             </div>
-
             <div class="sequencer-container">
                 <div class="sweep-bar" id="sweep-bar"></div>
                 <div class="grid-layout" id="main-grid"></div>
             </div>
-
             <div class="controls">
                 <div class="control-row">
-                    <button class="btn btn-icon" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
-                    <button class="btn btn-icon" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="sound-icon"></i></button>
-                    <button class="btn btn-icon" onclick="showHelp()" title="How to Play" style="background: var(--neon-blue); border-color: var(--neon-blue); color: black;"><i class="fa-solid fa-question"></i></button>
-                    
+                    <button class="btn btn-hint" onclick="fillAnswer()"><i class="fa-solid fa-lightbulb"></i> HINT</button>
                     <div style="flex-grow:1"></div>
-                    
-                    <button class="btn" style="background:#222; color:#aaa; border:1px solid #444;" onclick="resetGrid()">
-                        <i class="fa-solid fa-trash"></i> CLEAR
-                    </button>
-                    <button class="btn" style="background:transparent; border:1px solid var(--neon-blue); color:var(--neon-blue);" onclick="fillAnswer()">
-                        <i class="fa-solid fa-lightbulb"></i> HINT
-                    </button>
+                    <button class="btn btn-icon" onclick="goHome()"><i class="fa-solid fa-house"></i></button>
+                    <button class="btn btn-icon" onclick="resetGrid()"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button class="btn btn-icon" onclick="toggle('help-modal', true)"><i class="fa-solid fa-question text-cyan-400"></i></button>
+                    <button class="btn btn-icon" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="sound-icon"></i></button>
                 </div>
                 <div class="control-row">
-                    <button id="btn-play" class="btn btn-play" onclick="togglePlay()">
-                        <i class="fa-solid fa-play"></i> PLAY LOOP
-                    </button>
-                    <button id="btn-stop" class="btn btn-stop" onclick="togglePlay()">
-                        <i class="fa-solid fa-stop"></i> STOP LOOP
-                    </button>
-                    <button id="btn-submit" class="btn btn-submit" disabled onclick="submitSolution()">
-                        <i class="fa-solid fa-check"></i> submit code
-                    </button>
+                    <button id="btn-play" class="btn btn-play" onclick="togglePlay()"><i class="fa-solid fa-play"></i> PLAY<span class="nomob"> LOOP</span></button>
+                    <button id="btn-stop" class="btn btn-stop" onclick="togglePlay()"><i class="fa-solid fa-stop"></i> STOP<span class="nomob"> LOOP</span></button>
+                    <button id="btn-submit" class="btn btn-submit" disabled onclick="submitSolution()"><i class="fa-solid fa-check"></i> COMPILE<span class="nomob"> CODE</span></button>
                 </div>
             </div>
-
         </div>
     </div>
-
     <div id="modal" class="modal">
-        <div class="modal-box">
-            <div class="text-6xl text-green-400 mb-4 animate-bounce"><i class="fa-solid fa-check-circle"></i></div>
-            <h2 class="text-2xl font-bold text-white mb-2" style="font-family: 'Titan One'">COMPILED!</h2>
-            <p class="text-gray-400 mb-6">Sequence logic matches target.</p>
-            <button class="btn btn-play w-full" onclick="nextLevel()">NEXT LEVEL</button>
+        <div class="modal-box success-box">
+            <div class="text-6xl text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(0,255,102,0.5)] animate-bounce"><i class="fa-solid fa-check-circle"></i></div>
+            <h2 class="text-3xl font-bold text-white mb-2" style="font-family: 'Titan One'; letter-spacing: 1px;">COMPILED!</h2>
+            <p class="text-gray-400 mb-8 font-semibold">Sequence logic matches target.</p>
+            <button class="btn btn-play w-full" style="background:var(--neon-green); color:black;" onclick="nextLevel()">NEXT LEVEL</button>
         </div>
     </div>
-
     <div id="finish-modal" class="modal">
         <div class="modal-box finish-box">
-            <div class="text-6xl text-pink-400 mb-4 animate-pulse"><i class="fa-solid fa-trophy"></i></div>
-            <h2 class="text-2xl font-bold text-white mb-2" style="font-family: 'Titan One'">ALL SYSTEMS GO</h2>
-            <p class="text-gray-400 mb-6">You have mastered the rhythm.</p>
-            <button class="btn btn-play w-full" style="background:var(--neon-pink); color:white;" onclick="finishGame()">HOME</button>
+            <div class="text-6xl text-pink-500 mb-4 drop-shadow-[0_0_15px_rgba(255,42,133,0.5)] animate-pulse"><i class="fa-solid fa-trophy"></i></div>
+            <h2 class="text-3xl font-bold text-white mb-2" style="font-family: 'Titan One'; letter-spacing: 1px;">SYSTEMS GO</h2>
+            <p class="text-gray-400 mb-8 font-semibold">You have mastered the rhythm.</p>
+            <button class="btn btn-play w-full" style="background:linear-gradient(135deg, var(--neon-pink), #cc1461);" onclick="goHome()">RETURN HOME</button>
         </div>
     </div>
-
     <div id="info-modal" class="modal">
         <div class="modal-box info-box">
-            <h2 class="text-xl font-bold text-yellow-400 mb-4" style="font-family: 'Titan One'">
-                EDUCATIONAL VALUE
-            </h2>
-            
-            
-
-            <div class="info-list">
-                <div class="info-item">
-                    <span class="info-title">1. Syntax Mapping</span>
-                    <span class="info-desc">Translating code commands into physical grid positions.</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-title">2. Arrays & Indexes</span>
-                    <span class="info-desc">Understanding that `play(1)` means the first slot in the sequence array.</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-title">3. Loops</span>
-                    <span class="info-desc">Visualizing `for` loops as filling a range of beats.</span>
-                </div>
+            <h2 class="text-2xl font-bold text-white mb-6" style="font-family: 'Titan One'; letter-spacing: 1px;"><i class="fa-solid fa-graduation-cap text-yellow-400 mr-2"></i>EDUCATIONAL VALUE</h2>
+            <div class="info-list mb-6">
+                <div class="info-item"><span class="info-title text-pink-400">1. Syntax Mapping</span><span class="info-desc">Translating abstract code commands directly into physical grid coordinates.</span></div>
+                <div class="info-item"><span class="info-title text-blue-400">2. Arrays & Indexes</span><span class="info-desc">Understanding that `play(1)` targets the first positional slot in the sequence array.</span></div>
+                <div class="info-item"><span class="info-title text-green-400">3. Iterative Loops</span><span class="info-desc">Visualizing `for` loops as sequentially filling a defined range of beats over time.</span></div>
             </div>
-            <button class="btn btn-submit w-full" onclick="closeInfo()">UNDERSTOOD</button>
+            <button class="btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); width:100%; color:white;" onclick="toggle('info-modal', false)">ACKNOWLEDGE</button>
         </div>
     </div>
-
     <div id="help-modal" class="modal">
         <div class="modal-box help-box">
-            <h2 class="text-xl font-bold text-cyan-400 mb-4" style="font-family: 'Titan One'">
-                HOW TO PLAY
-            </h2>
-            <div class="info-list">
-                <div class="info-item">
-                    <span class="info-title">1. Read the Code</span>
-                    <span class="info-desc">Look at the <strong>MISSION CODE</strong> box at the top. It tells you which beats to activate.</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-title">2. Program the Grid</span>
-                    <span class="info-desc">Tap the grid squares to match the code instructions. (e.g., `kick.play(1)` means tap column 1 on the kick row).</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-title">3. Play & Submit</span>
-                    <span class="info-desc">Hit <strong>PLAY LOOP</strong> to hear it. This unlocks the <strong>submit code</strong> button!</span>
-                </div>
+            <h2 class="text-2xl font-bold text-cyan-400 mb-6" style="font-family: 'Titan One'; letter-spacing: 1px;"><i class="fa-solid fa-satellite-dish mr-2"></i>HOW TO PLAY</h2>
+            <div class="info-list mb-6">
+                <div class="info-item"><span class="info-title text-pink-400">1. Read the Code</span><span class="info-desc">Analyze the <strong class="text-white">MISSION CODE</strong> snippet at the top. It defines which instruments play on which beats.</span></div>
+                <div class="info-item"><span class="info-title text-yellow-400">2. Program the Grid</span><span class="info-desc">Tap the drum pads in the central sequencer to perfectly match the logic instructed by the code.</span></div>
+                <div class="info-item"><span class="info-title text-green-400">3. Play & Compile</span><span class="info-desc">Hit <strong class="text-white">PLAY</strong> to verify your audio. If it's correct, you can submit to advance!</span></div>
             </div>
-            <button class="btn btn-submit w-full" style="background: var(--neon-blue);" onclick="closeHelp()">LET'S CODE</button>
+            <button class="btn" style="background:linear-gradient(135deg, var(--neon-blue), #00a3cc); color:black; width:100%; border:none;" onclick="toggle('help-modal', false)">INITIATE</button>
         </div>
     </div>
-
     <script>
-        // --- AUDIO ENGINE ---
+        // dom
+        const $ = i => document.getElementById(i), qs = s => document.querySelector(s), $$ = s => document.querySelectorAll(s), toggle = (i, s) => $(i).classList.toggle('active', s);
+        // audio
         const AudioSys = {
             ctx: null, muted: false,
-            unlock() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume().then(() => {
-                        console.log("Audio Context Resumed");
-                    });
-                }
+            init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if(this.ctx.state === 'suspended') this.ctx.resume(); },
+            osc(t, f, d, v) {
+                if(this.muted) return; this.init();
+                const c = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+                o.type = t; o.frequency.setValueAtTime(f, c);
+                if(t === 'triangle') o.frequency.exponentialRampToValueAtTime(10, c + d);
+                g.gain.setValueAtTime(v, c); g.gain.exponentialRampToValueAtTime(0.01, c + d);
+                o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(c + d);
             },
-            init() { 
-                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+            noise(d) {
+                if(this.muted) return; this.init();
+                const c = this.ctx.currentTime, s = this.ctx.sampleRate * d, b = this.ctx.createBuffer(1, s, this.ctx.sampleRate), a = b.getChannelData(0);
+                for(let i=0; i<s; i++) a[i] = Math.random() * 2 - 1;
+                const n = this.ctx.createBufferSource(), g = this.ctx.createGain();
+                n.buffer = b; g.gain.setValueAtTime(0.1, c); g.gain.exponentialRampToValueAtTime(0.01, c + d);
+                n.connect(g); g.connect(this.ctx.destination); n.start();
             },
-            playTone(type, freq, decay, vol) {
-                if (this.muted || !this.ctx) return; 
-                const osc = this.ctx.createOscillator(); 
-                const gain = this.ctx.createGain();
-                osc.type = type; 
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                if(type === 'triangle') osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + decay);
-                gain.gain.setValueAtTime(vol, this.ctx.currentTime); 
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + decay);
-                osc.connect(gain); 
-                gain.connect(this.ctx.destination); 
-                osc.start(); 
-                osc.stop(this.ctx.currentTime + decay);
-            },
-            playNoise(decay) {
-                if (this.muted || !this.ctx) return; 
-                const bufferSize = this.ctx.sampleRate * decay; 
-                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                const data = buffer.getChannelData(0); 
-                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-                const noise = this.ctx.createBufferSource(); 
-                noise.buffer = buffer; 
-                const gain = this.ctx.createGain();
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); 
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + decay);
-                noise.connect(gain); 
-                gain.connect(this.ctx.destination); 
-                noise.start();
-            },
-            trigger(row) {
-                this.init(); // Ensure init
-                switch(row) {
-                    case 0: this.playTone('triangle', 150, 0.2, 0.8); break; // Kick
-                    case 1: this.playTone('square', 200, 0.1, 0.1); this.playNoise(0.1); break; // Snare
-                    case 2: this.playNoise(0.05); break; // Hat
-                    case 3: this.playTone('sine', 440, 0.4, 0.1); break; // Synth
-                }
+            trigger(r) {
+                if(r===0) this.osc('triangle', 150, 0.2, 0.8);
+                else if(r===1) { this.osc('square', 200, 0.1, 0.1); this.noise(0.1); }
+                else if(r===2) this.noise(0.05);
+                else if(r===3) this.osc('sine', 440, 0.4, 0.1);
             }
         };
-
-        // GLOBAL UNLOCK LISTENER (Catches first tap anywhere)
-        document.addEventListener('touchstart', function() { AudioSys.unlock(); }, { once: true });
-        document.addEventListener('click', function() { AudioSys.unlock(); }, { once: true });
-
-        function toggleMute() {
-            AudioSys.muted = !AudioSys.muted;
-            const icon = document.getElementById('sound-icon');
-            icon.className = AudioSys.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
-        }
-
-        /* --- GAME LOGIC --- */
-        const INSTRUMENTS = ["kick", "snare", "hihat", "synth"];
-        let hasPlayedLoop = false; // Dependency Flag
-        
-        function getRandomInts(count, min, max) {
-            let nums = new Set();
-            while(nums.size < count) nums.add(Math.floor(Math.random() * (max - min + 1)) + min);
-            return Array.from(nums).sort((a,b) => a-b);
-        }
-
-        const LevelGenerator = {
-            createGrid() { return Array(4).fill().map(() => Array(8).fill(0)); },
-            level1() { // Vars
-                const k = getRandomInts(2, 1, 8); const s = getRandomInts(2, 1, 8);
-                const grid = this.createGrid();
-                k.forEach(x => grid[0][x-1] = 1); s.forEach(x => grid[1][x-1] = 1);
-                return { id: 1, badge: "EASY", color: "#00ff00", grid: grid, html: `<span class="keyword">let</span> kick = [<span class="number">${k.join(',')}</span>];<br><span class="keyword">let</span> snare = [<span class="number">${s.join(',')}</span>];` };
-            },
-            level2() { // Methods
-                const i = getRandomInts(3, 0, 3); const s1 = getRandomInts(1,1,8)[0]; const s2 = getRandomInts(3,1,8);
-                const grid = this.createGrid();
-                grid[i[0]][s1-1] = 1; s2.forEach(x => grid[i[1]][x-1] = 1);
-                return { id: 2, badge: "EASY", color: "#00ff00", grid: grid, html: `${INSTRUMENTS[i[0]]}.<span class="keyword">play</span>(<span class="number">${s1}</span>);<br>${INSTRUMENTS[i[1]]}.<span class="keyword">play</span>([<span class="number">${s2.join(',')}</span>]);` };
-            },
-            level3() { // Loop
-                const idx = Math.floor(Math.random()*4); const start = Math.floor(Math.random()*4)+1; const end = Math.floor(Math.random()*(8-start))+start+1;
-                const grid = this.createGrid();
-                for(let x=start; x<=end; x++) grid[idx][x-1] = 1;
-                return { id: 3, badge: "MED", color: "#ffff00", grid: grid, html: `<span class="keyword">for</span>(i=<span class="number">${start}</span> to <span class="number">${end}</span>) {<br>&nbsp;${INSTRUMENTS[idx]}.<span class="keyword">play</span>(i);<br>}` };
-            },
-            level4() { // If/Else
-                const i = getRandomInts(2, 0, 3); const grid = this.createGrid();
-                [0,2,4,6].forEach(x => grid[i[0]][x] = 1); [1,3,5,7].forEach(x => grid[i[1]][x] = 1);
-                return { id: 4, badge: "HARD", color: "#ff00ff", grid: grid, html: `<span class="keyword">if</span>(odd) ${INSTRUMENTS[i[0]]}.<span class="keyword">play</span>();<br><span class="keyword">else</span> ${INSTRUMENTS[i[1]]}.<span class="keyword">play</span>();` };
-            },
-            level5() { // Function
-                const i = getRandomInts(2, 0, 3); const s1 = getRandomInts(3,1,8); const s2 = getRandomInts(3,1,8);
-                const grid = this.createGrid();
-                s1.forEach(x => grid[i[0]][x-1] = 1); s2.forEach(x => grid[i[1]][x-1] = 1);
-                return { id: 5, badge: "PRO", color: "#ff0000", grid: grid, html: `<span class="keyword">func</span> beat() {<br>&nbsp;${INSTRUMENTS[i[0]]}(<span class="number">${s1.join(',')}</span>);<br>&nbsp;${INSTRUMENTS[i[1]]}(<span class="number">${s2.join(',')}</span>);<br>}` };
-            }
-        };
-
-        let currentLevelIdx = 0; let userGrid = []; let targetGrid = []; let isPlaying = false; let currentStep = 0; let intervalId = null;
-        const mainGridEl = document.getElementById('main-grid'); const sweepBar = document.getElementById('sweep-bar');
-
-        function startGame() { 
-            AudioSys.unlock(); 
-            document.getElementById('start-screen').classList.remove('active'); 
-            document.getElementById('game-screen').classList.add('active'); 
-            currentLevelIdx = 1; 
-            loadLevel(); 
-        }
-        
-        function goHome() { stopSequence(); document.getElementById('game-screen').classList.remove('active'); document.getElementById('start-screen').classList.add('active'); document.getElementById('modal').style.display = 'none'; document.getElementById('finish-modal').style.display = 'none'; }
-        function finishGame() { document.getElementById('finish-modal').style.display = 'none'; goHome(); }
-        
-        function showInfo() { AudioSys.unlock(); document.getElementById('info-modal').style.display = 'flex'; }
-        function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
-        
-        function showHelp() { AudioSys.unlock(); document.getElementById('help-modal').style.display = 'flex'; }
-        function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
-
+        ['touchstart', 'click'].forEach(e => document.addEventListener(e, () => AudioSys.init(), {once: true}));
+        function toggleMute() { AudioSys.muted = !AudioSys.muted; $('sound-icon').className = `fa-solid fa-volume-${AudioSys.muted ? 'xmark' : 'high'}`; }
+        const getInts = (c, m, x) => { let n = new Set(); while(n.size < c) n.add(Math.floor(Math.random()*(x-m+1))+m); return [...n].sort((a,b)=>a-b); };
+        const newGrid = () => Array(4).fill().map(() => Array(8).fill(0));
+        // levels
+        const INST = ["kick", "snare", "hihat", "synth"];
+        const LvlGen = [
+            null,
+            () => { const k=getInts(2,1,8), s=getInts(2,1,8), g=newGrid(); k.forEach(x=>g[0][x-1]=1); s.forEach(x=>g[1][x-1]=1); return {id:1, bdg:"EASY", col:"var(--neon-green)", bg:"rgba(0,255,102,0.1)", g, h:`<span class="keyword">let</span> kick = [<span class="number">${k.join(',')}</span>];<br><span class="keyword">let</span> snare = [<span class="number">${s.join(',')}</span>];`} },
+            () => { const i=getInts(3,0,3), s1=getInts(1,1,8)[0], s2=getInts(3,1,8), g=newGrid(); g[i[0]][s1-1]=1; s2.forEach(x=>g[i[1]][x-1]=1); return {id:2, bdg:"EASY", col:"var(--neon-green)", bg:"rgba(0,255,102,0.1)", g, h:`${INST[i[0]]}.<span class="keyword">play</span>(<span class="number">${s1}</span>);<br>${INST[i[1]]}.<span class="keyword">play</span>([<span class="number">${s2.join(',')}</span>]);`} },
+            () => { const i=Math.floor(Math.random()*4), s=Math.floor(Math.random()*4)+1, e=Math.floor(Math.random()*(8-s))+s+1, g=newGrid(); for(let x=s; x<=e; x++) g[i][x-1]=1; return {id:3, bdg:"MED", col:"var(--neon-yellow)", bg:"rgba(255,230,0,0.1)", g, h:`<span class="keyword">for</span>(i=<span class="number">${s}</span> to <span class="number">${e}</span>) {<br>&nbsp;${INST[i]}.<span class="keyword">play</span>(i);<br>}`} },
+            () => { const i=getInts(2,0,3), g=newGrid(); [0,2,4,6].forEach(x=>g[i[0]][x]=1); [1,3,5,7].forEach(x=>g[i[1]][x]=1); return {id:4, bdg:"HARD", col:"var(--neon-pink)", bg:"rgba(255,42,133,0.1)", g, h:`<span class="keyword">if</span>(odd) ${INST[i[0]]}.<span class="keyword">play</span>();<br><span class="keyword">else</span> ${INST[i[1]]}.<span class="keyword">play</span>();`} },
+            () => { const i=getInts(2,0,3), s1=getInts(3,1,8), s2=getInts(3,1,8), g=newGrid(); s1.forEach(x=>g[i[0]][x-1]=1); s2.forEach(x=>g[i[1]][x-1]=1); return {id:5, bdg:"PRO", col:"var(--neon-purple)", bg:"rgba(176,38,255,0.1)", g, h:`<span class="keyword">func</span> beat() {<br>&nbsp;${INST[i[0]]}(<span class="number">${s1.join(',')}</span>);<br>&nbsp;${INST[i[1]]}(<span class="number">${s2.join(',')}</span>);<br>}`} }
+        ];
+        let curLvl = 0, uGrid = [], tGrid = [], isPlay = false, curStep = 0, intId = null;
+        function startGame() { AudioSys.init(); $('start-screen').classList.remove('active'); $('game-screen').classList.add('active'); curLvl = 1; loadLevel(); }
+        function goHome() { stopSequence(); $('game-screen').classList.remove('active'); $('start-screen').classList.add('active'); toggle('modal', false); toggle('finish-modal', false); }
         function loadLevel() {
-            const levels = [null, LevelGenerator.level1, LevelGenerator.level2, LevelGenerator.level3, LevelGenerator.level4, LevelGenerator.level5];
-            if(currentLevelIdx >= levels.length) { document.getElementById('finish-modal').style.display = 'flex'; return; }
-            
-            const data = levels[currentLevelIdx].call(LevelGenerator);
-            targetGrid = data.grid;
-            document.getElementById('level-num').innerText = `LVL ${data.id}`;
-            const badge = document.getElementById('difficulty-badge');
-            badge.innerText = data.badge; badge.style.color = data.color;
-            document.getElementById('instructions').innerHTML = data.html;
-            
-            // RESET STATE
-            hasPlayedLoop = false;
-            document.getElementById('btn-submit').disabled = true;
-            
+            if(curLvl >= LvlGen.length) return toggle('finish-modal', true);
+            const d = LvlGen[curLvl](); tGrid = d.g;
+            $('level-num').innerText = `LVL ${d.id}`;
+            $('difficulty-badge').innerText = d.bdg; $('difficulty-badge').style.color = d.col; $('difficulty-badge').style.background = d.bg;
+            $('instructions').innerHTML = d.h; $('btn-submit').disabled = true;
             stopSequence(); resetGrid();
         }
-
-        function resetGrid() { userGrid = Array(4).fill().map(() => Array(8).fill(0)); renderMainGrid(); }
-        
-        function fillAnswer() { 
-            for(let r=0; r<4; r++) for(let c=0; c<8; c++) userGrid[r][c] = targetGrid[r][c]; 
-            renderMainGrid(); 
-        }
-
+        function resetGrid() { uGrid = newGrid(); renderMainGrid(); }
+        function fillAnswer() { uGrid = tGrid.map(r => [...r]); renderMainGrid(); }
         function renderMainGrid() {
-            mainGridEl.innerHTML = `
-                <div></div><div class="col-header">1</div><div class="col-header">2</div><div class="col-header">3</div><div class="col-header">4</div>
-                <div class="col-header">5</div><div class="col-header">6</div><div class="col-header">7</div><div class="col-header">8</div>
-            `;
-            const labels = ["KICK", "SNR", "HAT", "SYN"];
-            
-            for(let r=0; r<4; r++) {
-                const label = document.createElement('div'); label.className = 'track-label'; label.innerText = labels[r]; mainGridEl.appendChild(label);
-                for(let c=0; c<8; c++) {
-                    const btn = document.createElement('div'); 
-                    let classes = `beat-btn row-${r} col-${c}`;
-                    if(userGrid[r][c]) classes += " active";
-                    btn.className = classes;
-                    // Instant touch logic
-                    btn.addEventListener('touchstart', (e) => { e.preventDefault(); toggleNote(r,c); }, {passive: false});
-                    btn.addEventListener('mousedown', () => toggleNote(r,c));
-                    mainGridEl.appendChild(btn);
-                }
-            }
+            let h = `<div></div>`;
+            for(let i=1; i<=8; i++) h += `<div class="col-header">${i}</div>`;
+            ["KICK", "SNR", "HAT", "SYN"].forEach((l, r) => {
+                h += `<div class="track-label">${l}</div>`;
+                for(let c=0; c<8; c++) h += `<div class="beat-btn row-${r} col-${c} ${uGrid[r][c]?'active':''}" onmousedown="toggleNote(${r},${c})" ontouchstart="event.preventDefault();toggleNote(${r},${c})"></div>`;
+            });
+            $('main-grid').innerHTML = h;
         }
-
-        function toggleNote(r, c) {
-            AudioSys.init(); 
-            userGrid[r][c] = userGrid[r][c] ? 0 : 1; 
-            renderMainGrid(); // simpler to just re-render to ensure classes stick
-            if(userGrid[r][c]) AudioSys.trigger(r);
-        }
-
-        function togglePlay() { isPlaying ? stopSequence() : startSequence(); }
-
+        function toggleNote(r, c) { AudioSys.init(); uGrid[r][c] = uGrid[r][c] ? 0 : 1; renderMainGrid(); if(uGrid[r][c]) AudioSys.trigger(r); }
+        function togglePlay() { isPlay ? stopSequence() : startSequence(); }
         function startSequence() {
-            // UNLOCK SUBMIT BUTTON
-            hasPlayedLoop = true;
-            document.getElementById('btn-submit').disabled = false;
-
-            isPlaying = true; currentStep = 0; 
-            document.getElementById('btn-play').style.display = 'none'; 
-            document.getElementById('btn-stop').style.display = 'flex'; 
-            sweepBar.style.display = 'block';
-            intervalId = setInterval(playStep, 250);
+            $('btn-submit').disabled = false; isPlay = true; curStep = 0; 
+            $('btn-play').style.display = 'none'; $('btn-stop').style.display = 'flex'; $('sweep-bar').style.display = 'block';
+            updateSweepBar();
+            intId = setInterval(playStep, 250);
         }
-
         function stopSequence() {
-            isPlaying = false; clearInterval(intervalId); 
-            document.getElementById('btn-play').style.display = 'flex'; 
-            document.getElementById('btn-stop').style.display = 'none'; 
-            sweepBar.style.display = 'none'; 
-            // clear highlights
-            document.querySelectorAll('.beat-btn').forEach(b => b.style.filter = 'none');
+            isPlay = false; clearInterval(intId); 
+            $('btn-play').style.display = 'flex'; $('btn-stop').style.display = 'none'; $('sweep-bar').style.display = 'none'; 
+            $$('.beat-btn').forEach(b => b.style.filter = 'none');
         }
-
+        function updateSweepBar() {
+            const a = qs(`.row-0.col-${curStep}`);
+            if (a) $('sweep-bar').style.left = (a.offsetLeft + a.offsetWidth / 2 - 2) + 'px';
+        }
+        window.addEventListener('resize', () => { if(isPlay) updateSweepBar(); });
         function playStep() {
-            // Highlight current column
-            document.querySelectorAll('.beat-btn').forEach(b => b.style.filter = 'none');
-            for(let r=0; r<4; r++) {
-                if(userGrid[r][currentStep]) {
-                    AudioSys.trigger(r);
-                    const btn = document.querySelector(`.row-${r}.col-${currentStep}`);
-                    if(btn) btn.style.filter = "brightness(2)";
-                }
+            $$('.beat-btn').forEach(b => b.style.filter = 'none');
+            updateSweepBar();
+            for(let r=0; r<4; r++) if(uGrid[r][curStep]) {
+                AudioSys.trigger(r);
+                const b = qs(`.row-${r}.col-${curStep}`);
+                if(b) b.style.filter = "brightness(1.5) contrast(1.2)";
             }
-            
-            // Move sweep bar (calculated based on layout)
-            const leftPercent = 14 + (currentStep * 10.7); // Approximate alignment
-            sweepBar.style.left = `${leftPercent}%`;
-
-            currentStep++; if(currentStep >= 8) currentStep = 0;
+            curStep = (curStep + 1) % 8;
         }
-
         function submitSolution() {
-            let match = true;
-            for(let r=0; r<4; r++) for(let c=0; c<8; c++) if(userGrid[r][c] !== targetGrid[r][c]) match = false;
-            
-            if(match) {
-                stopSequence(); AudioSys.playTone('sine', 880, 0.3, 0.2);
-                if(currentLevelIdx === 5) document.getElementById('finish-modal').style.display = 'flex';
-                else document.getElementById('modal').style.display = 'flex';
+            if(uGrid.every((r, i) => r.every((v, j) => v === tGrid[i][j]))) {
+                stopSequence(); AudioSys.osc('sine', 880, 0.3, 0.2); toggle(curLvl === 5 ? 'finish-modal' : 'modal', true);
             } else {
-                AudioSys.trigger(1);
-                
-                // RED SHAKE ERROR EFFECT
-                const term = document.getElementById('code-terminal');
-                term.classList.remove('error', 'shake'); // Reset
-                void term.offsetWidth; // Trigger reflow
-                term.classList.add('error', 'shake');
-                
-                // Remove error style after animation
-                setTimeout(() => {
-                    term.classList.remove('error', 'shake');
-                }, 500);
+                AudioSys.trigger(1); const t = $('code-terminal');
+                t.classList.remove('error', 'shake'); void t.offsetWidth; t.classList.add('error', 'shake');
+                setTimeout(() => t.classList.remove('error', 'shake'), 400);
             }
         }
-
-        function nextLevel() {
-            document.getElementById('modal').style.display = 'none';
-            currentLevelIdx++;
-            loadLevel();
-        }
+        function nextLevel() { toggle('modal', false); curLvl++; loadLevel(); }
     </script>
 </body>
 </html>
